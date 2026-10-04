@@ -10,7 +10,7 @@ Design: `portify/docs/plans/calendar-service-2026-10-02/07-ui-package.md`.
 ## Install (git dependency until GitHub Packages auth is set up, O8)
 
 ```json
-"@shirahcan/calendar-ui": "github:Shirahcan/calendar-ui#v0.2.1"
+"@shirahcan/calendar-ui": "github:Shirahcan/calendar-ui#v0.2.2"
 ```
 
 `prepare` builds `dist/` on install. Peer deps: React 19.
@@ -32,7 +32,7 @@ VIEWER's day; when the host's zone differs, each time also shows the host's loca
   zone they picked with a "Show times in" control (kept in that browser only, never written to a
   profile), else the device's. Emails and calendar files use the profile zone, server side.
 - **Always labelled:** every date and time names its zone. Use `formatZonedTime`,
-  `formatZonedTimeRange`, `formatZonedDateTime` ("Wed, Oct 7, 2026, 8:25 PM GMT+1"); never a bare
+  `formatZonedTimeRange`, `formatZonedDateTime` ("Wed, Oct 7, 2026, 8:25 PM EDT"; a zone with no abbreviation gets its full name, never "GMT+1"); never a bare
   `toLocaleTimeString()`.
 - **A day is the viewer's day:** list slots under a picked date with `onDay(items, day, zone,
   startOf)`, and date a chosen slot from the slot itself, never from the date that was clicked.
