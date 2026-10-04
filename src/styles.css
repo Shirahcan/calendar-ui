@@ -4,7 +4,7 @@
  * glassmorphic surfaces, MployNow's and Studendly's own), never by forking components.
  * No Tailwind dependency, so it works on Tailwind 3 and 4 alike.
  */
-:where(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-editor, .cal-slots__empty) {
+:where(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-editor, .cal-slots__empty, .cal-zoneprompt) {
   --cal-accent: #4361ee;
   --cal-accent-ink: #ffffff;
   --cal-surface: #ffffff;
@@ -23,7 +23,7 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :where(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-editor, .cal-slots__empty) {
+  :where(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-editor, .cal-slots__empty, .cal-zoneprompt) {
     --cal-surface: #0f172a;
     --cal-surface-muted: #1e293b;
     --cal-border: #334155;
@@ -84,6 +84,15 @@
 .cal-flow__timer, .cal-flow__note { color: var(--cal-ink-muted); margin: 0; font-size: 13px; }
 .cal-flow__error { color: var(--cal-danger); margin: 0; }
 .cal-flow__actions { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+
+/* Profile zone prompt */
+.cal-zoneprompt { display: flex; flex-direction: column; gap: 8px; padding: 12px 16px; border: 1px solid var(--cal-border); border-radius: var(--cal-radius); background: var(--cal-surface-muted); }
+.cal-zoneprompt--done { color: var(--cal-ink-muted); font-size: 13px; margin: 0; }
+.cal-zoneprompt__title { margin: 0; font-weight: 600; }
+.cal-zoneprompt__body { margin: 0; font-size: 13px; color: var(--cal-ink-muted); }
+.cal-zoneprompt__error { margin: 0; font-size: 13px; color: var(--cal-danger); }
+.cal-zoneprompt__actions { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+.cal-slots__zone { margin: 0; font-size: 12px; color: var(--cal-ink-muted); }
 
 /* Buttons and chips */
 .cal-btn { padding: 8px 16px; border-radius: var(--cal-radius-pill); border: 1px solid var(--cal-border); background: var(--cal-surface); color: var(--cal-ink); font: inherit; cursor: pointer; white-space: nowrap; outline: none; }

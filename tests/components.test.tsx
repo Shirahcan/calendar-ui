@@ -18,7 +18,9 @@ describe('SlotPicker', () => {
     const onPick = vi.fn();
     render(<SlotPicker byDay={slotsByDay(slots, 'Africa/Lagos')} viewerZone="Africa/Lagos" hostZone="America/Toronto" onPick={onPick} />);
 
-    const first = screen.getByRole('button', { name: /Monday 12 October, 2:00 PM your time, 9:00 AM in Toronto/ });
+    const first = screen.getByRole('button', { name: /Monday 12 October, 2:00 PM West Africa Standard Time, 9:00 AM in Toronto/ });
+    // The zone is named once above the compact buttons.
+    expect(screen.getByText('Times in West Africa Standard Time')).toBeTruthy();
     fireEvent.click(first);
     expect(onPick).toHaveBeenCalledWith(slots[0]);
   });

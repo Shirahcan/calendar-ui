@@ -114,3 +114,43 @@ describe('useDisplayTimezone', () => {
     expect(result.current.isPicked).toBe(false);
   });
 });
+
+describe('useProfileZonePrompt', () => {
+  it('asks only when the booked clock differs from the profile, saves on yes, and remembers a no', async () => {
+    const { useProfileZonePrompt } = await import('../src/hooks/useProfileZonePrompt');
+    window.localStorage.clear();
+    const save = vi.fn(async () => undefined);
+
+    // Same clock (Toronto vs New York): nothing to ask.
+    const same = renderHook(() => useProfileZonePrompt({ profileZone: 'America/Toronto', bookedZone: 'America/New_York', save }));
+    expect(same.result.current.status).toBe('hidden');
+
+    // No profile zone: nothing to ask.
+    const none = renderHook(() => useProfileZonePrompt({ profileZone: null, bookedZone: 'Africa/Lagos', save }));
+    expect(none.result.current.visible).toBe(false);
+
+    const yes = renderHook(() => useProfileZonePrompt({ profileZone: 'America/Toronto', bookedZone: 'Africa/Lagos', save }));
+    expect(yes.result.current.status).toBe('ask');
+    await act(() => yes.result.current.accept());
+    expect(save).toHaveBeenCalledWith('Africa/Lagos');
+    expect(yes.result.current.status).toBe('saved');
+
+    const no = renderHook(() => useProfileZonePrompt({ profileZone: 'America/Toronto', bookedZone: 'Asia/Manila', save }));
+    act(() => no.result.current.decline());
+    expect(no.result.current.status).toBe('declined');
+    // ...and the next booking on the same pair does not ask again.
+    const again = renderHook(() => useProfileZonePrompt({ profileZone: 'America/Toronto', bookedZone: 'Asia/Manila', save }));
+    expect(again.result.current.visible).toBe(false);
+  });
+
+  it('keeps asking and shows the error when the save fails', async () => {
+    const { useProfileZonePrompt } = await import('../src/hooks/useProfileZonePrompt');
+    window.localStorage.clear();
+    const save = vi.fn(async () => { throw new Error('Profile service is down'); });
+    const { result } = renderHook(() => useProfileZonePrompt({ profileZone: 'Europe/London', bookedZone: 'Asia/Tokyo', save }));
+
+    await act(() => result.current.accept());
+    expect(result.current.status).toBe('ask');
+    expect((result.current.error as Error).message).toBe('Profile service is down');
+  });
+});

@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { formatIn } from '../time';
+import { zoneLabel } from '../zoned';
 import type { BookingFlow as Flow } from '../hooks/useBookingFlow';
 import type { Slot } from '../types';
 import { SlotPicker } from './SlotPicker';
@@ -30,7 +31,7 @@ export function BookingFlow({ flow, byDay, viewerZone, hostZone, loading, detail
   const { state } = flow;
 
   if (state.step === 'done') {
-    return <div className="cal-flow cal-flow--done" role="status">{done ?? `Booked for ${formatIn(state.booking.start_utc, viewerZone, 'EEEE d MMMM, h:mm a')}.`}</div>;
+    return <div className="cal-flow cal-flow--done" role="status">{done ?? `Booked for ${formatIn(state.booking.start_utc, viewerZone, 'EEEE d MMMM, h:mm a')} ${zoneLabel(state.booking.start_utc, viewerZone)}.`}</div>;
   }
 
   if (state.step === 'held' || state.step === 'confirming') {
@@ -40,7 +41,7 @@ export function BookingFlow({ flow, byDay, viewerZone, hostZone, loading, detail
     return (
       <div className="cal-flow cal-flow--held">
         <p className="cal-flow__summary">
-          {formatIn(state.slot.start_utc, viewerZone, 'EEEE d MMMM, h:mm a')} to {formatIn(state.slot.end_utc, viewerZone, 'h:mm a')}
+          {formatIn(state.slot.start_utc, viewerZone, 'EEEE d MMMM, h:mm a')} to {formatIn(state.slot.end_utc, viewerZone, 'h:mm a')} {zoneLabel(state.slot.end_utc, viewerZone)}
         </p>
         <p className="cal-flow__timer" aria-live="polite">We are holding this time for {mins}:{secs}.</p>
         {details}

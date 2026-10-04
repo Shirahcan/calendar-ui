@@ -28,3 +28,23 @@ describe('zoned formatting (the test process runs in Pacific/Kiritimati, UTC+14)
     expect(onDay(slots, '2026-09-29', 'Africa/Lagos', (s) => s.at)).toEqual([slots[1]]);
   });
 });
+
+describe('wall times and clocks', () => {
+  it('reads a typed wall time on the named zone, not the machine one', async () => {
+    const { wallTimeToInstant, instantToWallTime } = await import('../src/zoned');
+    expect(wallTimeToInstant('2026-10-07T20:25', 'Africa/Lagos')).toBe('2026-10-07T19:25:00.000Z');
+    expect(wallTimeToInstant('2026-10-07T15:25', 'America/Toronto')).toBe('2026-10-07T19:25:00.000Z');
+    expect(wallTimeToInstant('not a time', 'Africa/Lagos')).toBeNull();
+    expect(instantToWallTime('2026-10-07T19:25:00Z', 'Asia/Manila')).toBe('2026-10-08T03:25');
+  });
+
+  it('knows which zones read the same clock in both DST seasons', async () => {
+    const { sameClock, zoneCity } = await import('../src/zoned');
+    const oct = Date.parse('2026-10-04T12:00:00Z');
+    expect(sameClock('America/Toronto', 'America/New_York', oct)).toBe(true);
+    expect(sameClock('America/Toronto', 'Africa/Lagos', oct)).toBe(false);
+    // Same offset today, different in winter: London (BST, +1) vs Lagos (+1 all year).
+    expect(sameClock('Europe/London', 'Africa/Lagos', Date.parse('2026-07-01T12:00:00Z'))).toBe(false);
+    expect(zoneCity('America/Argentina/Buenos_Aires')).toBe('Buenos Aires');
+  });
+});

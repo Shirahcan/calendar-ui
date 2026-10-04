@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { formatIn, itemsOn, minutesIntoDay, type GridDay } from '../time';
+import { zoneLabel } from '../zoned';
 import type { CalendarItem } from '../types';
 import type { DragSelection } from '../hooks/useDragSelect';
 
@@ -28,7 +29,8 @@ export function WeekView({ days, items, zone, startHour = 7, endHour = 20, onIte
     <div className={`cal-week ${className ?? ''}`} role="grid" aria-label={`Week of ${days[0] ? formatIn(days[0].start, zone, 'd MMMM yyyy') : ''}`}
       style={{ '--cal-days': days.length } as CSSProperties}>
       <div className="cal-week__head" role="row">
-        <div className="cal-week__gutter" aria-hidden="true" />
+        {/* The zone every time below is in (estate rule: a time always names its zone). */}
+        <div className="cal-week__gutter cal-week__zone" title={zone}>{zoneLabel(days[0]?.start ?? Date.now(), zone)}</div>
         {days.map((d) => (
           <div key={d.key} role="columnheader" className={`cal-week__dayhead${d.isToday ? ' is-today' : ''}`}>
             <span className="cal-week__dow">{formatIn(d.start, zone, 'EEE')}</span>
@@ -67,7 +69,7 @@ export function WeekView({ days, items, zone, startHour = 7, endHour = 20, onIte
               {itemsOn(items, d).filter((it) => !it.allDay).map((it) => {
                 const start = it.start < d.start ? 0 : minutesIntoDay(it.start, zone);
                 const end = it.end >= d.end ? 1440 : minutesIntoDay(it.end, zone);
-                const label = `${it.title}, ${formatIn(it.start, zone, 'EEEE d MMMM, HH:mm')} to ${formatIn(it.end, zone, 'HH:mm')}`;
+                const label = `${it.title}, ${formatIn(it.start, zone, 'EEEE d MMMM, HH:mm')} to ${formatIn(it.end, zone, 'HH:mm')} ${zoneLabel(it.start, zone)}`;
 
                 return (
                   <button

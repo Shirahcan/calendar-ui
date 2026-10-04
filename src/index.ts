@@ -24,7 +24,11 @@ export type { BookingFlowProps } from './components/BookingFlow';
 export { AvailabilityEditor } from './components/AvailabilityEditor';
 export type { AvailabilityEditorProps } from './components/AvailabilityEditor';
 
-export { formatZonedDate, formatZonedDateTime, formatZonedTime, formatZonedTimeRange, onDay, zoneLabel } from './zoned';
+export { formatZonedDate, formatZonedDateTime, formatZonedTime, formatZonedTimeRange, instantToWallTime, onDay, sameClock, wallTimeToInstant, zoneCity, zoneLabel } from './zoned';
 export type { DateStyle, Instant } from './zoned';
 export { deviceTimezone, setDisplayTimezone, useDisplayTimezone } from './hooks/useDisplayTimezone';
 export type { DisplayTimezone } from './hooks/useDisplayTimezone';
+export { useProfileZonePrompt } from './hooks/useProfileZonePrompt';
+export type { ProfileZonePrompt as ProfileZonePromptState, ProfileZonePromptOptions, ProfileZonePromptStatus } from './hooks/useProfileZonePrompt';
+export { ProfileZonePrompt } from './components/ProfileZonePrompt';
+export type { ProfileZonePromptProps } from './components/ProfileZonePrompt';

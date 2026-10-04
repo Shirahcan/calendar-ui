@@ -1,3 +1,4 @@
+import { TZDate } from '@date-fns/tz';
 import { dayKey } from './time';
 
 /**
@@ -69,4 +70,57 @@ export function formatZonedDateTime(value: Instant, zone: string, style: DateSty
  */
 export function onDay<T>(items: T[], day: string, zone: string, startOf: (item: T) => Instant): T[] {
   return items.filter((item) => dayKey(asDate(startOf(item)), zone) === day);
+}
+
+const WALL = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/;
+
+/**
+ * A wall time typed on `zone`'s clock ("2026-10-07T20:25", what a datetime-local input holds)
+ * as the instant it names, ISO UTC. Null when the text is not a wall time. A datetime-local
+ * value sent as-is carries no zone at all, so a server reads it on ITS clock: a Lagos
+ * consultant's "8:25 PM" became 8:25 PM UTC.
+ */
+export function wallTimeToInstant(wall: string, zone: string): string | null {
+  const m = WALL.exec(wall.trim());
+  if (!m) return null;
+  const [y, mo, d, h, mi] = m.slice(1).map(Number) as [number, number, number, number, number];
+
+  return new Date(new TZDate(y, mo - 1, d, h, mi, zone).getTime()).toISOString();
+}
+
+/** The instant on `zone`'s clock as a datetime-local value ("2026-10-07T20:25"). */
+export function instantToWallTime(value: Instant, zone: string): string {
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat('en-CA', {
+      timeZone: zone, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+    })
+      .formatToParts(asDate(value))
+      .map((p) => [p.type, p.value]),
+  );
+
+  return `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}`;
+}
+
+/** "America/Toronto" -> "Toronto", "America/Argentina/Buenos_Aires" -> "Buenos Aires". */
+export function zoneCity(zone: string): string {
+  return (zone.split('/').pop() ?? zone).replace(/_/g, ' ');
+}
+
+const offsetAt = (instant: number, zone: string): number => {
+  const wall = instantToWallTime(instant, zone);
+  const asUtc = Date.UTC(+wall.slice(0, 4), +wall.slice(5, 7) - 1, +wall.slice(8, 10), +wall.slice(11, 13), +wall.slice(14, 16));
+
+  return Math.round((asUtc - Math.floor(instant / 60000) * 60000) / 60000);
+};
+
+/**
+ * True when two zones read the same clock now and half a year from now (so both DST seasons):
+ * Toronto and New York do, Toronto and Lagos do not. Used to decide whether a difference
+ * between zones is one a person would notice.
+ */
+export function sameClock(a: string, b: string, now: number = Date.now()): boolean {
+  if (a === b) return true;
+  const later = now + 182 * 24 * 3600 * 1000;
+
+  return offsetAt(now, a) === offsetAt(now, b) && offsetAt(later, a) === offsetAt(later, b);
 }

@@ -10,7 +10,7 @@ Design: `portify/docs/plans/calendar-service-2026-10-02/07-ui-package.md`.
 ## Install (git dependency until GitHub Packages auth is set up, O8)
 
 ```json
-"@shirahcan/calendar-ui": "github:Shirahcan/calendar-ui#v0.2.2"
+"@shirahcan/calendar-ui": "github:Shirahcan/calendar-ui#v0.3.0"
 ```
 
 `prepare` builds `dist/` on install. Peer deps: React 19.
@@ -37,6 +37,14 @@ VIEWER's day; when the host's zone differs, each time also shows the host's loca
 - **A day is the viewer's day:** list slots under a picked date with `onDay(items, day, zone,
   startOf)`, and date a chosen slot from the slot itself, never from the date that was clicked.
   The server side of the same rule is `ViewerDay` in `shirahcan/calendar-client`.
+- **Typed times:** a `datetime-local` value carries no zone. Convert it with
+  `wallTimeToInstant(value, zone)` before sending it, and fill one with
+  `instantToWallTime(instant, zone)`; never send the raw value (a server reads it on its own clock).
+- **Ask, never switch, the profile zone:** after a booking made on a clock other than the
+  profile's, render `<ProfileZonePrompt prompt={useProfileZonePrompt({ profileZone, bookedZone, save })} />`.
+  It asks whether emails and invites should follow the new zone (owner decision 2026-10-04),
+  only when the two zones really read different clocks (`sameClock`), and remembers a "no" for
+  that pair on this browser. `save` is the product's own profile endpoint.
 
 ## Theming
 
@@ -66,6 +74,9 @@ also takes a `className`.
 | `useAvailabilityEditor` | edit a schema-1 spec in memory; `specProblems` mirrors the service's checks |
 | `MonthView`, `WeekView`, `DayView` | grids; service events via `eventsToItems`, plus product layers |
 | `SlotPicker`, `BookingFlow`, `AvailabilityEditor` | the booking and availability surfaces |
+| `useDisplayTimezone`, `formatZoned*`, `zoneLabel`, `onDay` | which clock a screen shows, and naming it |
+| `wallTimeToInstant`, `instantToWallTime`, `sameClock`, `zoneCity` | typed times and zone comparison |
+| `useProfileZonePrompt`, `ProfileZonePrompt` | after a booking, ask whether emails should follow the booked zone |
 
 Other products' bookings arrive from the service as nameless "Busy" blocks; the package
 keeps that privacy line.

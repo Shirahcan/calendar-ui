@@ -1,4 +1,5 @@
 import { formatIn, itemsOn, type GridDay } from '../time';
+import { zoneLabel } from '../zoned';
 import type { CalendarItem } from '../types';
 
 export interface MonthViewProps {
@@ -35,7 +36,7 @@ export function MonthView({ days, items, zone, maxPerDay = 3, onSelectDay, onIte
                 </button>
                 {dayItems.slice(0, maxPerDay).map((it) => (
                   <button type="button" key={it.id} className={`cal-item cal-item--${it.layer} cal-item--compact`} style={it.color ? { background: it.color } : undefined}
-                    aria-label={`${it.title}, ${it.allDay ? 'all day' : formatIn(it.start, zone, 'HH:mm')}`} onClick={() => onItemClick?.(it)}>
+                    aria-label={`${it.title}, ${it.allDay ? 'all day' : `${formatIn(it.start, zone, 'HH:mm')} ${zoneLabel(it.start, zone)}`}`} onClick={() => onItemClick?.(it)}>
                     {!it.allDay && <span className="cal-item__time">{formatIn(it.start, zone, 'HH:mm')}</span>}
                     <span className="cal-item__title">{it.title}</span>
                   </button>
