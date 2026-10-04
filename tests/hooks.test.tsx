@@ -96,3 +96,21 @@ describe('availability editor', () => {
     expect(specProblems({ ...base, dates: [{ date: '2026-10-08', windows: [['09:00', '12:00'], ['11:00', '13:00']] }] })).toEqual(['2026-10-08: two windows overlap.']);
   });
 });
+
+describe('useDisplayTimezone', () => {
+  it('reads the device zone, follows a pick on this browser, and clears back to the device', async () => {
+    const { useDisplayTimezone, setDisplayTimezone, deviceTimezone } = await import('../src/hooks/useDisplayTimezone');
+    const { result } = renderHook(() => useDisplayTimezone());
+
+    expect(result.current.timezone).toBe(deviceTimezone());
+    expect(result.current.isPicked).toBe(false);
+
+    act(() => setDisplayTimezone('Africa/Lagos'));
+    expect(result.current.timezone).toBe('Africa/Lagos');
+    expect(result.current.isPicked).toBe(true);
+
+    act(() => setDisplayTimezone(deviceTimezone()));
+    expect(result.current.timezone).toBe(deviceTimezone());
+    expect(result.current.isPicked).toBe(false);
+  });
+});
