@@ -2,7 +2,8 @@ import { defineConfig } from 'tsup';
 
 export default defineConfig({
   entry: ['src/index.ts'],
-  format: ['esm'],
+  // CJS too, so a product's jest (CommonJS, node_modules untransformed) can require it.
+  format: ['esm', 'cjs'],
   dts: true,
   clean: true,
   sourcemap: true,

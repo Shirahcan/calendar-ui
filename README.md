@@ -10,7 +10,7 @@ Design: `portify/docs/plans/calendar-service-2026-10-02/07-ui-package.md`.
 ## Install (git dependency until GitHub Packages auth is set up, O8)
 
 ```json
-"@shirahcan/calendar-ui": "github:Shirahcan/calendar-ui#v0.2.0"
+"@shirahcan/calendar-ui": "github:Shirahcan/calendar-ui#v0.2.1"
 ```
 
 `prepare` builds `dist/` on install. Peer deps: React 19.
