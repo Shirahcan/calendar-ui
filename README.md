@@ -97,13 +97,29 @@ also takes a `className`.
 A private pad for whoever runs a call, docked to the room's right edge and closed until opened.
 The package holds no storage and no product words: the product decides **whether** its room
 shows it and **for whom**, **where** it is kept, and **every sentence** on it. The defaults are
-neutral (, , ) and never name a
+neutral (`Scratchpad`, `Only you see this. It is kept as you type.`, `Save`) and never name a
 product's records.
 
-\
+```tsx
+const pad = useMeetingScratchpad({
+  load: () => api.getDraft(bookingId),
+  saveDraft: (text) => api.saveDraft(bookingId, text),
+  commit: (text) => api.fileToRecord(bookingId, text), // omit to hide the button
+  saveOnUnload: (text) => api.saveDraftKeepalive(bookingId, text),
+});
+
+<CalendarUiProvider labels={{
+  scratchpadHint: 'Only you see this. Save it to the candidate when you are done.',
+  scratchpadCommit: 'Save to candidate',
+  scratchpadCommitted: 'Saved to the candidate.',
+}}>
+  <MeetingScratchpadDock scratchpad={pad} />
+</CalendarUiProvider>
+```
+
 Write the hint for EVERY person your room shows it to (a solo host, a co-host, an admin):
 say who can read a saved note in terms that are true for all of them. Position the dock with
- /  so it clears your own chrome.
+`--cal-dock-top` / `--cal-dock-bottom` so it clears your own chrome.
 
 ## Pieces
 
