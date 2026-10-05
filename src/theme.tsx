@@ -84,6 +84,17 @@ export interface CalendarLabels {
   zonePromptSaving: string;
   zonePromptDone: (booked: string, bookedZone: string) => string;
   zonePromptFailed: string;
+  scratchpadTitle: string;
+  scratchpadHint: string;
+  scratchpadPlaceholder: string;
+  scratchpadLoading: string;
+  scratchpadSaving: string;
+  scratchpadSaved: string;
+  scratchpadUnsaved: string;
+  scratchpadFailed: string;
+  scratchpadCommit: string;
+  scratchpadCommitting: string;
+  scratchpadCommitted: string;
 }
 
 export const DEFAULT_LABELS: CalendarLabels = {
@@ -111,6 +122,17 @@ export const DEFAULT_LABELS: CalendarLabels = {
   zonePromptSaving: 'Saving…',
   zonePromptDone: (booked, zone) => `Done. Your emails and calendar invites now use ${booked} (${zone}).`,
   zonePromptFailed: 'Your profile could not be updated. Please try again.',
+  scratchpadTitle: 'Scratchpad',
+  scratchpadHint: 'Only you see this. It is kept as you type.',
+  scratchpadPlaceholder: 'Jot things down as the call goes…',
+  scratchpadLoading: 'Loading…',
+  scratchpadSaving: 'Saving…',
+  scratchpadSaved: 'Saved',
+  scratchpadUnsaved: 'Not saved yet',
+  scratchpadFailed: 'Your notes could not be saved. Please try again.',
+  scratchpadCommit: 'Save',
+  scratchpadCommitting: 'Saving…',
+  scratchpadCommitted: 'Saved.',
 };
 
 /** Extra classes per part, appended to the package's own (never replacing them). */
@@ -126,6 +148,7 @@ export interface CalendarClassNames {
   buttonPrimary: string;
   zonePrompt: string;
   editor: string;
+  scratchpad: string;
 }
 
 export type ColorScheme = 'light' | 'dark' | 'auto';

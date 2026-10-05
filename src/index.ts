@@ -33,4 +33,8 @@ export type { DisplayTimezone } from './hooks/useDisplayTimezone';
 export { useProfileZonePrompt } from './hooks/useProfileZonePrompt';
 export type { ProfileZonePrompt as ProfileZonePromptState, ProfileZonePromptOptions, ProfileZonePromptStatus } from './hooks/useProfileZonePrompt';
 export { ProfileZonePrompt } from './components/ProfileZonePrompt';
+export { useMeetingScratchpad } from './hooks/useMeetingScratchpad';
+export type { MeetingScratchpadState, ScratchpadAdapter, ScratchpadStatus } from './hooks/useMeetingScratchpad';
+export { MeetingScratchpad } from './components/MeetingScratchpad';
+export type { MeetingScratchpadProps } from './components/MeetingScratchpad';
 export type { ProfileZonePromptProps } from './components/ProfileZonePrompt';

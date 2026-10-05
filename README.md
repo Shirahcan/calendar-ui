@@ -106,6 +106,7 @@ also takes a `className`.
 | `useDisplayTimezone`, `formatZoned*`, `zoneLabel`, `onDay` | which clock a screen shows, and naming it |
 | `wallTimeToInstant`, `instantToWallTime`, `sameClock`, `zoneCity` | typed times and zone comparison |
 | `useProfileZonePrompt`, `ProfileZonePrompt` | after a booking, ask whether emails should follow the booked zone |
+| `useMeetingScratchpad`, `MeetingScratchpad` | a private pad beside a live call; the product supplies load / save / commit and decides who sees it (v0.5.0) |
 
 Other products' bookings arrive from the service as nameless "Busy" blocks; the package
 keeps that privacy line.

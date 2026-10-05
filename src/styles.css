@@ -12,7 +12,7 @@
  */
 .cal-root { display: contents; }
 
-:where(.cal-root, :is(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-editor, .cal-slots__empty, .cal-zoneprompt):not(.cal-root *)) {
+:where(.cal-root, :is(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-editor, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad):not(.cal-root *)) {
   --cal-accent: #4361ee;
   --cal-accent-ink: #ffffff;
   --cal-surface: #ffffff;
@@ -28,14 +28,14 @@
   --cal-hour-height: 48px;
 }
 
-:where(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-editor, .cal-slots__empty, .cal-zoneprompt) {
+:where(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-editor, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad) {
   font-family: var(--cal-font);
   color: var(--cal-ink);
 }
 
 /* Dark: the OS decides for a component used alone; a provider decides for everything inside it. */
 @media (prefers-color-scheme: dark) {
-  :where(:is(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-editor, .cal-slots__empty, .cal-zoneprompt):not(.cal-root *)) {
+  :where(:is(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-editor, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad):not(.cal-root *)) {
     --cal-surface: #0f172a;
     --cal-surface-muted: #1e293b;
     --cal-border: #334155;
@@ -112,6 +112,16 @@
 .cal-zoneprompt__title { margin: 0; font-weight: 600; }
 .cal-zoneprompt__body { margin: 0; font-size: 13px; color: var(--cal-ink-muted); }
 .cal-zoneprompt__error { margin: 0; font-size: 13px; color: var(--cal-danger); }
+.cal-scratchpad { display: flex; flex-direction: column; gap: 8px; padding: 16px; border: 1px solid var(--cal-border); border-radius: var(--cal-radius); background: var(--cal-surface); }
+.cal-scratchpad__head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.cal-scratchpad__title { margin: 0; font-weight: 600; }
+.cal-scratchpad__status { font-size: 12px; color: var(--cal-ink-muted); white-space: nowrap; }
+.cal-scratchpad__hint { margin: 0; font-size: 13px; color: var(--cal-ink-muted); }
+.cal-scratchpad__field { width: 100%; min-height: 220px; resize: vertical; box-sizing: border-box; padding: 8px 12px; border: 1px solid var(--cal-border); border-radius: var(--cal-radius); background: var(--cal-surface-muted); color: var(--cal-ink); font: inherit; line-height: 1.5; outline: none; }
+.cal-scratchpad__field:focus-visible { box-shadow: 0 0 0 3px color-mix(in srgb, var(--cal-accent) 35%, transparent); }
+.cal-scratchpad__error { margin: 0; font-size: 13px; color: var(--cal-danger); }
+.cal-scratchpad__actions { display: flex; align-items: center; justify-content: flex-end; gap: 12px; }
+.cal-scratchpad__done { font-size: 13px; color: var(--cal-ink-muted); }
 .cal-zoneprompt__actions { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
 .cal-slots__zone { margin: 0; font-size: 12px; color: var(--cal-ink-muted); }
 
