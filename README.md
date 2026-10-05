@@ -92,6 +92,19 @@ Variables: `--cal-accent`, `--cal-accent-ink`, `--cal-surface`, `--cal-surface-m
 `--cal-radius`, `--cal-radius-pill`, `--cal-font`, `--cal-hour-height`. Every component
 also takes a `className`.
 
+## The meeting-room scratchpad (v0.6.0)
+
+A private pad for whoever runs a call, docked to the room's right edge and closed until opened.
+The package holds no storage and no product words: the product decides **whether** its room
+shows it and **for whom**, **where** it is kept, and **every sentence** on it. The defaults are
+neutral (, , ) and never name a
+product's records.
+
+\
+Write the hint for EVERY person your room shows it to (a solo host, a co-host, an admin):
+say who can read a saved note in terms that are true for all of them. Position the dock with
+ /  so it clears your own chrome.
+
 ## Pieces
 
 | Export | Does |
