@@ -119,7 +119,10 @@ const pad = useMeetingScratchpad({
 
 Write the hint for EVERY person your room shows it to (a solo host, a co-host, an admin):
 say who can read a saved note in terms that are true for all of them. Position the dock with
-`--cal-dock-top` / `--cal-dock-bottom` so it clears your own chrome.
+`--cal-dock-top` / `--cal-dock-bottom` so it clears your own chrome, and size it with
+`--cal-dock-width`. The panel slides in from the edge with its tab and back out on close
+(v0.6.1; instant under `prefers-reduced-motion`); opening puts the cursor in the pad, closing
+saves and returns focus to the tab.
 
 ## Pieces
 

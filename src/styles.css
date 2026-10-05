@@ -149,10 +149,16 @@
 .cal-editor input:focus-visible { border-color: var(--cal-accent); }
 
 /* The scratchpad dock: a tab on the right edge, and a viewport-bounded panel it opens. */
-.cal-dock { position: fixed; right: 0; top: var(--cal-dock-top, 96px); bottom: var(--cal-dock-bottom, 112px); z-index: 40; display: flex; align-items: flex-start; pointer-events: none; font-family: var(--cal-font); color: var(--cal-ink); }
+.cal-dock { --cal-dock-w: var(--cal-dock-width, min(360px, calc(100vw - 56px))); position: fixed; right: 0; top: var(--cal-dock-top, 96px); bottom: var(--cal-dock-bottom, 112px); z-index: 40; display: flex; align-items: flex-start; pointer-events: none; font-family: var(--cal-font); color: var(--cal-ink); }
+/* Tab and panel slide together: closed, the panel waits just past the edge with the tab still showing. */
+.cal-dock__slide { display: flex; align-items: flex-start; height: 100%; transform: translateX(var(--cal-dock-w)); transition: transform 280ms cubic-bezier(0.32, 0.72, 0, 1); will-change: transform; }
+.cal-dock--open .cal-dock__slide { transform: translateX(0); }
 .cal-dock__tab { pointer-events: auto; position: relative; writing-mode: vertical-rl; transform: rotate(180deg); padding: 14px 8px; border: 1px solid var(--cal-border); border-right: 0; border-radius: 0 var(--cal-radius) var(--cal-radius) 0; background: var(--cal-surface); color: var(--cal-ink); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; outline: none; box-shadow: 0 4px 16px rgb(15 23 42 / 0.08); }
 .cal-dock__tab:focus-visible { box-shadow: 0 0 0 3px color-mix(in srgb, var(--cal-accent) 35%, transparent); }
 .cal-dock__dot { position: absolute; top: 6px; left: 6px; width: 8px; height: 8px; border-radius: 999px; background: var(--cal-accent); }
-.cal-dock__panel { pointer-events: auto; width: min(360px, calc(100vw - 56px)); max-height: 100%; overflow-y: auto; box-shadow: 0 12px 40px rgb(15 23 42 / 0.16); border-radius: var(--cal-radius) 0 0 var(--cal-radius); }
-.cal-dock__panel[hidden] { display: none; }
+.cal-dock__panel { pointer-events: auto; width: var(--cal-dock-w); flex-shrink: 0; max-height: 100%; overflow-y: auto; box-shadow: 0 12px 40px rgb(15 23 42 / 0.16); border-radius: var(--cal-radius) 0 0 var(--cal-radius); visibility: hidden; opacity: 0; transition: opacity 200ms ease, visibility 0s linear 280ms; }
+.cal-dock--open .cal-dock__panel { visibility: visible; opacity: 1; transition: opacity 200ms ease, visibility 0s; }
+@media (prefers-reduced-motion: reduce) {
+  .cal-dock__slide, .cal-dock__panel, .cal-dock--open .cal-dock__panel { transition: none; }
+}
 .cal-dock__panel .cal-scratchpad { border-radius: var(--cal-radius) 0 0 var(--cal-radius); }
