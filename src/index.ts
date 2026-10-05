@@ -37,4 +37,6 @@ export { useMeetingScratchpad } from './hooks/useMeetingScratchpad';
 export type { MeetingScratchpadState, ScratchpadAdapter, ScratchpadStatus } from './hooks/useMeetingScratchpad';
 export { MeetingScratchpad } from './components/MeetingScratchpad';
 export type { MeetingScratchpadProps } from './components/MeetingScratchpad';
+export { MeetingScratchpadDock } from './components/MeetingScratchpadDock';
+export type { MeetingScratchpadDockProps } from './components/MeetingScratchpadDock';
 export type { ProfileZonePromptProps } from './components/ProfileZonePrompt';

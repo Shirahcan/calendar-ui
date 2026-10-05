@@ -12,7 +12,7 @@
  */
 .cal-root { display: contents; }
 
-:where(.cal-root, :is(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-editor, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad):not(.cal-root *)) {
+:where(.cal-root, :is(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-editor, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad, .cal-dock):not(.cal-root *)) {
   --cal-accent: #4361ee;
   --cal-accent-ink: #ffffff;
   --cal-surface: #ffffff;
@@ -28,14 +28,14 @@
   --cal-hour-height: 48px;
 }
 
-:where(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-editor, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad) {
+:where(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-editor, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad, .cal-dock) {
   font-family: var(--cal-font);
   color: var(--cal-ink);
 }
 
 /* Dark: the OS decides for a component used alone; a provider decides for everything inside it. */
 @media (prefers-color-scheme: dark) {
-  :where(:is(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-editor, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad):not(.cal-root *)) {
+  :where(:is(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-editor, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad, .cal-dock):not(.cal-root *)) {
     --cal-surface: #0f172a;
     --cal-surface-muted: #1e293b;
     --cal-border: #334155;
@@ -147,3 +147,12 @@
 .cal-editor__problems { color: var(--cal-danger); margin: 0; padding-left: 20px; }
 .cal-editor input:not([type='checkbox']) { padding: 8px 12px; border: 1px solid var(--cal-border); border-radius: 8px; background: var(--cal-surface); color: var(--cal-ink); font: inherit; outline: none; }
 .cal-editor input:focus-visible { border-color: var(--cal-accent); }
+
+/* The scratchpad dock: a tab on the right edge, and a viewport-bounded panel it opens. */
+.cal-dock { position: fixed; right: 0; top: var(--cal-dock-top, 96px); bottom: var(--cal-dock-bottom, 112px); z-index: 40; display: flex; align-items: flex-start; pointer-events: none; font-family: var(--cal-font); color: var(--cal-ink); }
+.cal-dock__tab { pointer-events: auto; position: relative; writing-mode: vertical-rl; transform: rotate(180deg); padding: 14px 8px; border: 1px solid var(--cal-border); border-right: 0; border-radius: 0 var(--cal-radius) var(--cal-radius) 0; background: var(--cal-surface); color: var(--cal-ink); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; outline: none; box-shadow: 0 4px 16px rgb(15 23 42 / 0.08); }
+.cal-dock__tab:focus-visible { box-shadow: 0 0 0 3px color-mix(in srgb, var(--cal-accent) 35%, transparent); }
+.cal-dock__dot { position: absolute; top: 6px; left: 6px; width: 8px; height: 8px; border-radius: 999px; background: var(--cal-accent); }
+.cal-dock__panel { pointer-events: auto; width: min(360px, calc(100vw - 56px)); max-height: 100%; overflow-y: auto; box-shadow: 0 12px 40px rgb(15 23 42 / 0.16); border-radius: var(--cal-radius) 0 0 var(--cal-radius); }
+.cal-dock__panel[hidden] { display: none; }
+.cal-dock__panel .cal-scratchpad { border-radius: var(--cal-radius) 0 0 var(--cal-radius); }

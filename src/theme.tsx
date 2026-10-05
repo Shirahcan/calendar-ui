@@ -95,6 +95,9 @@ export interface CalendarLabels {
   scratchpadCommit: string;
   scratchpadCommitting: string;
   scratchpadCommitted: string;
+  scratchpadShow: string;
+  scratchpadHide: string;
+  scratchpadHasText: string;
 }
 
 export const DEFAULT_LABELS: CalendarLabels = {
@@ -133,6 +136,9 @@ export const DEFAULT_LABELS: CalendarLabels = {
   scratchpadCommit: 'Save',
   scratchpadCommitting: 'Saving…',
   scratchpadCommitted: 'Saved.',
+  scratchpadShow: 'Scratchpad',
+  scratchpadHide: 'Hide scratchpad',
+  scratchpadHasText: 'Has notes',
 };
 
 /** Extra classes per part, appended to the package's own (never replacing them). */
@@ -149,6 +155,7 @@ export interface CalendarClassNames {
   zonePrompt: string;
   editor: string;
   scratchpad: string;
+  scratchpadDock: string;
 }
 
 export type ColorScheme = 'light' | 'dark' | 'auto';

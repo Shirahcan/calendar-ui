@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { MeetingScratchpad } from '../src/components/MeetingScratchpad';
+import { MeetingScratchpadDock } from '../src/components/MeetingScratchpadDock';
 import { useMeetingScratchpad, type ScratchpadAdapter } from '../src/hooks/useMeetingScratchpad';
 import { CalendarUiProvider } from '../src/theme';
 
@@ -70,5 +71,25 @@ describe('MeetingScratchpad', () => {
     fireEvent.change(field, { target: { value: 'x' } });
     fireEvent.blur(field);
     expect(await screen.findByRole('alert')).toHaveProperty('textContent', 'Offline');
+  });
+
+  it('docks closed by default, opens on the tab, and saves when closed', async () => {
+    const saveDraft = vi.fn().mockResolvedValue(undefined);
+    function Dock() {
+      return <MeetingScratchpadDock scratchpad={useMeetingScratchpad({ load: async () => '', saveDraft, idleMs: 60_000 })} />;
+    }
+    render(<Dock />);
+
+    const tab = screen.getByRole('button', { name: 'Scratchpad' });
+    expect(tab.getAttribute('aria-expanded')).toBe('false');
+    expect(screen.queryByRole('textbox')).toBeNull();
+
+    fireEvent.click(tab);
+    const field = await screen.findByRole('textbox');
+    fireEvent.change(field, { target: { value: 'kept on close' } });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Hide scratchpad' }));
+    await waitFor(() => expect(saveDraft).toHaveBeenCalledWith('kept on close'));
+    expect(screen.queryByRole('textbox')).toBeNull();
   });
 });
