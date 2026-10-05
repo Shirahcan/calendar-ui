@@ -1,10 +1,18 @@
 /*
- * @shirahcan/calendar-ui default theme. Every colour, radius and font is a CSS variable:
- * a product restyles the whole package by setting these on a wrapper (Portify's
- * glassmorphic surfaces, MployNow's and Studendly's own), never by forking components.
- * No Tailwind dependency, so it works on Tailwind 3 and 4 alike.
+ * @shirahcan/calendar-ui default theme. Every colour, radius and font is a CSS variable, so a
+ * product restyles the whole package without forking a component. Two ways to set them:
+ *   - <CalendarUiProvider theme={...} colorScheme="dark|light|auto"> (the variables land on its
+ *     `.cal-root` wrapper and every component inside inherits them), or
+ *   - plain CSS on a wrapper of your own, targeting the components (Portify's `.pf-cal`).
+ * No Tailwind dependency, so it works on Tailwind 3 and 4 alike. Everything sits in :where(),
+ * so any product selector outranks it.
+ *
+ * The defaults are declared on the provider's wrapper, or on a component used WITHOUT one; a
+ * component inside a provider declares nothing itself, or it would shadow the provider's values.
  */
-:where(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-editor, .cal-slots__empty, .cal-zoneprompt) {
+.cal-root { display: contents; }
+
+:where(.cal-root, :is(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-editor, .cal-slots__empty, .cal-zoneprompt):not(.cal-root *)) {
   --cal-accent: #4361ee;
   --cal-accent-ink: #ffffff;
   --cal-surface: #ffffff;
@@ -18,12 +26,16 @@
   --cal-radius-pill: 999px;
   --cal-font: inherit;
   --cal-hour-height: 48px;
+}
+
+:where(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-editor, .cal-slots__empty, .cal-zoneprompt) {
   font-family: var(--cal-font);
   color: var(--cal-ink);
 }
 
+/* Dark: the OS decides for a component used alone; a provider decides for everything inside it. */
 @media (prefers-color-scheme: dark) {
-  :where(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-editor, .cal-slots__empty, .cal-zoneprompt) {
+  :where(:is(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-editor, .cal-slots__empty, .cal-zoneprompt):not(.cal-root *)) {
     --cal-surface: #0f172a;
     --cal-surface-muted: #1e293b;
     --cal-border: #334155;
@@ -31,6 +43,15 @@
     --cal-ink-muted: #94a3b8;
     --cal-busy: #475569;
   }
+}
+
+:where(.cal-root[data-cal-scheme='dark']) {
+  --cal-surface: #0f172a;
+  --cal-surface-muted: #1e293b;
+  --cal-border: #334155;
+  --cal-ink: #f1f5f9;
+  --cal-ink-muted: #94a3b8;
+  --cal-busy: #475569;
 }
 
 /* Week / day */

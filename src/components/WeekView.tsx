@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { formatIn, itemsOn, minutesIntoDay, type GridDay } from '../time';
+import { cx, useCalendarUi } from '../theme';
 import { zoneLabel } from '../zoned';
 import type { CalendarItem } from '../types';
 import type { DragSelection } from '../hooks/useDragSelect';
@@ -22,11 +23,12 @@ const pct = (n: number) => `${Math.max(0, Math.min(100, n))}%`;
 
 /** Week (or, with one day, day) grid. Items are placed by their minutes in `zone`. */
 export function WeekView({ days, items, zone, startHour = 7, endHour = 20, onItemClick, renderItem, drag, className }: WeekViewProps) {
+  const { labels, classNames, timePattern, hourCycle } = useCalendarUi();
   const span = (endHour - startHour) * 60;
   const hours = Array.from({ length: endHour - startHour }, (_, i) => startHour + i);
 
   return (
-    <div className={`cal-week ${className ?? ''}`} role="grid" aria-label={`Week of ${days[0] ? formatIn(days[0].start, zone, 'd MMMM yyyy') : ''}`}
+    <div className={cx('cal-week', classNames.week, className)} role="grid" aria-label={labels.weekOf(days[0] ? formatIn(days[0].start, zone, 'd MMMM yyyy') : '')}
       style={{ '--cal-days': days.length } as CSSProperties}>
       <div className="cal-week__head" role="row">
         {/* The zone every time below is in (estate rule: a time always names its zone). */}
@@ -44,7 +46,7 @@ export function WeekView({ days, items, zone, startHour = 7, endHour = 20, onIte
         {days.map((d) => (
           <div key={d.key} role="gridcell" className="cal-week__alldaycell">
             {itemsOn(items, d).filter((it) => it.allDay).map((it) => (
-              <button type="button" key={it.id} className={`cal-item cal-item--${it.layer}`} style={it.color ? { background: it.color } : undefined} onClick={() => onItemClick?.(it)}>
+              <button type="button" key={it.id} className={cx('cal-item', `cal-item--${it.layer}`, classNames.item)} style={it.color ? { background: it.color } : undefined} onClick={() => onItemClick?.(it)}>
                 {renderItem ? renderItem(it) : it.title}
               </button>
             ))}
@@ -55,7 +57,7 @@ export function WeekView({ days, items, zone, startHour = 7, endHour = 20, onIte
       <div className="cal-week__body" role="row">
         <div className="cal-week__gutter">
           {hours.map((h) => (
-            <div key={h} className="cal-week__hour" aria-hidden="true">{String(h).padStart(2, '0')}:00</div>
+            <div key={h} className="cal-week__hour" aria-hidden="true">{hourCycle === 12 ? `${h % 12 === 0 ? 12 : h % 12} ${h < 12 ? 'AM' : 'PM'}` : `${String(h).padStart(2, '0')}:00`}</div>
           ))}
         </div>
 
@@ -76,13 +78,13 @@ export function WeekView({ days, items, zone, startHour = 7, endHour = 20, onIte
                     type="button"
                     key={it.id}
                     aria-label={label}
-                    className={`cal-item cal-item--${it.layer}`}
+                    className={cx('cal-item', `cal-item--${it.layer}`, classNames.item)}
                     style={{ top: pct(((start - startHour * 60) / span) * 100), height: pct(((end - start) / span) * 100), ...(it.color ? { background: it.color } : {}) }}
                     onClick={() => onItemClick?.(it)}
                   >
                     {renderItem ? renderItem(it) : (
                       <>
-                        <span className="cal-item__time">{formatIn(it.start, zone, 'HH:mm')}</span>
+                        <span className="cal-item__time">{formatIn(it.start, zone, timePattern)}</span>
                         <span className="cal-item__title">{it.title}</span>
                       </>
                     )}

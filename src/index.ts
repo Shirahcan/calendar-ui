@@ -1,4 +1,6 @@
 export * from './types';
+export { CalendarUiProvider, DEFAULT_LABELS, cx, themeStyle, useCalendarUi } from './theme';
+export type { CalendarClassNames, CalendarLabels, CalendarTheme, CalendarUiConfig, CalendarUiProviderProps, ColorScheme, ResolvedCalendarUi } from './theme';
 export { dayKey, eventsToItems, formatIn, gridDays, inZone, itemsOn, minutesIntoDay, shiftAnchor, slotsByDay } from './time';
 export type { GridDay, WeekStart } from './time';
 

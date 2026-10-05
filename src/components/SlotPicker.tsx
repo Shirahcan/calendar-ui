@@ -1,5 +1,7 @@
+import type { ReactNode } from 'react';
 import { formatIn } from '../time';
 import type { Slot } from '../types';
+import { cx, useCalendarUi } from '../theme';
 import { zoneCity, zoneLabel as namedZone } from '../zoned';
 
 export interface SlotPickerProps {
@@ -12,13 +14,18 @@ export interface SlotPickerProps {
   onPick: (slot: Slot) => void;
   selected?: string | null;
   disabled?: boolean;
+  /** Defaults to the provider's `labels.noTimes`. */
   emptyLabel?: string;
+  /** The inside of one time button, when a product needs it to look entirely different. */
+  renderSlot?: (slot: Slot, info: { selected: boolean; time: string; hostTime: string | null }) => ReactNode;
   className?: string;
 }
 
-export function SlotPicker({ byDay, viewerZone, hostZone, onPick, selected, disabled, emptyLabel = 'No times are open in this range.', className }: SlotPickerProps) {
+export function SlotPicker({ byDay, viewerZone, hostZone, onPick, selected, disabled, emptyLabel, renderSlot, className }: SlotPickerProps) {
+  const { labels, classNames, timePattern } = useCalendarUi();
+
   if (byDay.size === 0) {
-    return <p className={`cal-slots__empty ${className ?? ''}`}>{emptyLabel}</p>;
+    return <p className={cx('cal-slots__empty', classNames.slots, className)}>{emptyLabel ?? labels.noTimes}</p>;
   }
 
   // A plain string (not a boolean flag) so TypeScript keeps the narrowing below.
@@ -29,21 +36,28 @@ export function SlotPicker({ byDay, viewerZone, hostZone, onPick, selected, disa
   const firstStart = [...byDay.values()][0]?.[0]?.start_utc ?? Date.now();
 
   return (
-    <div className={`cal-slots ${className ?? ''}`}>
-      <p className="cal-slots__zone">Times in {namedZone(firstStart, viewerZone)}</p>
+    <div className={cx('cal-slots', classNames.slots, className)}>
+      <p className="cal-slots__zone">{labels.timesIn(namedZone(firstStart, viewerZone))}</p>
       {[...byDay.entries()].map(([key, slots]) => (
         <section key={key} className="cal-slots__day" aria-label={formatIn(slots[0]!.start_utc, viewerZone, 'EEEE d MMMM yyyy')}>
           <h4 className="cal-slots__dayhead">{formatIn(slots[0]!.start_utc, viewerZone, 'EEE d MMM')}</h4>
           <div className="cal-slots__times">
             {slots.map((s) => {
+              const isSelected = selected === s.start_utc;
+              const time = formatIn(s.start_utc, viewerZone, timePattern);
+              const hostTime = hostTz ? `${formatIn(s.start_utc, hostTz, timePattern)} ${namedZone(s.start_utc, hostTz)}` : null;
               const label = `${formatIn(s.start_utc, viewerZone, 'EEEE d MMMM, h:mm a')} ${namedZone(s.start_utc, viewerZone)}`
                 + (hostTz ? `, ${formatIn(s.start_utc, hostTz, 'h:mm a')} in ${zoneCity(hostTz)}` : '');
 
               return (
-                <button type="button" key={s.start_utc} disabled={disabled} aria-label={label} aria-pressed={selected === s.start_utc}
-                  className={`cal-slot${selected === s.start_utc ? ' is-selected' : ''}`} onClick={() => onPick(s)}>
-                  <span className="cal-slot__time">{formatIn(s.start_utc, viewerZone, 'HH:mm')}</span>
-                  {hostTz && <span className="cal-slot__host">{formatIn(s.start_utc, hostTz, 'HH:mm')} {namedZone(s.start_utc, hostTz)}</span>}
+                <button type="button" key={s.start_utc} disabled={disabled} aria-label={label} aria-pressed={isSelected}
+                  className={cx('cal-slot', isSelected && 'is-selected', classNames.slot, isSelected && classNames.slotSelected)} onClick={() => onPick(s)}>
+                  {renderSlot ? renderSlot(s, { selected: isSelected, time, hostTime }) : (
+                    <>
+                      <span className="cal-slot__time">{time}</span>
+                      {hostTime && <span className="cal-slot__host">{hostTime}</span>}
+                    </>
+                  )}
                 </button>
               );
             })}

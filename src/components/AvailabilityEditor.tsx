@@ -1,6 +1,7 @@
 import { useId, useState, type Dispatch } from 'react';
 import type { EditorAction } from '../hooks/useAvailabilityEditor';
 import type { AvailabilitySpec, DayName } from '../types';
+import { cx, useCalendarUi } from '../theme';
 
 export interface AvailabilityEditorProps {
   spec: AvailabilitySpec;
@@ -59,13 +60,14 @@ function DatedRows({ title, help, rows, onSet, onRemove }: {
 
 /** The person's availability: weekly hours, dated windows, overrides, time off, holidays. */
 export function AvailabilityEditor({ spec, dispatch, problems, sections = ['zone', 'weekly', 'dates', 'overrides', 'blocks', 'holidays'], className }: AvailabilityEditorProps) {
+  const { classNames } = useCalendarUi();
   const zoneListId = useId();
   const [blockFrom, setBlockFrom] = useState('');
   const [blockTo, setBlockTo] = useState('');
   const has = (s: (typeof sections)[number]) => sections.includes(s);
 
   return (
-    <div className={`cal-editor ${className ?? ''}`}>
+    <div className={cx('cal-editor', classNames.editor, className)}>
       {problems.length > 0 && (
         <ul className="cal-editor__problems" role="alert">{problems.map((p) => <li key={p}>{p}</li>)}</ul>
       )}

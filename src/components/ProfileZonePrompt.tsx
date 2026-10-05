@@ -1,4 +1,5 @@
 import type { ProfileZonePrompt as Prompt } from '../hooks/useProfileZonePrompt';
+import { cx, useCalendarUi } from '../theme';
 import { zoneCity, zoneLabel } from '../zoned';
 
 export interface ProfileZonePromptProps {
@@ -9,9 +10,6 @@ export interface ProfileZonePromptProps {
   className?: string;
 }
 
-const describe = (error: unknown): string =>
-  error instanceof Error && error.message ? error.message : 'Your profile could not be updated. Please try again.';
-
 /**
  * The question, after a booking made on a clock other than the profile's:
  *
@@ -19,38 +17,37 @@ const describe = (error: unknown): string =>
  *   You booked on Lagos time. Your emails and calendar invites use the timezone on your
  *   profile. Switch them to Lagos time?
  *   [Keep Toronto time] [Use Lagos time]
+ *
+ * Every sentence comes from the provider's labels, so a product can word it in its own voice.
  */
-export function ProfileZonePrompt({ prompt, describeError = describe, className }: ProfileZonePromptProps) {
+export function ProfileZonePrompt({ prompt, describeError, className }: ProfileZonePromptProps) {
+  const { labels, classNames } = useCalendarUi();
   if (!prompt.visible || !prompt.profileZone) return null;
 
   const now = Date.now();
   const booked = `${zoneCity(prompt.bookedZone)} time`;
   const profile = `${zoneCity(prompt.profileZone)} time`;
+  const describe = describeError ?? ((error: unknown) => (error instanceof Error && error.message ? error.message : labels.zonePromptFailed));
 
   if (prompt.status === 'saved') {
     return (
-      <p className={`cal-zoneprompt cal-zoneprompt--done ${className ?? ''}`} role="status">
-        Done. Your emails and calendar invites now use {booked} ({zoneLabel(now, prompt.bookedZone)}).
+      <p className={cx('cal-zoneprompt', 'cal-zoneprompt--done', classNames.zonePrompt, className)} role="status">
+        {labels.zonePromptDone(booked, zoneLabel(now, prompt.bookedZone))}
       </p>
     );
   }
 
   return (
-    <section className={`cal-zoneprompt ${className ?? ''}`} aria-label="Timezone for your emails">
-      <p className="cal-zoneprompt__title">
-        Your emails use {profile} ({zoneLabel(now, prompt.profileZone)})
-      </p>
-      <p className="cal-zoneprompt__body">
-        You booked on {booked} ({zoneLabel(now, prompt.bookedZone)}). Your emails and calendar invites use the
-        timezone on your profile. Switch them to {booked}?
-      </p>
-      {prompt.error != null && <p className="cal-zoneprompt__error" role="alert">{describeError(prompt.error)}</p>}
+    <section className={cx('cal-zoneprompt', classNames.zonePrompt, className)} aria-label={labels.zonePromptAria}>
+      <p className="cal-zoneprompt__title">{labels.zonePromptTitle(profile, zoneLabel(now, prompt.profileZone))}</p>
+      <p className="cal-zoneprompt__body">{labels.zonePromptBody(booked, zoneLabel(now, prompt.bookedZone))}</p>
+      {prompt.error != null && <p className="cal-zoneprompt__error" role="alert">{describe(prompt.error)}</p>}
       <div className="cal-zoneprompt__actions">
-        <button type="button" className="cal-btn" onClick={prompt.decline} disabled={prompt.status === 'saving'}>
-          Keep {profile}
+        <button type="button" className={cx('cal-btn', classNames.button)} onClick={prompt.decline} disabled={prompt.status === 'saving'}>
+          {labels.zonePromptKeep(profile)}
         </button>
-        <button type="button" className="cal-btn cal-btn--primary" onClick={() => void prompt.accept()} disabled={prompt.status === 'saving'}>
-          {prompt.status === 'saving' ? 'Saving…' : `Use ${booked}`}
+        <button type="button" className={cx('cal-btn', 'cal-btn--primary', classNames.button, classNames.buttonPrimary)} onClick={() => void prompt.accept()} disabled={prompt.status === 'saving'}>
+          {prompt.status === 'saving' ? labels.zonePromptSaving : labels.zonePromptUse(booked)}
         </button>
       </div>
     </section>

@@ -46,17 +46,46 @@ VIEWER's day; when the host's zone differs, each time also shows the host's loca
   only when the two zones really read different clocks (`sameClock`), and remembers a "no" for
   that pair on this browser. `save` is the product's own profile endpoint.
 
-## Theming
+## Customising it for a product (v0.4.0)
 
-No Tailwind dependency. Set the CSS variables on a wrapper:
+Every product uses the same components; each one makes them its own with four levers, lightest
+first. Reach for the next one only when the previous cannot say what you need.
 
-```css
-.portify-calendar {
-  --cal-accent: #4361ee;
-  --cal-surface: rgb(255 255 255 / 0.7);
-  --cal-radius: 2rem;
-}
+```tsx
+import { CalendarUiProvider } from '@shirahcan/calendar-ui';
+import '@shirahcan/calendar-ui/styles.css';
+
+<CalendarUiProvider
+  theme={{ accent: '#6f6df3', surface: '#fff', radius: '1rem', font: 'Inter, sans-serif' }}
+  darkTheme={{ surface: '#0b1220', ink: '#e2e8f0' }}
+  colorScheme={isDark ? 'dark' : 'light'}            // or 'auto' (the OS decides)
+  hourCycle={12}                                       // '2:30 PM' instead of '14:30'
+  labels={{ timesIn: (zone) => `Showing times in ${zone}`, confirm: 'Book interview' }}
+  classNames={{ slot: 'rounded-lg px-3', buttonPrimary: 'shadow-md' }}
+>
+  <SlotPicker ... />
+  <WeekView ... />
+</CalendarUiProvider>
 ```
+
+1. **Theme tokens** become CSS variables on one `.cal-root` wrapper (`display: contents`, so it
+   adds no box). Tokens: `accent`, `accentInk`, `surface`, `surfaceMuted`, `border`, `ink`,
+   `inkMuted`, `busy`, `danger`, `radius`, `radiusPill`, `font`, `hourHeight`.
+   `themeStyle(tokens)` gives the same variables as a style object for your own wrapper.
+2. **Labels**: every sentence the components show (`DEFAULT_LABELS` lists them), for a product's
+   voice or language. A prop that already takes text (`emptyLabel`, `confirmLabel`) still wins.
+3. **classNames**: extra classes per part (`week`, `month`, `item`, `slots`, `slot`,
+   `slotSelected`, `flow`, `button`, `buttonPrimary`, `zonePrompt`, `editor`), appended to the
+   package's own, so Tailwind products style parts without CSS files.
+4. **Render props**: `SlotPicker renderSlot`, `MonthView renderItem`, `WeekView renderItem`, when
+   a part must look entirely different. Accessible names and zone wording stay the package's.
+
+`colorScheme` lets a product with its own dark-mode switch drive the calendar instead of the OS.
+Without a provider everything behaves as before (defaults, OS dark mode).
+
+Plain CSS still works too: set the variables on your own wrapper, targeting the components
+(Portify's `.pf-cal :where(.cal-week, ...)`), or skip `styles.css` entirely and style the
+`cal-*` classes yourself.
 
 Variables: `--cal-accent`, `--cal-accent-ink`, `--cal-surface`, `--cal-surface-muted`,
 `--cal-border`, `--cal-ink`, `--cal-ink-muted`, `--cal-busy`, `--cal-danger`,
