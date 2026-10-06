@@ -37,10 +37,17 @@ export interface MeetingScratchpadState {
   commits: number;
   error: unknown;
   canCommit: boolean;
+  /** The pad holds something worth asking about when the call ends (ScratchpadWrapUp). */
+  hasNotes: boolean;
   setText: (text: string) => void;
   /** Save now if anything changed (call on blur). */
   flush: () => Promise<void>;
-  commit: () => Promise<void>;
+  /** File the pad (the adapter's `commit`). Resolves true when it was filed. */
+  commit: () => Promise<boolean>;
+  /** Keep the pad as a draft for next time. Resolves true once it is saved. */
+  keep: () => Promise<boolean>;
+  /** Empty the pad, saved empty. Resolves true once it is. */
+  discard: () => Promise<boolean>;
 }
 
 export function useMeetingScratchpad(adapter: ScratchpadAdapter): MeetingScratchpadState {
@@ -124,10 +131,10 @@ export function useMeetingScratchpad(adapter: ScratchpadAdapter): MeetingScratch
     };
   }, [flush]);
 
-  const commit = useCallback(async () => {
+  const commit = useCallback(async (): Promise<boolean> => {
     const run = adapterRef.current.commit;
     const value = latest.current;
-    if (!run || value.trim() === '') return;
+    if (!run || value.trim() === '') return false;
     setCommitting(true);
     try {
       await run(value);
@@ -139,10 +146,37 @@ export function useMeetingScratchpad(adapter: ScratchpadAdapter): MeetingScratch
         setTextState('');
         setStatus('idle');
       }
+      return true;
     } catch (e) {
       setError(e);
+      return false;
     } finally {
       setCommitting(false);
+    }
+  }, []);
+
+  const keep = useCallback(async (): Promise<boolean> => {
+    await flush();
+    return latest.current === saved.current;
+  }, [flush]);
+
+  const discard = useCallback(async (): Promise<boolean> => {
+    if (timer.current) {
+      clearTimeout(timer.current);
+      timer.current = null;
+    }
+    try {
+      await adapterRef.current.saveDraft('');
+      latest.current = '';
+      saved.current = '';
+      setTextState('');
+      setError(null);
+      setStatus('idle');
+      return true;
+    } catch (e) {
+      setError(e);
+      setStatus('error');
+      return false;
     }
   }, []);
 
@@ -153,8 +187,11 @@ export function useMeetingScratchpad(adapter: ScratchpadAdapter): MeetingScratch
     commits,
     error,
     canCommit: !!adapter.commit,
+    hasNotes: text.trim() !== '',
     setText,
     flush,
     commit,
+    keep,
+    discard,
   };
 }

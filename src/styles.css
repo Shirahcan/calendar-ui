@@ -129,6 +129,7 @@
 .cal-btn { padding: 8px 16px; border-radius: var(--cal-radius-pill); border: 1px solid var(--cal-border); background: var(--cal-surface); color: var(--cal-ink); font: inherit; cursor: pointer; white-space: nowrap; outline: none; }
 .cal-btn--primary { background: var(--cal-accent); border-color: var(--cal-accent); color: var(--cal-accent-ink); }
 .cal-btn--ghost { background: transparent; border-color: transparent; }
+.cal-btn--danger { background: var(--cal-danger); border-color: var(--cal-danger); color: #fff; }
 .cal-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .cal-btn:focus-visible, .cal-chip:focus-visible { box-shadow: 0 0 0 3px color-mix(in srgb, var(--cal-accent) 35%, transparent); }
 .cal-chip { padding: 4px 10px; border-radius: var(--cal-radius-pill); border: 1px solid var(--cal-border); background: var(--cal-surface); font: inherit; font-size: 12px; cursor: pointer; white-space: nowrap; outline: none; color: var(--cal-ink); }
@@ -199,3 +200,9 @@
 @media (max-width: 520px) {
   .cal-holidays__row { grid-template-columns: 1fr; gap: 4px; }
 }
+
+/* Scratchpad wrap-up: the call is over and the pad still holds notes */
+.cal-wrapup__notes { max-height: 40vh; overflow-y: auto; white-space: pre-wrap; word-break: break-word; padding: 8px 12px; border: 1px solid var(--cal-border); border-radius: var(--cal-radius); background: var(--cal-surface-muted); color: var(--cal-ink); line-height: 1.5; font-size: 14px; outline: none; }
+.cal-wrapup__notes:focus-visible { box-shadow: 0 0 0 3px color-mix(in srgb, var(--cal-accent) 35%, transparent); }
+.cal-wrapup__actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px; }
+.cal-wrapup__ask { margin-right: auto; font-size: 13px; color: var(--cal-ink); }

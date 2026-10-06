@@ -98,6 +98,13 @@ export interface CalendarLabels {
   scratchpadShow: string;
   scratchpadHide: string;
   scratchpadHasText: string;
+  wrapUpTitle: string;
+  wrapUpHint: string;
+  wrapUpKeep: string;
+  wrapUpDiscard: string;
+  wrapUpDiscardConfirm: string;
+  wrapUpDiscardYes: string;
+  wrapUpDiscardNo: string;
   holidayTitle: string;
   holidayRegion: string;
   holidayYear: string;
@@ -164,6 +171,13 @@ export const DEFAULT_LABELS: CalendarLabels = {
   scratchpadShow: 'Scratchpad',
   scratchpadHide: 'Hide scratchpad',
   scratchpadHasText: 'Has notes',
+  wrapUpTitle: 'You have notes in your scratchpad',
+  wrapUpHint: 'The call is over. Save them, keep them for next time, or let them go.',
+  wrapUpKeep: 'Keep as a draft',
+  wrapUpDiscard: 'Discard',
+  wrapUpDiscardConfirm: 'Discard these notes for good?',
+  wrapUpDiscardYes: 'Discard',
+  wrapUpDiscardNo: 'Keep them',
   holidayTitle: 'Public holidays',
   holidayRegion: 'Country or province',
   holidayYear: 'Year',

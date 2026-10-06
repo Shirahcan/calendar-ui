@@ -39,6 +39,8 @@ export { MeetingScratchpad } from './components/MeetingScratchpad';
 export type { MeetingScratchpadProps } from './components/MeetingScratchpad';
 export { MeetingScratchpadDock } from './components/MeetingScratchpadDock';
 export type { MeetingScratchpadDockProps } from './components/MeetingScratchpadDock';
+export { ScratchpadWrapUp } from './components/ScratchpadWrapUp';
+export type { ScratchpadWrapUpProps } from './components/ScratchpadWrapUp';
 export type { ProfileZonePromptProps } from './components/ProfileZonePrompt';
 export { useHolidayEditor } from './hooks/useHolidayEditor';
 export type { HolidayEditorAdapter, HolidayEditorState, HolidayRow, UseHolidayEditorOptions } from './hooks/useHolidayEditor';

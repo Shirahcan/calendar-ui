@@ -2,6 +2,7 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest';
 import { MeetingScratchpad } from '../src/components/MeetingScratchpad';
 import { MeetingScratchpadDock } from '../src/components/MeetingScratchpadDock';
+import { ScratchpadWrapUp } from '../src/components/ScratchpadWrapUp';
 import { useMeetingScratchpad, type ScratchpadAdapter } from '../src/hooks/useMeetingScratchpad';
 import { CalendarUiProvider } from '../src/theme';
 
@@ -91,5 +92,48 @@ describe('MeetingScratchpad', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Hide scratchpad' }));
     await waitFor(() => expect(saveDraft).toHaveBeenCalledWith('kept on close'));
     expect(screen.queryByRole('textbox')).toBeNull();
+  });
+});
+
+function WrapUp({ adapter, onDone }: { adapter: ScratchpadAdapter; onDone: (c: string) => void }) {
+  const pad = useMeetingScratchpad(adapter);
+  if (pad.status === 'loading') return null;
+  return pad.hasNotes ? <ScratchpadWrapUp scratchpad={pad} onDone={onDone} /> : <p>nothing to ask</p>;
+}
+
+describe('ScratchpadWrapUp', () => {
+  it('files the notes, then lets the product move on', async () => {
+    const commit = vi.fn().mockResolvedValue(undefined);
+    const onDone = vi.fn();
+    render(
+      <CalendarUiProvider labels={{ scratchpadCommit: 'Save to case' }}>
+        <WrapUp adapter={{ load: async () => 'ask for the bank letter', saveDraft: async () => undefined, commit }} onDone={onDone} />
+      </CalendarUiProvider>,
+    );
+    expect(await screen.findByText('ask for the bank letter')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Save to case' }));
+    await waitFor(() => expect(onDone).toHaveBeenCalledWith('committed'));
+    expect(commit).toHaveBeenCalledWith('ask for the bank letter');
+  });
+
+  it('keeps the draft, or discards it only after asking', async () => {
+    const saveDraft = vi.fn().mockResolvedValue(undefined);
+    const onDone = vi.fn();
+    render(<WrapUp adapter={{ load: async () => 'notes', saveDraft }} onDone={onDone} />);
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Discard' }));
+    expect(saveDraft).not.toHaveBeenCalled();
+    expect(screen.getByText('Discard these notes for good?')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Keep them' }));
+
+    fireEvent.click(screen.getByRole('button', { name: 'Discard' }));
+    fireEvent.click(screen.getAllByRole('button', { name: 'Discard' })[0]!);
+    await waitFor(() => expect(onDone).toHaveBeenCalledWith('discarded'));
+    expect(saveDraft).toHaveBeenCalledWith('');
+  });
+
+  it('an empty pad has nothing to ask', async () => {
+    render(<WrapUp adapter={{ load: async () => '   ', saveDraft: async () => undefined }} onDone={() => {}} />);
+    expect(await screen.findByText('nothing to ask')).toBeTruthy();
   });
 });
