@@ -124,6 +124,21 @@ say who can read a saved note in terms that are true for all of them. Position t
 (v0.6.1; instant under `prefers-reduced-motion`); opening puts the cursor in the pad, closing
 saves and returns focus to the tab.
 
+## Public holidays editor (v0.7.0)
+
+Holidays belong to a jurisdiction, not a product, so calendar-service holds them and every
+product's admin edits them with the same screen: researched dates waiting for review (confirm or
+reject; only confirmed dates close anybody's calendar), the year's holidays (remove one and the
+yearly sync never puts it back), removed ones (put back), and add a date the formula cannot
+compute (an Eid). The product passes functions that call ITS backend, which calls the service
+through `shirahcan/calendar-client` (`holidays(region, year, ['proposed','rejected'])`,
+`putHoliday`, `removeHoliday`, `confirmHoliday`, `rejectHoliday`).
+
+```tsx
+const editor = useHolidayEditor({ initialRegion: 'CA', initialYear: 2027, load, put, remove, confirm, reject });
+<HolidayEditor editor={editor} regions={[{ code: 'CA', label: 'Canada' }]} confirmRemove={askWithYourDialog} />
+```
+
 ## Pieces
 
 | Export | Does |
@@ -138,6 +153,7 @@ saves and returns focus to the tab.
 | `useDisplayTimezone`, `formatZoned*`, `zoneLabel`, `onDay` | which clock a screen shows, and naming it |
 | `wallTimeToInstant`, `instantToWallTime`, `sameClock`, `zoneCity` | typed times and zone comparison |
 | `useProfileZonePrompt`, `ProfileZonePrompt` | after a booking, ask whether emails should follow the booked zone |
+| `useHolidayEditor`, `HolidayEditor` | the admin screen for public holidays: review, correct, add (v0.7.0) |
 | `useMeetingScratchpad`, `MeetingScratchpad`, `MeetingScratchpadDock` | a private pad for a live call, docked to the room's edge and closed until opened; the product supplies load / save / commit and decides who sees it (v0.6.0) |
 
 Other products' bookings arrive from the service as nameless "Busy" blocks; the package

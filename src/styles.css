@@ -12,7 +12,7 @@
  */
 .cal-root { display: contents; }
 
-:where(.cal-root, :is(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-editor, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad, .cal-dock):not(.cal-root *)) {
+:where(.cal-root, :is(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-editor, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad, .cal-dock, .cal-holidays):not(.cal-root *)) {
   --cal-accent: #4361ee;
   --cal-accent-ink: #ffffff;
   --cal-surface: #ffffff;
@@ -28,14 +28,14 @@
   --cal-hour-height: 48px;
 }
 
-:where(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-editor, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad, .cal-dock) {
+:where(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-editor, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad, .cal-dock, .cal-holidays) {
   font-family: var(--cal-font);
   color: var(--cal-ink);
 }
 
 /* Dark: the OS decides for a component used alone; a provider decides for everything inside it. */
 @media (prefers-color-scheme: dark) {
-  :where(:is(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-editor, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad, .cal-dock):not(.cal-root *)) {
+  :where(:is(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-editor, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad, .cal-dock, .cal-holidays):not(.cal-root *)) {
     --cal-surface: #0f172a;
     --cal-surface-muted: #1e293b;
     --cal-border: #334155;
@@ -162,3 +162,40 @@
   .cal-dock__slide, .cal-dock__panel, .cal-dock--open .cal-dock__panel { transition: none; }
 }
 .cal-dock__panel .cal-scratchpad { border-radius: var(--cal-radius) 0 0 var(--cal-radius); }
+
+/* The holiday editor (v0.7.0). */
+.cal-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.cal-input { padding: 8px 12px; border: 1px solid var(--cal-border); border-radius: 10px; background: var(--cal-surface); color: var(--cal-ink); font: inherit; outline: none; }
+.cal-input:focus-visible { box-shadow: 0 0 0 3px color-mix(in srgb, var(--cal-accent) 35%, transparent); }
+.cal-holidays { display: grid; gap: 18px; padding: 20px; border: 1px solid var(--cal-border); border-radius: var(--cal-radius); background: var(--cal-surface); }
+.cal-holidays__head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.cal-holidays__title { margin: 0; font-size: 16px; font-weight: 600; }
+.cal-holidays__controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.cal-holidays__year { display: inline-flex; align-items: center; gap: 6px; }
+.cal-holidays__year .cal-btn { padding: 6px 12px; }
+.cal-holidays__year-value { min-width: 3.5em; text-align: center; font-weight: 600; }
+.cal-holidays__error { margin: 0; padding: 8px 12px; border-radius: 10px; color: var(--cal-danger); background: color-mix(in srgb, var(--cal-danger) 8%, transparent); font-size: 13px; }
+.cal-holidays__group { display: grid; gap: 8px; }
+.cal-holidays__group--waiting { padding: 12px; border-radius: 12px; background: color-mix(in srgb, var(--cal-accent) 6%, transparent); border: 1px solid color-mix(in srgb, var(--cal-accent) 25%, transparent); }
+.cal-holidays__group-title { margin: 0; font-size: 13px; font-weight: 600; }
+.cal-holidays__hint { margin: 0; font-size: 12px; color: var(--cal-ink-muted); }
+.cal-holidays__list { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; }
+.cal-holidays__row { display: grid; grid-template-columns: 7.5em minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 8px 10px; border-radius: 10px; }
+.cal-holidays__row:hover { background: var(--cal-surface-muted); }
+.cal-holidays__row--muted { color: var(--cal-ink-muted); }
+.cal-holidays__date { font-size: 13px; font-variant-numeric: tabular-nums; color: var(--cal-ink-muted); }
+.cal-holidays__name { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-width: 0; font-size: 14px; }
+.cal-holidays__meta { font-size: 12px; color: var(--cal-ink-muted); }
+.cal-holidays__badge { padding: 1px 8px; border-radius: var(--cal-radius-pill); background: color-mix(in srgb, var(--cal-accent) 12%, transparent); color: var(--cal-accent); font-size: 11px; font-weight: 600; }
+.cal-holidays__source { font-size: 12px; color: var(--cal-accent); }
+.cal-holidays__actions { display: inline-flex; gap: 6px; }
+.cal-holidays__actions .cal-btn { padding: 6px 12px; font-size: 13px; }
+.cal-holidays__add { display: grid; gap: 8px; padding-top: 12px; border-top: 1px solid var(--cal-border); }
+.cal-holidays__add-fields { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px; }
+.cal-holidays__field { display: grid; gap: 4px; }
+.cal-holidays__field--grow { flex: 1 1 14rem; }
+.cal-holidays__field--grow .cal-input { width: 100%; }
+.cal-holidays__label { font-size: 12px; font-weight: 600; color: var(--cal-ink-muted); }
+@media (max-width: 520px) {
+  .cal-holidays__row { grid-template-columns: 1fr; gap: 4px; }
+}

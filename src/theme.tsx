@@ -98,6 +98,31 @@ export interface CalendarLabels {
   scratchpadShow: string;
   scratchpadHide: string;
   scratchpadHasText: string;
+  holidayTitle: string;
+  holidayRegion: string;
+  holidayYear: string;
+  holidayPrevYear: string;
+  holidayNextYear: string;
+  holidayWaiting: string;
+  holidayWaitingHint: string;
+  holidayList: string;
+  holidayRemoved: string;
+  holidayEmpty: string;
+  holidayLoading: string;
+  holidayEstimated: string;
+  holidayConfirm: string;
+  holidayReject: string;
+  holidayRemove: string;
+  holidayRemoveAsk: (name: string, date: string) => string;
+  holidayPutBack: string;
+  holidayRejected: string;
+  holidayAddTitle: string;
+  holidayAddDate: string;
+  holidayAddName: string;
+  holidayAdd: string;
+  holidaySourceManual: string;
+  holidaySourceComputed: string;
+  holidayFailed: string;
 }
 
 export const DEFAULT_LABELS: CalendarLabels = {
@@ -139,6 +164,31 @@ export const DEFAULT_LABELS: CalendarLabels = {
   scratchpadShow: 'Scratchpad',
   scratchpadHide: 'Hide scratchpad',
   scratchpadHasText: 'Has notes',
+  holidayTitle: 'Public holidays',
+  holidayRegion: 'Country or province',
+  holidayYear: 'Year',
+  holidayPrevYear: 'Previous year',
+  holidayNextYear: 'Next year',
+  holidayWaiting: 'Waiting for review',
+  holidayWaitingHint: "Researched dates that close nobody's calendar until you confirm them.",
+  holidayList: 'Holidays',
+  holidayRemoved: 'Removed or rejected',
+  holidayEmpty: 'No holidays for this year yet.',
+  holidayLoading: 'Loading…',
+  holidayEstimated: 'Estimated',
+  holidayConfirm: 'Confirm',
+  holidayReject: 'Reject',
+  holidayRemove: 'Remove',
+  holidayRemoveAsk: (name, date) => `Remove ${name} (${date})? Calendars open on that day again, and the yearly update will not put it back.`,
+  holidayPutBack: 'Put back',
+  holidayRejected: 'Rejected',
+  holidayAddTitle: 'Add a holiday',
+  holidayAddDate: 'Date',
+  holidayAddName: 'Name',
+  holidayAdd: 'Add',
+  holidaySourceManual: 'Added by an admin',
+  holidaySourceComputed: 'Official calendar',
+  holidayFailed: 'That change did not save. Please try again.',
 };
 
 /** Extra classes per part, appended to the package's own (never replacing them). */
@@ -156,6 +206,7 @@ export interface CalendarClassNames {
   editor: string;
   scratchpad: string;
   scratchpadDock: string;
+  holidayEditor: string;
 }
 
 export type ColorScheme = 'light' | 'dark' | 'auto';
