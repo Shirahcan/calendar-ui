@@ -137,3 +137,43 @@ describe('ScratchpadWrapUp', () => {
     expect(await screen.findByText('nothing to ask')).toBeTruthy();
   });
 });
+
+describe('the product decides where the pad is filed', () => {
+  it('draws one "Save to …" per target the product named, and files to the one pressed', async () => {
+    const commit = vi.fn().mockResolvedValue(undefined);
+    render(
+      <Pad
+        adapter={{
+          load: async () => ({ content: 'CRS 462', targets: [{ key: 'case_notes', label: 'Save to case notes' }, { key: 'meeting_notes', label: 'Save to meeting notes' }] }),
+          saveDraft: vi.fn().mockResolvedValue(undefined),
+          commit,
+        }}
+      />,
+    );
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Save to meeting notes' }));
+    await waitFor(() => expect(commit).toHaveBeenCalledWith('CRS 462', 'meeting_notes'));
+    expect(screen.getByRole('button', { name: 'Save to case notes' })).toBeTruthy();
+  });
+
+  it('offers no "Save to …" when the product named nowhere for this person', async () => {
+    render(<Pad adapter={{ load: async () => ({ content: 'x', targets: [] }), saveDraft: vi.fn(), commit: vi.fn() }} />);
+    await screen.findByDisplayValue('x');
+    expect(screen.queryByRole('button', { name: /Save/ })).toBeNull();
+  });
+
+  it('kitScratchpadAdapter speaks the calendar-client kit, through the product\'s own request', async () => {
+    const { kitScratchpadAdapter } = await import('../src/kitScratchpad');
+    const request = vi.fn(async (method: string) => (method === 'GET' ? { data: { content: 'pad', targets: [{ key: 'k', label: 'L' }] } } : { data: {} }));
+    const adapter = kitScratchpadAdapter({ path: '/v1/calendar/meetings/m-1/', request: request as never });
+
+    expect(await adapter.load()).toEqual({ content: 'pad', targets: [{ key: 'k', label: 'L' }] });
+    await adapter.saveDraft('more');
+    await adapter.commit!('more', 'k');
+    expect(request.mock.calls).toEqual([
+      ['GET', '/v1/calendar/meetings/m-1/scratchpad'],
+      ['PUT', '/v1/calendar/meetings/m-1/scratchpad', { content: 'more' }],
+      ['POST', '/v1/calendar/meetings/m-1/scratchpad/commit', { target: 'k', content: 'more' }],
+    ]);
+  });
+});

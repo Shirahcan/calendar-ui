@@ -54,14 +54,17 @@ export function MeetingScratchpad({ scratchpad: pad, describeError, className }:
       {pad.canCommit && (
         <div className="cal-scratchpad__actions">
           {pad.commits > 0 && pad.text === '' && <span className="cal-scratchpad__done">{labels.scratchpadCommitted}</span>}
-          <button
-            type="button"
-            className={cx('cal-btn', 'cal-btn--primary', classNames.button, classNames.buttonPrimary)}
-            onClick={() => void pad.commit()}
-            disabled={pad.committing || pad.text.trim() === ''}
-          >
-            {pad.committing ? labels.scratchpadCommitting : labels.scratchpadCommit}
-          </button>
+          {pad.targets.map((t, i) => (
+            <button
+              key={t.key ?? 'default'}
+              type="button"
+              className={cx('cal-btn', i === 0 && 'cal-btn--primary', classNames.button, i === 0 && classNames.buttonPrimary)}
+              onClick={() => void pad.commit(t.key)}
+              disabled={pad.committing || pad.text.trim() === ''}
+            >
+              {pad.committing ? labels.scratchpadCommitting : t.label ?? labels.scratchpadCommit}
+            </button>
+          ))}
         </div>
       )}
     </section>

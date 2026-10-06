@@ -30,10 +30,10 @@ export function ScratchpadWrapUp({ scratchpad: pad, onDone, describeError, class
   const [busy, setBusy] = useState(false);
   const describe = describeError ?? ((error: unknown) => (error instanceof Error && error.message ? error.message : labels.scratchpadFailed));
 
-  const run = async (choice: 'committed' | 'kept' | 'discarded') => {
+  const run = async (choice: 'committed' | 'kept' | 'discarded', target?: string) => {
     setBusy(true);
     try {
-      const ok = choice === 'committed' ? await pad.commit() : choice === 'kept' ? await pad.keep() : await pad.discard();
+      const ok = choice === 'committed' ? await pad.commit(target) : choice === 'kept' ? await pad.keep() : await pad.discard();
       if (ok) onDone(choice);
     } finally {
       setBusy(false);
@@ -58,16 +58,18 @@ export function ScratchpadWrapUp({ scratchpad: pad, onDone, describeError, class
         </div>
       ) : (
         <div className="cal-wrapup__actions">
-          {pad.canCommit && (
-            <button
-              type="button"
-              className={cx('cal-btn', 'cal-btn--primary', classNames.button, classNames.buttonPrimary)}
-              disabled={busy || pad.committing}
-              onClick={() => void run('committed')}
-            >
-              {pad.committing ? labels.scratchpadCommitting : labels.scratchpadCommit}
-            </button>
-          )}
+          {pad.canCommit &&
+            pad.targets.map((t, i) => (
+              <button
+                key={t.key ?? 'default'}
+                type="button"
+                className={cx('cal-btn', i === 0 && 'cal-btn--primary', classNames.button, i === 0 && classNames.buttonPrimary)}
+                disabled={busy || pad.committing}
+                onClick={() => void run('committed', t.key)}
+              >
+                {pad.committing ? labels.scratchpadCommitting : t.label ?? labels.scratchpadCommit}
+              </button>
+            ))}
           <button type="button" className={cx('cal-btn', classNames.button)} disabled={busy} onClick={() => void run('kept')}>
             {labels.wrapUpKeep}
           </button>

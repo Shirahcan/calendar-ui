@@ -13,12 +13,27 @@ import { useCallback, useEffect, useRef, useState } from 'react';
  * away, and on page hide through `saveOnUnload` (an ordinary request does not survive a closed
  * tab, and losing someone's call notes is the worst thing a pad can do).
  */
+/**
+ * Somewhere the pad can be filed, as the PRODUCT names it ("Save to case notes"): owner
+ * 2026-10-07, "save to case" is customizable per product. The calendar-client kit's endpoint
+ * returns these with the pad.
+ */
+export interface ScratchpadCommitTarget {
+  key: string;
+  label: string;
+}
+
+/** What `load` may return: the text alone, or the text and where it can be filed. */
+export type ScratchpadLoaded = string | { content: string; targets?: ScratchpadCommitTarget[] };
+
 export interface ScratchpadAdapter {
-  /** The person's saved pad, or '' when there is none. */
-  load: () => Promise<string>;
+  /** The person's saved pad ('' when there is none), optionally with its targets. */
+  load: () => Promise<ScratchpadLoaded>;
   saveDraft: (text: string) => Promise<void>;
-  /** "Save to …": files the pad somewhere lasting. Absent hides the button. */
-  commit?: (text: string) => Promise<void>;
+  /** "Save to …": files the pad somewhere lasting, to `target` when there are several. Absent hides the button. */
+  commit?: (text: string, target?: string) => Promise<void>;
+  /** Where the pad can be filed, when known up front (a `load` answer with targets replaces these). */
+  targets?: ScratchpadCommitTarget[];
   /** Fire-and-forget save while the page goes away (fetch keepalive). False when it could not try. */
   saveOnUnload?: (text: string) => boolean;
   /** Empty the pad after a commit (default true). */
@@ -37,13 +52,15 @@ export interface MeetingScratchpadState {
   commits: number;
   error: unknown;
   canCommit: boolean;
+  /** One "Save to …" per entry. A single entry with no label uses the provider's default wording. */
+  targets: Array<{ key: string | undefined; label: string | undefined }>;
   /** The pad holds something worth asking about when the call ends (ScratchpadWrapUp). */
   hasNotes: boolean;
   setText: (text: string) => void;
   /** Save now if anything changed (call on blur). */
   flush: () => Promise<void>;
-  /** File the pad (the adapter's `commit`). Resolves true when it was filed. */
-  commit: () => Promise<boolean>;
+  /** File the pad (the adapter's `commit`) to `target`. Resolves true when it was filed. */
+  commit: (target?: string) => Promise<boolean>;
   /** Keep the pad as a draft for next time. Resolves true once it is saved. */
   keep: () => Promise<boolean>;
   /** Empty the pad, saved empty. Resolves true once it is. */
@@ -56,6 +73,7 @@ export function useMeetingScratchpad(adapter: ScratchpadAdapter): MeetingScratch
   const [committing, setCommitting] = useState(false);
   const [commits, setCommits] = useState(0);
   const [error, setError] = useState<unknown>(null);
+  const [loadedTargets, setLoadedTargets] = useState<ScratchpadCommitTarget[] | null>(null);
 
   // The adapter is usually an inline object; read the latest through a ref so effects stay stable.
   const adapterRef = useRef(adapter);
@@ -72,9 +90,11 @@ export function useMeetingScratchpad(adapter: ScratchpadAdapter): MeetingScratch
     adapterRef.current.load().then(
       (loaded) => {
         if (!alive) return;
-        latest.current = loaded;
-        saved.current = loaded;
-        setTextState(loaded);
+        const content = typeof loaded === 'string' ? loaded : loaded.content;
+        if (typeof loaded !== 'string' && loaded.targets) setLoadedTargets(loaded.targets);
+        latest.current = content;
+        saved.current = content;
+        setTextState(content);
         setStatus('idle');
       },
       (e: unknown) => {
@@ -131,13 +151,13 @@ export function useMeetingScratchpad(adapter: ScratchpadAdapter): MeetingScratch
     };
   }, [flush]);
 
-  const commit = useCallback(async (): Promise<boolean> => {
+  const commit = useCallback(async (target?: string): Promise<boolean> => {
     const run = adapterRef.current.commit;
     const value = latest.current;
     if (!run || value.trim() === '') return false;
     setCommitting(true);
     try {
-      await run(value);
+      await (target === undefined ? run(value) : run(value, target));
       setError(null);
       setCommits((n) => n + 1);
       if (adapterRef.current.clearOnCommit ?? true) {
@@ -186,7 +206,10 @@ export function useMeetingScratchpad(adapter: ScratchpadAdapter): MeetingScratch
     committing,
     commits,
     error,
-    canCommit: !!adapter.commit,
+    canCommit: !!adapter.commit && (loadedTargets ?? adapter.targets ?? [null]).length > 0,
+    targets: !adapter.commit
+      ? []
+      : (loadedTargets ?? adapter.targets)?.map((t) => ({ key: t.key, label: t.label })) ?? [{ key: undefined, label: undefined }],
     hasNotes: text.trim() !== '',
     setText,
     flush,
