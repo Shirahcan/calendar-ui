@@ -1,5 +1,5 @@
 export * from './types';
-export { CalendarUiProvider, DEFAULT_LABELS, cx, themeStyle, useCalendarUi } from './theme';
+export { CalendarUiProvider, DEFAULT_LABELS, cx, reminderLeadLabel, themeStyle, useCalendarUi } from './theme';
 export type { CalendarClassNames, CalendarLabels, CalendarTheme, CalendarUiConfig, CalendarUiProviderProps, ColorScheme, ResolvedCalendarUi } from './theme';
 export { dayKey, eventsToItems, formatIn, gridDays, inZone, itemsOn, minutesIntoDay, shiftAnchor, slotsByDay } from './time';
 export type { GridDay, WeekStart } from './time';
@@ -48,3 +48,5 @@ export { useHolidayEditor } from './hooks/useHolidayEditor';
 export type { HolidayEditorAdapter, HolidayEditorState, HolidayRow, UseHolidayEditorOptions } from './hooks/useHolidayEditor';
 export { HolidayEditor } from './components/HolidayEditor';
 export type { HolidayEditorProps } from './components/HolidayEditor';
+export { ReminderPolicyEditor } from './components/ReminderPolicyEditor';
+export type { ReminderPolicy, ReminderPolicyAdapter, ReminderPolicyEditorProps } from './components/ReminderPolicyEditor';

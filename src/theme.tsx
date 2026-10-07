@@ -130,6 +130,37 @@ export interface CalendarLabels {
   holidaySourceManual: string;
   holidaySourceComputed: string;
   holidayFailed: string;
+  // Booking reminder times (ReminderPolicyEditor)
+  reminderTitle: string;
+  reminderIntro: string;
+  reminderNone: string;
+  reminderLead: (minutes: number) => string;
+  reminderRemove: (lead: string) => string;
+  reminderAddAmount: string;
+  reminderAddUnit: string;
+  reminderUnitMinutes: string;
+  reminderUnitHours: string;
+  reminderUnitDays: string;
+  reminderAdd: string;
+  reminderSave: string;
+  reminderSaved: string;
+  reminderUseDefault: string;
+  reminderIsDefault: string;
+  reminderLoading: string;
+  reminderTooMany: (max: number) => string;
+  reminderOutOfRange: string;
+  reminderFailed: string;
+}
+
+/** "1 day", "2 hours", "1 hour 30 minutes", "15 minutes". */
+export function reminderLeadLabel(minutes: number): string {
+  if (minutes >= 1440 && minutes % 1440 === 0) {
+    const d = minutes / 1440;
+    return `${d} ${d === 1 ? 'day' : 'days'}`;
+  }
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return [h > 0 ? `${h} ${h === 1 ? 'hour' : 'hours'}` : '', m > 0 ? `${m} ${m === 1 ? 'minute' : 'minutes'}` : ''].filter(Boolean).join(' ');
 }
 
 export const DEFAULT_LABELS: CalendarLabels = {
@@ -203,6 +234,25 @@ export const DEFAULT_LABELS: CalendarLabels = {
   holidaySourceManual: 'Added by an admin',
   holidaySourceComputed: 'Official calendar',
   holidayFailed: 'That change did not save. Please try again.',
+  reminderTitle: 'Meeting reminders',
+  reminderIntro: 'Everyone a meeting is for gets a reminder at each of these times before it starts. A meeting booked later than a reminder time skips that one.',
+  reminderNone: 'No reminders are sent.',
+  reminderLead: (minutes) => `${reminderLeadLabel(minutes)} before`,
+  reminderRemove: (lead) => `Remove the reminder ${lead}`,
+  reminderAddAmount: 'How long before',
+  reminderAddUnit: 'Unit',
+  reminderUnitMinutes: 'minutes',
+  reminderUnitHours: 'hours',
+  reminderUnitDays: 'days',
+  reminderAdd: 'Add',
+  reminderSave: 'Save reminder times',
+  reminderSaved: 'Saved',
+  reminderUseDefault: 'Use the standard times',
+  reminderIsDefault: 'These are the standard times.',
+  reminderLoading: 'Loading reminder times...',
+  reminderTooMany: (max) => `Up to ${max} reminders.`,
+  reminderOutOfRange: 'A reminder must be between 1 minute and 7 days before.',
+  reminderFailed: 'Those reminder times did not save. Please try again.',
 };
 
 /** Extra classes per part, appended to the package's own (never replacing them). */
@@ -221,6 +271,7 @@ export interface CalendarClassNames {
   scratchpad: string;
   scratchpadDock: string;
   holidayEditor: string;
+  reminderEditor: string;
 }
 
 export type ColorScheme = 'light' | 'dark' | 'auto';

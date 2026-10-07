@@ -12,7 +12,7 @@
  */
 .cal-root { display: contents; }
 
-:where(.cal-root, :is(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-editor, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad, .cal-dock, .cal-holidays):not(.cal-root *)) {
+:where(.cal-root, :is(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-editor, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad, .cal-dock, .cal-holidays, .cal-reminders):not(.cal-root *)) {
   --cal-accent: #4361ee;
   --cal-accent-ink: #ffffff;
   --cal-surface: #ffffff;
@@ -28,14 +28,14 @@
   --cal-hour-height: 48px;
 }
 
-:where(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-editor, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad, .cal-dock, .cal-holidays) {
+:where(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-editor, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad, .cal-dock, .cal-holidays, .cal-reminders) {
   font-family: var(--cal-font);
   color: var(--cal-ink);
 }
 
 /* Dark: the OS decides for a component used alone; a provider decides for everything inside it. */
 @media (prefers-color-scheme: dark) {
-  :where(:is(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-editor, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad, .cal-dock, .cal-holidays):not(.cal-root *)) {
+  :where(:is(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-editor, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad, .cal-dock, .cal-holidays, .cal-reminders):not(.cal-root *)) {
     --cal-surface: #0f172a;
     --cal-surface-muted: #1e293b;
     --cal-border: #334155;
@@ -206,3 +206,16 @@
 .cal-wrapup__notes:focus-visible { box-shadow: 0 0 0 3px color-mix(in srgb, var(--cal-accent) 35%, transparent); }
 .cal-wrapup__actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px; }
 .cal-wrapup__ask { margin-right: auto; font-size: 13px; color: var(--cal-ink); }
+
+/* Booking reminder times (ReminderPolicyEditor) */
+.cal-reminders { display: grid; gap: 14px; padding: 20px; border: 1px solid var(--cal-border); border-radius: var(--cal-radius); background: var(--cal-surface); }
+.cal-reminders__title { margin: 0; font-size: 16px; font-weight: 600; }
+.cal-reminders__intro, .cal-reminders__note { margin: 0; font-size: 13px; color: var(--cal-ink-muted); }
+.cal-reminders__list { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.cal-reminders__chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 8px 6px 12px; border: 1px solid var(--cal-border); border-radius: 999px; font-size: 13px; }
+.cal-reminders__chip button { border: 0; background: transparent; color: var(--cal-ink-muted); cursor: pointer; font-size: 15px; line-height: 1; padding: 2px 4px; }
+.cal-reminders__add { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px; }
+.cal-reminders__field { display: grid; gap: 4px; font-size: 12px; color: var(--cal-ink-muted); }
+.cal-reminders__field .cal-input { width: 110px; }
+.cal-reminders__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.cal-reminders__error { margin: 0; font-size: 13px; color: #b91c1c; }
