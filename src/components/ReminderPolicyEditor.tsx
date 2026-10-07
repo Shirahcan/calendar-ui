@@ -146,8 +146,9 @@ export function ReminderPolicyEditor({ adapter, describeError, className }: Remi
             {!saved.is_default ? (
               <button type="button" className={btn} onClick={() => save(null)} disabled={busy}>{labels.reminderUseDefault}</button>
             ) : null}
-            {justSaved && !dirty ? <span className="cal-reminders__note" role="status">{labels.reminderSaved}</span> : null}
-            {saved.is_default && !dirty ? <span className="cal-reminders__note">{labels.reminderIsDefault}</span> : null}
+            {/* One status at a time: "standard" says it all after a reset. */}
+            {!dirty && saved.is_default ? <span className="cal-reminders__note" role="status">{labels.reminderIsDefault}</span> : null}
+            {!dirty && !saved.is_default && justSaved ? <span className="cal-reminders__note" role="status">{labels.reminderSaved}</span> : null}
           </div>
         </>
       ) : null}
