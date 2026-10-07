@@ -1,21 +1,27 @@
-import { useId, useState, type Dispatch } from 'react';
-import type { EditorAction } from '../hooks/useAvailabilityEditor';
-import type { AvailabilitySpec, DayName } from '../types';
+import { useId, useState, type ReactNode } from 'react';
+import { useAvailabilitySchedule, type AvailabilityAdapter } from '../hooks/useAvailabilitySchedule';
 import { cx, useCalendarUi } from '../theme';
+import { DateChanges } from './availability/DateChanges';
+import { PublicHolidays } from './availability/PublicHolidays';
+import { TimeOff } from './availability/TimeOff';
+import { WeekRibbon } from './availability/WeekRibbon';
+import { WeeklyHours } from './availability/WeeklyHours';
+
+export type AvailabilitySection = 'weekly' | 'dates' | 'timeoff' | 'holidays';
 
 export interface AvailabilityEditorProps {
-  spec: AvailabilitySpec;
-  dispatch: Dispatch<EditorAction>;
-  problems: string[];
-  /** Hide sections a product does not use (MployNow hosts only add dates). */
-  sections?: Array<'zone' | 'weekly' | 'dates' | 'overrides' | 'blocks' | 'holidays'>;
+  adapter: AvailabilityAdapter;
+  /** Which tabs, in order. MployNow hosts that only add dates can drop `weekly`. */
+  sections?: AvailabilitySection[];
+  /** The places a person can pick for public holidays (code -> label). */
+  regions?: Array<{ code: string; label: string }>;
+  /** Show the time-zone picker (off when the product keeps the zone on the person's profile). */
+  showZone?: boolean;
+  /** The product's own settings that belong with availability (a buffer, a notice period). */
+  extra?: ReactNode;
+  describeError?: (error: unknown) => string;
   className?: string;
 }
-
-const DAYS: { key: DayName; label: string }[] = [
-  { key: 'mon', label: 'Mon' }, { key: 'tue', label: 'Tue' }, { key: 'wed', label: 'Wed' },
-  { key: 'thu', label: 'Thu' }, { key: 'fri', label: 'Fri' }, { key: 'sat', label: 'Sat' }, { key: 'sun', label: 'Sun' },
-];
 
 function zones(): string[] {
   const intl = Intl as unknown as { supportedValuesOf?: (k: string) => string[] };
@@ -23,137 +29,100 @@ function zones(): string[] {
   return intl.supportedValuesOf?.('timeZone') ?? [];
 }
 
-/** Hoisted (static-components rule): one row of date-specific windows. */
-function DatedRows({ title, help, rows, onSet, onRemove }: {
-  title: string; help: string; rows: { date: string; windows: [string, string][] }[];
-  onSet: (date: string, windows: [string, string][]) => void; onRemove: (date: string) => void;
-}) {
-  const [date, setDate] = useState('');
-  const [start, setStart] = useState('09:00');
-  const [end, setEnd] = useState('12:00');
+/**
+ * A person's availability, the same screen in every product: weekly hours, date changes, time
+ * off and public holidays, on calendar-service's spec (the service is the authority; the product
+ * only passes it through). Saving replaces the whole spec, so the screen and the service never
+ * disagree about what was saved.
+ */
+export function AvailabilityEditor({ adapter, sections = ['weekly', 'dates', 'timeoff', 'holidays'], regions, showZone = false, extra, describeError, className }: AvailabilityEditorProps) {
+  const { labels, classNames } = useCalendarUi();
+  const ids = useId();
+  const s = useAvailabilitySchedule(adapter);
+  const [tab, setTab] = useState<AvailabilitySection>(sections[0] ?? 'weekly');
+  const describe = describeError ?? ((e: unknown) => (e instanceof Error && e.message ? e.message : labels.availFailed));
+  const busy = s.saving || !s.ready;
+  const titles: Record<AvailabilitySection, string> = {
+    weekly: labels.availTabWeekly,
+    dates: labels.availTabDates,
+    timeoff: labels.availTabTimeOff,
+    holidays: labels.availTabHolidays,
+  };
 
   return (
-    <fieldset className="cal-editor__section">
-      <legend>{title}</legend>
-      <p className="cal-editor__help">{help}</p>
-      <ul className="cal-editor__list">
-        {rows.map((r) => (
-          <li key={r.date}>
-            <span>{r.date}</span>
-            <span>{r.windows.length === 0 ? 'Closed' : r.windows.map(([s, e]) => `${s} to ${e}`).join(', ')}</span>
-            <button type="button" className="cal-btn cal-btn--ghost" onClick={() => onRemove(r.date)}>Remove</button>
-          </li>
-        ))}
-      </ul>
-      <div className="cal-editor__row">
-        <input type="date" aria-label="Date" value={date} onChange={(e) => setDate(e.target.value)} />
-        <input type="time" aria-label="From" value={start} onChange={(e) => setStart(e.target.value)} />
-        <input type="time" aria-label="To" value={end} onChange={(e) => setEnd(e.target.value)} />
-        <button type="button" className="cal-btn" disabled={!date} onClick={() => {
-          const existing = rows.find((r) => r.date === date)?.windows ?? [];
-          onSet(date, [...existing, [start, end]]);
-        }}>Add</button>
-      </div>
-    </fieldset>
-  );
-}
+    <section className={cx('cal-avail', classNames.availabilityEditor, className)} aria-labelledby={`${ids}-t`}>
+      <header className="cal-avail__head">
+        <h3 className="cal-avail__title" id={`${ids}-t`}>{labels.availTitle}</h3>
+        {s.ready ? <p className="cal-avail__intro">{labels.availIntro(s.spec.timezone.zone)}</p> : null}
+      </header>
 
-/** The person's availability: weekly hours, dated windows, overrides, time off, holidays. */
-export function AvailabilityEditor({ spec, dispatch, problems, sections = ['zone', 'weekly', 'dates', 'overrides', 'blocks', 'holidays'], className }: AvailabilityEditorProps) {
-  const { classNames } = useCalendarUi();
-  const zoneListId = useId();
-  const [blockFrom, setBlockFrom] = useState('');
-  const [blockTo, setBlockTo] = useState('');
-  const has = (s: (typeof sections)[number]) => sections.includes(s);
+      {!s.ready && !s.error ? <p className="cal-avail__empty">{labels.availLoading}</p> : null}
+      {s.error ? <p className="cal-avail__error" role="alert">{describe(s.error)}</p> : null}
 
-  return (
-    <div className={cx('cal-editor', classNames.editor, className)}>
-      {problems.length > 0 && (
-        <ul className="cal-editor__problems" role="alert">{problems.map((p) => <li key={p}>{p}</li>)}</ul>
-      )}
+      {s.ready ? (
+        <>
+          <WeekRibbon spec={s.spec} />
 
-      {has('zone') && (
-        <fieldset className="cal-editor__section">
-          <legend>Time zone</legend>
-          <input list={zoneListId} aria-label="Time zone" value={spec.timezone.zone}
-            onChange={(e) => dispatch({ type: 'setZone', zone: e.target.value })} />
-          <datalist id={zoneListId}>{zones().map((z) => <option key={z} value={z} />)}</datalist>
-          <label className="cal-editor__check">
-            <input type="checkbox" checked={Boolean(spec.timezone.follow_host_profile)}
-              onChange={(e) => dispatch({ type: 'setZone', zone: spec.timezone.zone, followHostProfile: e.target.checked })} />
-            Follow my profile time zone when I travel
-          </label>
-        </fieldset>
-      )}
-
-      {has('weekly') && (
-        <fieldset className="cal-editor__section">
-          <legend>Weekly hours</legend>
-          {(spec.weekly ?? []).map((rule, i) => (
-            <div key={i} className="cal-editor__row">
-              <div className="cal-editor__days" role="group" aria-label={`Days for hours ${i + 1}`}>
-                {DAYS.map((d) => (
-                  <button type="button" key={d.key} aria-pressed={rule.days.includes(d.key)}
-                    className={`cal-chip${rule.days.includes(d.key) ? ' is-on' : ''}`}
-                    onClick={() => dispatch({ type: 'updateWeekly', index: i, rule: {
-                      ...rule, days: rule.days.includes(d.key) ? rule.days.filter((x) => x !== d.key) : [...rule.days, d.key],
-                    } })}>{d.label}</button>
+          {showZone ? (
+            <label className="cal-avail__field cal-avail__zone">
+              {labels.availZone}
+              <select className="cal-input" value={s.spec.timezone.zone} disabled={busy} onChange={(e) => s.edit({ type: 'setZone', zone: e.target.value })}>
+                {(zones().includes(s.spec.timezone.zone) ? zones() : [s.spec.timezone.zone, ...zones()]).map((z) => (
+                  <option key={z} value={z}>{z}</option>
                 ))}
-              </div>
-              <input type="time" aria-label="From" value={rule.start} onChange={(e) => dispatch({ type: 'updateWeekly', index: i, rule: { ...rule, start: e.target.value } })} />
-              <input type="time" aria-label="To" value={rule.end} onChange={(e) => dispatch({ type: 'updateWeekly', index: i, rule: { ...rule, end: e.target.value } })} />
-              <button type="button" className="cal-btn cal-btn--ghost" onClick={() => dispatch({ type: 'removeWeekly', index: i })}>Remove</button>
+              </select>
+            </label>
+          ) : null}
+
+          {sections.length > 1 ? (
+            <div className="cal-avail__tabs" role="tablist">
+              {sections.map((key) => (
+                <button
+                  key={key}
+                  type="button"
+                  role="tab"
+                  id={`${ids}-${key}`}
+                  aria-selected={tab === key}
+                  aria-controls={`${ids}-${key}-panel`}
+                  className={cx('cal-avail__tab', tab === key && 'cal-avail__tab--on')}
+                  onClick={() => setTab(key)}
+                >
+                  {titles[key]}
+                </button>
+              ))}
             </div>
-          ))}
-          <button type="button" className="cal-btn" onClick={() => dispatch({ type: 'addWeekly', rule: { days: ['mon', 'tue', 'wed', 'thu', 'fri'], start: '09:00', end: '17:00' } })}>Add hours</button>
-        </fieldset>
-      )}
+          ) : null}
 
-      {has('dates') && (
-        <DatedRows title="Extra dates" help="Times you are free on a specific date, on top of your weekly hours."
-          rows={spec.dates ?? []} onSet={(date, windows) => dispatch({ type: 'setDate', date, windows })} onRemove={(date) => dispatch({ type: 'removeDate', date })} />
-      )}
-
-      {has('overrides') && (
-        <DatedRows title="Different hours on a date" help="Replaces your weekly hours for that date only. Remove every window to close the day."
-          rows={spec.overrides ?? []} onSet={(date, windows) => dispatch({ type: 'setOverride', date, windows })} onRemove={(date) => dispatch({ type: 'removeOverride', date })} />
-      )}
-
-      {has('blocks') && (
-        <fieldset className="cal-editor__section">
-          <legend>Time off</legend>
-          <ul className="cal-editor__list">
-            {(spec.blocks ?? []).map((b, i) => (
-              <li key={i}>
-                <span>{'from' in b ? `${b.from} to ${b.to}` : `${b.start.replace('T', ' ')} to ${b.end.replace('T', ' ')}`}</span>
-                <button type="button" className="cal-btn cal-btn--ghost" onClick={() => dispatch({ type: 'removeBlock', index: i })}>Remove</button>
-              </li>
-            ))}
-          </ul>
-          <div className="cal-editor__row">
-            <input type="date" aria-label="First day off" value={blockFrom} onChange={(e) => setBlockFrom(e.target.value)} />
-            <input type="date" aria-label="Last day off" value={blockTo} onChange={(e) => setBlockTo(e.target.value)} />
-            <button type="button" className="cal-btn" disabled={!blockFrom} onClick={() => {
-              dispatch({ type: 'addBlock', block: { from: blockFrom, to: blockTo || blockFrom } });
-              setBlockFrom('');
-              setBlockTo('');
-            }}>Add time off</button>
+          <div role="tabpanel" id={`${ids}-${tab}-panel`} aria-labelledby={`${ids}-${tab}`} className="cal-avail__panel">
+            {tab === 'weekly' ? <WeeklyHours spec={s.spec} edit={s.edit} disabled={busy} /> : null}
+            {tab === 'dates' ? <DateChanges spec={s.spec} edit={s.edit} disabled={busy} /> : null}
+            {tab === 'timeoff' ? <TimeOff spec={s.spec} edit={s.edit} disabled={busy} /> : null}
+            {tab === 'holidays' ? <PublicHolidays spec={s.spec} edit={s.edit} regions={regions} holidays={adapter.holidays} disabled={busy} /> : null}
           </div>
-        </fieldset>
-      )}
 
-      {has('holidays') && (
-        <fieldset className="cal-editor__section">
-          <legend>Public holidays</legend>
-          <label className="cal-editor__check">
-            <input type="checkbox" checked={Boolean(spec.holidays?.observe)}
-              onChange={(e) => dispatch({ type: 'setHolidays', region: e.target.checked ? (spec.holidays?.region ?? 'CA') : null })} />
-            Close on public holidays in
-          </label>
-          <input aria-label="Holiday region (e.g. CA-ON, NG)" value={spec.holidays?.region ?? ''} disabled={!spec.holidays?.observe}
-            onChange={(e) => dispatch({ type: 'setHolidays', region: e.target.value.toUpperCase() || null })} />
-        </fieldset>
-      )}
-    </div>
+          {extra ? <div className="cal-avail__extra">{extra}</div> : null}
+
+          {s.problems.length > 0 ? (
+            <ul className="cal-avail__problems" role="alert">
+              {s.problems.map((p) => <li key={p}>{p}</li>)}
+            </ul>
+          ) : null}
+
+          <footer className="cal-avail__bar">
+            {s.dirty ? <span className="cal-avail__status">{labels.availUnsaved}</span> : s.justSaved ? <span className="cal-avail__status" role="status">{labels.availSaved}</span> : <span />}
+            <div className="cal-avail__bar-actions">
+              {s.dirty ? (
+                <button type="button" className={cx('cal-btn cal-btn--ghost', classNames.button)} disabled={s.saving} onClick={s.discard}>
+                  {labels.availDiscard}
+                </button>
+              ) : null}
+              <button type="button" className={cx('cal-btn cal-btn--primary', classNames.button, classNames.buttonPrimary)} disabled={!s.dirty || s.saving || s.problems.length > 0} onClick={() => void s.save()}>
+                {labels.availSave}
+              </button>
+            </div>
+          </footer>
+        </>
+      ) : null}
+    </section>
   );
 }

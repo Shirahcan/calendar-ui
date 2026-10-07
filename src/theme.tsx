@@ -150,6 +150,46 @@ export interface CalendarLabels {
   reminderTooMany: (max: number) => string;
   reminderOutOfRange: string;
   reminderFailed: string;
+  // Availability (AvailabilityEditor)
+  availTitle: string;
+  availIntro: (zone: string) => string;
+  availTabWeekly: string;
+  availTabDates: string;
+  availTabTimeOff: string;
+  availTabHolidays: string;
+  availRibbon: string;
+  availDayNames: Record<'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun', string>;
+  availDayOff: string;
+  availAddHours: string;
+  availRemoveHours: (day: string, start: string, end: string) => string;
+  availCopyWeekdays: string;
+  availCopyAll: string;
+  availOpenDay: (day: string) => string;
+  availDatesIntro: string;
+  availDate: string;
+  availClosedAllDay: string;
+  availAddChange: string;
+  availNoChanges: string;
+  availTimeOffIntro: string;
+  availFrom: string;
+  availTo: string;
+  availPartDay: string;
+  availAddTimeOff: string;
+  availNoTimeOff: string;
+  availRemove: string;
+  availHolidaysIntro: string;
+  availObserve: string;
+  availRegion: string;
+  availWorking: string;
+  availNoHolidays: string;
+  availZone: string;
+  availSave: string;
+  availSaved: string;
+  availDiscard: string;
+  availUnsaved: string;
+  availLoading: string;
+  availFailed: string;
+  availNoHours: string;
 }
 
 /** "1 day", "2 hours", "1 hour 30 minutes", "15 minutes". */
@@ -253,6 +293,45 @@ export const DEFAULT_LABELS: CalendarLabels = {
   reminderTooMany: (max) => `Up to ${max} reminders.`,
   reminderOutOfRange: 'A reminder must be between 1 minute and 7 days before.',
   reminderFailed: 'Those reminder times did not save. Please try again.',
+  availTitle: 'Availability',
+  availIntro: (zone) => `When people can book time with you. Times are on ${zone} time.`,
+  availTabWeekly: 'Weekly hours',
+  availTabDates: 'Date changes',
+  availTabTimeOff: 'Time off',
+  availTabHolidays: 'Public holidays',
+  availRibbon: 'Your week at a glance',
+  availDayNames: { mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday', thu: 'Thursday', fri: 'Friday', sat: 'Saturday', sun: 'Sunday' },
+  availDayOff: 'Unavailable',
+  availAddHours: 'Add hours',
+  availRemoveHours: (day, start, end) => `Remove ${start} to ${end} on ${day}`,
+  availCopyWeekdays: 'Copy to weekdays',
+  availCopyAll: 'Copy to every day',
+  availOpenDay: (day) => `Take meetings on ${day}`,
+  availDatesIntro: "Change one date's hours without touching your weekly pattern, or close it for the day.",
+  availDate: 'Date',
+  availClosedAllDay: 'Closed all day',
+  availAddChange: 'Add change',
+  availNoChanges: 'No date changes. Your weekly hours apply every week.',
+  availTimeOffIntro: 'Days or hours you are away. Nothing can be booked in them.',
+  availFrom: 'From',
+  availTo: 'To',
+  availPartDay: 'Part of a day',
+  availAddTimeOff: 'Add time off',
+  availNoTimeOff: 'No time off planned.',
+  availRemove: 'Remove',
+  availHolidaysIntro: 'Close on the public holidays where you work. Pick any you will work anyway.',
+  availObserve: 'Close on public holidays',
+  availRegion: 'Where',
+  availWorking: 'Working this day',
+  availNoHolidays: 'No public holidays found for that place and year.',
+  availZone: 'Time zone',
+  availSave: 'Save availability',
+  availSaved: 'Saved',
+  availDiscard: 'Discard changes',
+  availUnsaved: 'Unsaved changes',
+  availLoading: 'Loading availability...',
+  availFailed: 'Your availability did not save. Please try again.',
+  availNoHours: 'No hours yet. Add the hours you can take meetings.',
 };
 
 /** Extra classes per part, appended to the package's own (never replacing them). */
@@ -272,6 +351,7 @@ export interface CalendarClassNames {
   scratchpadDock: string;
   holidayEditor: string;
   reminderEditor: string;
+  availabilityEditor: string;
 }
 
 export type ColorScheme = 'light' | 'dark' | 'auto';

@@ -59,6 +59,8 @@ export interface WeeklyRule {
   end: string;
   valid_from?: string | null;
   valid_until?: string | null;
+  /** Minutes kept free after each meeting on these days, when it differs from the booking type's. */
+  gap?: number;
 }
 
 /** The schema-1 availability spec the service stores (04-availability-spec-and-engine.md). */
@@ -68,9 +70,10 @@ export interface AvailabilitySpec {
   weekly?: WeeklyRule[];
   periods?: { from: string; to: string; weekly: WeeklyRule[] }[];
   dates?: { date: string; windows: [string, string][] }[];
-  overrides?: { date: string; windows: [string, string][] }[];
+  overrides?: { date: string; windows: [string, string][]; gap?: number }[];
   blocks?: ({ from: string; to: string } | { start: string; end: string })[];
-  holidays?: { region: string; observe: boolean };
+  /** Close on the region's public holidays (the service holds the dates), except the dates in `work`. */
+  holidays?: { region: string; observe: boolean; work?: string[] };
 }
 
 export type View = 'month' | 'week' | 'day';

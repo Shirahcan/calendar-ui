@@ -12,7 +12,9 @@ export { useBookingFlow } from './hooks/useBookingFlow';
 export type { BookingFlow as BookingFlowState, BookingFlowActions, FlowStep } from './hooks/useBookingFlow';
 export { useDragSelect } from './hooks/useDragSelect';
 export type { DragSelection } from './hooks/useDragSelect';
-export { reduceSpec, specProblems, useAvailabilityEditor } from './hooks/useAvailabilityEditor';
+export { dayWindows, reduceSpec, specProblems, useAvailabilityEditor } from './hooks/useAvailabilityEditor';
+export { useAvailabilitySchedule } from './hooks/useAvailabilitySchedule';
+export type { AvailabilityAdapter, AvailabilitySchedule, HolidayDay } from './hooks/useAvailabilitySchedule';
 export type { EditorAction } from './hooks/useAvailabilityEditor';
 
 export { DayView, WeekView } from './components/WeekView';
@@ -24,7 +26,7 @@ export type { SlotPickerProps } from './components/SlotPicker';
 export { BookingFlow } from './components/BookingFlow';
 export type { BookingFlowProps } from './components/BookingFlow';
 export { AvailabilityEditor } from './components/AvailabilityEditor';
-export type { AvailabilityEditorProps } from './components/AvailabilityEditor';
+export type { AvailabilityEditorProps, AvailabilitySection } from './components/AvailabilityEditor';
 
 export { formatZonedDate, formatZonedDateTime, formatZonedTime, formatZonedTimeRange, instantToWallTime, onDay, sameClock, wallTimeToInstant, zoneCity, zoneLabel } from './zoned';
 export type { DateStyle, Instant } from './zoned';

@@ -17,7 +17,12 @@ export type EditorAction =
   | { type: 'removeOverride'; date: string }
   | { type: 'addBlock'; block: { from: string; to: string } | { start: string; end: string } }
   | { type: 'removeBlock'; index: number }
-  | { type: 'setHolidays'; region: string | null };
+  | { type: 'setHolidays'; region: string | null }
+  /** Replace one weekday's hours (rules with their own validity dates are left alone). */
+  | { type: 'setDayWindows'; day: DayName; windows: Window[] }
+  /** Give other weekdays the same hours as this one. */
+  | { type: 'copyDay'; day: DayName; to: DayName[] }
+  | { type: 'setHolidayWork'; date: string; working: boolean };
 
 const DAYS: DayName[] = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
 const HHMM = /^([01]\d|2[0-3]):[0-5]\d$|^24:00$/;
@@ -26,6 +31,35 @@ function toMinutes(hhmm: string): number {
   const [h = '0', m = '0'] = hhmm.split(':');
 
   return Number(h) * 60 + Number(m);
+}
+
+/** The open windows of one weekday, from rules that apply every week (no validity dates). */
+export function dayWindows(spec: AvailabilitySpec, day: DayName): Window[] {
+  return (spec.weekly ?? [])
+    .filter((r) => r.days.includes(day) && !r.valid_from && !r.valid_until)
+    .map((r) => [r.start, r.end] as Window)
+    .sort((a, b) => a[0].localeCompare(b[0]));
+}
+
+/**
+ * Rewrite one weekday as one rule per window. A rule shared with other days keeps its other days;
+ * the day's own `gap` (a different buffer on that day) carries over to its new rules.
+ */
+function withDayWindows(spec: AvailabilitySpec, day: DayName, windows: Window[]): AvailabilitySpec {
+  const rules = spec.weekly ?? [];
+  const gap = rules.find((r) => r.days.includes(day) && !r.valid_from && !r.valid_until && r.gap !== undefined)?.gap;
+  const kept: WeeklyRule[] = [];
+  for (const r of rules) {
+    if (!r.days.includes(day) || r.valid_from || r.valid_until) {
+      kept.push(r);
+      continue;
+    }
+    const others = r.days.filter((d) => d !== day);
+    if (others.length) kept.push({ ...r, days: others });
+  }
+  const added = windows.map(([start, end]) => ({ days: [day], start, end, ...(gap !== undefined ? { gap } : {}) }) as WeeklyRule);
+
+  return { ...spec, weekly: [...kept, ...added] };
 }
 
 function upsertDated(rows: { date: string; windows: Window[] }[] | undefined, date: string, windows: Window[]) {
@@ -62,8 +96,24 @@ export function reduceSpec(spec: AvailabilitySpec, action: EditorAction): Availa
       return { ...spec, blocks: (spec.blocks ?? []).filter((_, i) => i !== action.index) };
     case 'setHolidays': {
       const { holidays: _drop, ...rest } = spec;
+      // A new region keeps the days already chosen to work only when it is the same region.
+      const work = spec.holidays?.region === action.region ? spec.holidays?.work : undefined;
 
-      return action.region ? { ...rest, holidays: { region: action.region, observe: true } } : rest;
+      return action.region ? { ...rest, holidays: { region: action.region, observe: true, ...(work?.length ? { work } : {}) } } : rest;
+    }
+    case 'setDayWindows':
+      return withDayWindows(spec, action.day, action.windows);
+    case 'copyDay': {
+      const source = dayWindows(spec, action.day);
+      return action.to.reduce((s, d) => withDayWindows(s, d, source), spec);
+    }
+    case 'setHolidayWork': {
+      if (!spec.holidays) return spec;
+      const rest = (spec.holidays.work ?? []).filter((d) => d !== action.date);
+      const work = action.working ? [...rest, action.date].sort() : rest;
+      const { work: _w, ...base } = spec.holidays;
+
+      return { ...spec, holidays: work.length ? { ...base, work } : base };
     }
   }
 }
