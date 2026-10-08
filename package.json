@@ -1,6 +1,6 @@
 {
   "name": "@shirahcan/calendar-ui",
-  "version": "0.12.1",
+  "version": "0.12.2",
   "private": true,
   "description": "Month, week and day views, the slot picker, the booking flow and the availability editor for calendar-service. Headless hooks plus themeable components; it never calls the service itself.",
   "type": "module",
