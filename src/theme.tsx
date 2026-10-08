@@ -268,6 +268,12 @@ export interface CalendarLabels {
   linkCancel: string;
   linkSave: string;
   linkCreate: string;
+  linkExternal: string;
+  linkExternalHelp: string;
+  linkExternalUrl: string;
+  linkExternalCallUrl: string;
+  linkExternalBadge: string;
+  linkOpenExternal: string;
   // Availability (AvailabilityEditor)
   availTitle: string;
   availIntro: (zone: string) => string;
@@ -541,6 +547,12 @@ export const DEFAULT_LABELS: CalendarLabels = {
   linkCancel: 'Cancel',
   linkSave: 'Save changes',
   linkCreate: 'Create link',
+  linkExternal: 'Booked elsewhere (optional)',
+  linkExternalHelp: 'Use your own scheduler instead: people book on that page and meet in that room.',
+  linkExternalUrl: 'Booking page address',
+  linkExternalCallUrl: 'Call room address',
+  linkExternalBadge: 'External',
+  linkOpenExternal: 'Open booking page',
   availTitle: 'Availability',
   availIntro: (zone) => `When people can book time with you. Times are on ${zone} time.`,
   availTabWeekly: 'Weekly hours',

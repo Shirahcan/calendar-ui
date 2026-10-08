@@ -13,6 +13,8 @@ export interface BookingLink {
   is_active: boolean;
   is_default: boolean;
   external_url: string | null;
+  /** An external link's own call room (e.g. the host's Zoom room). */
+  external_call_url?: string | null;
   duration: number | null;
   /** null = the host's usual buffer applies. */
   buffer_before: number | null;
@@ -36,6 +38,9 @@ export interface BookingLinkFields {
   buffer_after: number | null;
   daily_cap: number | null;
   days_ahead: number | null;
+  /** Only when the product allows external links. */
+  external_url?: string | null;
+  external_call_url?: string | null;
 }
 
 /** The limits a person may choose: the product's scheduling policy, never constants. */
@@ -55,6 +60,8 @@ export interface BookingLinkEditorProps {
   onSave: (fields: BookingLinkFields) => Promise<void>;
   onClose: () => void;
   describeError?: (error: unknown) => string;
+  /** Offer an external booking page and call room (a product's own scheduler, e.g. Calendly). */
+  allowExternal?: boolean;
 }
 
 const intOrNull = (v: string): number | null => (v.trim() === '' ? null : Math.max(0, Math.trunc(Number(v))));
@@ -65,7 +72,7 @@ const intOrNull = (v: string): number | null => (v.trim() === '' ? null : Math.m
  * Save button is reachable on a short screen. Limits come from the product's policy; a refusal shows
  * every reason the service gave, so the person can fix it.
  */
-export function BookingLinkEditor({ open, link, limits, onSave, onClose, describeError }: BookingLinkEditorProps) {
+export function BookingLinkEditor({ open, link, limits, onSave, onClose, describeError, allowExternal = false }: BookingLinkEditorProps) {
   const { labels, classNames } = useCalendarUi();
   const ids = useId();
   const dialog = useRef<HTMLDialogElement>(null);
@@ -103,6 +110,7 @@ export function BookingLinkEditor({ open, link, limits, onSave, onClose, describ
         buffer_after: intOrNull(form.buffer_after),
         daily_cap: intOrNull(form.daily_cap),
         days_ahead: intOrNull(form.days_ahead),
+        ...(allowExternal ? { external_url: form.external_url.trim() || null, external_call_url: form.external_call_url.trim() || null } : {}),
       });
     } catch (err) {
       setError(err);
@@ -162,6 +170,18 @@ export function BookingLinkEditor({ open, link, limits, onSave, onClose, describ
                 <input className={field} type="number" min={1} max={limits.maxDailyCap ?? 50} value={form.daily_cap} placeholder={labels.linkUnlimited} onChange={(e) => set({ daily_cap: e.target.value })} />
               </label>
             </div>
+            {allowExternal ? (
+              <fieldset className="cal-links__external">
+                <legend>{labels.linkExternal}</legend>
+                <span className="cal-links__hint">{labels.linkExternalHelp}</span>
+                <label className="cal-links__field">{labels.linkExternalUrl}
+                  <input className={field} type="url" inputMode="url" value={form.external_url} placeholder="https://" onChange={(e) => set({ external_url: e.target.value })} />
+                </label>
+                <label className="cal-links__field">{labels.linkExternalCallUrl}
+                  <input className={field} type="url" inputMode="url" value={form.external_call_url} placeholder="https://" onChange={(e) => set({ external_call_url: e.target.value })} />
+                </label>
+              </fieldset>
+            ) : null}
             <label className="cal-links__check">
               <input type="checkbox" checked={form.is_active} onChange={(e) => set({ is_active: e.target.checked })} /> {labels.linkActive}
             </label>
@@ -194,5 +214,7 @@ function toForm(link: BookingLink | null, limits: BookingLinkLimits) {
     daily_cap: s(link?.daily_cap),
     is_active: link?.is_active ?? true,
     is_default: link?.is_default ?? false,
+    external_url: link?.external_url ?? '',
+    external_call_url: link?.external_call_url ?? '',
   };
 }

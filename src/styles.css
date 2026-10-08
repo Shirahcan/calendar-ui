@@ -303,6 +303,8 @@
 .cal-links__slug { overflow-wrap: anywhere; }
 .cal-links__field { display: grid; gap: 4px; align-content: start; font-size: 12px; color: var(--cal-ink-muted); min-width: 0; }
 .cal-links__row { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: 12px; }
+.cal-links__external { display: grid; gap: 10px; margin: 0; padding: 12px 14px; border: 1px solid var(--cal-border); border-radius: calc(var(--cal-radius) * 0.6); min-width: 0; }
+.cal-links__external legend { padding: 0 6px; font-size: 13px; font-weight: 600; color: var(--cal-ink); }
 .cal-links__check { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--cal-ink); }
 .cal-links__color { padding: 2px; height: 38px; }
 .cal-linkdlg { width: min(36rem, calc(100vw - 32px)); max-height: 90vh; padding: 0; border: 1px solid var(--cal-border); border-radius: var(--cal-radius); background: var(--cal-surface); color: var(--cal-ink); overflow: hidden; }

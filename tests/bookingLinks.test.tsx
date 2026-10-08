@@ -70,13 +70,13 @@ describe('BookingLinksManager', () => {
     fireEvent.click(within(dlg).getByRole('button', { name: 'Save changes' }));
 
     await waitFor(() => expect(a.update).toHaveBeenCalledTimes(1));
-    expect(a.update.mock.calls[0]![1]).toMatchObject({ days_ahead: 7, daily_cap: 3, duration: 30, buffer_before: null });
+    expect(vi.mocked(a.update).mock.calls[0]![1]).toMatchObject({ days_ahead: 7, daily_cap: 3, duration: 30, buffer_before: null });
     await waitFor(() => expect(notice).toHaveBeenCalledWith('Link saved'));
   });
 
   it('shows every reason a save was refused, inside the dialog', async () => {
     const a = adapterWith([]);
-    a.create.mockRejectedValueOnce(Object.assign(new Error('The link cannot be saved.'), { errors: ['Choose a length of 15, 30, 60 minutes.'] }));
+    vi.mocked(a.create).mockRejectedValueOnce(Object.assign(new Error('The link cannot be saved.'), { errors: ['Choose a length of 15, 30, 60 minutes.'] }));
     render(<BookingLinksManager adapter={a} limits={LIMITS} />);
 
     expect(await screen.findByText('No booking links yet. Create one to start taking bookings.')).toBeTruthy();

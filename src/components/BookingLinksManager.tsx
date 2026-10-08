@@ -32,6 +32,8 @@ export interface BookingLinksManagerProps {
   /** Tell the person something worked ("Reference copied"); a product's toast. */
   onNotice?: (message: string) => void;
   describeError?: (error: unknown) => string;
+  /** Offer external links (a booking page and call room elsewhere) in the editor. */
+  allowExternal?: boolean;
   className?: string;
 }
 
@@ -41,7 +43,7 @@ export interface BookingLinksManagerProps {
  * Switch off/on, Make default, the product's own actions, then Delete behind a confirm). Products
  * that want no UI manage links through calendar-client directly.
  */
-export function BookingLinksManager({ adapter, limits, actions = [], confirmDelete, onNotice, describeError, className }: BookingLinksManagerProps) {
+export function BookingLinksManager({ adapter, limits, actions = [], confirmDelete, onNotice, describeError, allowExternal = false, className }: BookingLinksManagerProps) {
   const { labels, classNames } = useCalendarUi();
   const ids = useId();
   const [rows, setRows] = useState<BookingLink[] | null>(null);
@@ -112,6 +114,7 @@ export function BookingLinksManager({ adapter, limits, actions = [], confirmDele
   const items = (link: BookingLink): RowMenuItem[] => [
     { label: labels.linkEdit, onSelect: () => setEditing({ link, n: Date.now() }) },
     { label: labels.linkCopy, onSelect: () => void copy(link) },
+    ...(link.external_url ? [{ label: labels.linkOpenExternal, onSelect: () => void window.open(link.external_url!, '_blank', 'noopener,noreferrer') }] : []),
     ...actions.filter((a) => !a.hidden?.(link)).map((a) => ({ label: a.label, onSelect: () => a.onSelect(link) })),
     ...(link.is_default || !link.is_active ? [] : [{ label: labels.linkMakeDefault, onSelect: () => void act(() => adapter.setDefault(link.ref)) }]),
     { label: link.is_active ? labels.linkSwitchOff : labels.linkSwitchOn, onSelect: () => void act(() => adapter.update(link.ref, { is_active: !link.is_active })) },
@@ -142,6 +145,7 @@ export function BookingLinksManager({ adapter, limits, actions = [], confirmDele
                   {link.name}
                   {link.is_default ? <span className="cal-links__badge">{labels.linkDefaultBadge}</span> : null}
                   {!link.is_active ? <span className="cal-links__badge cal-links__badge--off">{labels.linkOffBadge}</span> : null}
+                  {link.external_url ? <span className="cal-links__badge cal-links__badge--off">{labels.linkExternalBadge}</span> : null}
                 </span>
                 <span className="cal-links__meta">
                   {link.duration ? labels.availMinutes(link.duration) : null}
@@ -164,6 +168,7 @@ export function BookingLinksManager({ adapter, limits, actions = [], confirmDele
           onSave={save}
           onClose={() => setEditing(null)}
           describeError={describeError}
+          allowExternal={allowExternal}
         />
       ) : null}
     </section>
