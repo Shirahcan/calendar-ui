@@ -87,7 +87,8 @@ describe('availability editor', () => {
 
     expect(spec.overrides).toEqual([{ date: '2026-10-13', windows: [] }]);
     expect(spec.holidays).toEqual({ region: 'CA-ON', observe: true });
-    expect(reduceSpec(spec, { type: 'setHolidays', region: null }).holidays).toBeUndefined();
+    // Not observing keeps the place, so ticking it again returns to it.
+    expect(reduceSpec(spec, { type: 'setHolidays', region: null }).holidays).toEqual({ region: 'CA-ON', observe: false });
   });
 
   it('flags what the service would refuse, without false-flagging an overnight window', () => {

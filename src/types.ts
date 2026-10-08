@@ -59,7 +59,7 @@ export interface WeeklyRule {
   end: string;
   valid_from?: string | null;
   valid_until?: string | null;
-  /** Minutes kept free after each meeting on these days, when it differs from the booking type's. */
+  /** Minutes kept free around each meeting on these days, when it differs from the schedule's buffer. */
   gap?: number;
 }
 
@@ -67,6 +67,8 @@ export interface WeeklyRule {
 export interface AvailabilitySpec {
   schema: 1;
   timezone: { zone: string; follow_host_profile?: boolean };
+  /** Minutes kept free around every meeting on a day that sets no `gap` of its own. */
+  buffer?: number;
   weekly?: WeeklyRule[];
   periods?: { from: string; to: string; weekly: WeeklyRule[] }[];
   dates?: { date: string; windows: [string, string][] }[];
@@ -74,6 +76,27 @@ export interface AvailabilitySpec {
   blocks?: ({ from: string; to: string } | { start: string; end: string })[];
   /** Close on the region's public holidays (the service holds the dates), except the dates in `work`. */
   holidays?: { region: string; observe: boolean; work?: string[] };
+}
+
+/** How a product's bookings are scheduled (calendar-service GET /v1/scheduling/policy). */
+export interface SchedulingPolicy {
+  min_buffer_minutes: number;
+  max_buffer_minutes: number;
+  default_buffer_minutes: number;
+  buffer_choices: number[];
+  min_notice_minutes: number;
+  horizon_days: number;
+  hold_seconds: number;
+  /** The week a new person starts with; its rows also give the hours a day gets when turned on. */
+  seed_weekly: WeeklyRule[];
+  observe_holidays_by_default: boolean;
+}
+
+/** A place with public holidays (calendar-service GET /v1/holidays/regions). */
+export interface HolidayRegion {
+  code: string;
+  name: string;
+  active?: boolean;
 }
 
 export type View = 'month' | 'week' | 'day';

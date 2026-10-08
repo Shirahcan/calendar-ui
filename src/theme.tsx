@@ -150,6 +150,75 @@ export interface CalendarLabels {
   reminderTooMany: (max: number) => string;
   reminderOutOfRange: string;
   reminderFailed: string;
+  // Scheduling policy (SchedulingPolicyEditor)
+  policyTitle: string;
+  policyIntro: string;
+  policyLoading: string;
+  policyBuffers: string;
+  policyMinBuffer: string;
+  policyDefaultBuffer: string;
+  policyMaxBuffer: string;
+  policyBufferChoices: string;
+  policyAddChoice: string;
+  policyRemoveChoice: (minutes: number) => string;
+  policyBooking: string;
+  policyNotice: string;
+  policyNoticeHint: string;
+  policyHorizon: string;
+  policyHold: string;
+  policySeedWeek: string;
+  policySeedWeekHint: string;
+  policyObserveHolidays: string;
+  policySave: string;
+  policySaved: string;
+  policyUseDefault: string;
+  policyIsDefault: string;
+  policyFailed: string;
+  // Holiday places and rules (HolidayRulesEditor)
+  rulesTitle: string;
+  rulesIntro: string;
+  rulesLoading: string;
+  rulesPlace: string;
+  rulesPlaceCode: string;
+  rulesPlaceName: string;
+  rulesAddPlace: string;
+  rulesNone: string;
+  rulesNoDate: string;
+  rulesEdit: string;
+  rulesRemove: string;
+  rulesConfirmRemove: (name: string) => string;
+  rulesAdd: string;
+  rulesChange: string;
+  rulesSave: string;
+  rulesName: string;
+  rulesKind: string;
+  rulesKindName: (kind: 'fixed' | 'nth_weekday' | 'last_weekday' | 'weekday_on_or_before' | 'easter_offset') => string;
+  rulesNth: string;
+  rulesWeekday: string;
+  rulesMonth: string;
+  rulesDay: string;
+  rulesEasterDays: string;
+  rulesActive: string;
+  rulesWeekdayName: (isoDay: number) => string;
+  rulesMonthName: (month: number) => string;
+  rulesDescribe: (kind: string, params: { month?: number; day?: number; weekday?: number; n?: number; days?: number }) => string;
+  rulesPreview: (year: number) => string;
+  rulesFailed: string;
+  // Calendar connections (CalendarConnectionsPanel)
+  connTitle: string;
+  connIntro: string;
+  connLoading: string;
+  connNone: string;
+  connProvider: (provider: 'google' | 'microsoft') => string;
+  connNoEmail: string;
+  connNeedsReauth: string;
+  connSynced: (iso: string) => string;
+  connNotSyncedYet: string;
+  connReconnect: string;
+  connDisconnect: string;
+  connConfirmDisconnect: (provider: string, email: string | null) => string;
+  connConnect: (provider: string) => string;
+  connFailed: string;
   // Availability (AvailabilityEditor)
   availTitle: string;
   availIntro: (zone: string) => string;
@@ -162,8 +231,12 @@ export interface CalendarLabels {
   availDayOff: string;
   availAddHours: string;
   availRemoveHours: (day: string, start: string, end: string) => string;
-  availCopyWeekdays: string;
-  availCopyAll: string;
+  availBuffer: string;
+  availBufferHelp: string;
+  availDayBuffer: string;
+  availDayBufferFor: (day: string) => string;
+  availBufferSameAsDefault: (minutes: number) => string;
+  availMinutes: (minutes: number) => string;
   availOpenDay: (day: string) => string;
   availDatesIntro: string;
   availDate: string;
@@ -293,6 +366,84 @@ export const DEFAULT_LABELS: CalendarLabels = {
   reminderTooMany: (max) => `Up to ${max} reminders.`,
   reminderOutOfRange: 'A reminder must be between 1 minute and 7 days before.',
   reminderFailed: 'Those reminder times did not save. Please try again.',
+  policyTitle: 'Scheduling rules',
+  policyIntro: 'How every booking on this platform is scheduled. Changes apply to new bookings straight away.',
+  policyLoading: 'Loading the scheduling rules...',
+  policyBuffers: 'Time kept free around meetings',
+  policyMinBuffer: 'Smallest allowed (minutes)',
+  policyDefaultBuffer: 'Usual (minutes)',
+  policyMaxBuffer: 'Largest allowed (minutes)',
+  policyBufferChoices: 'Choices people pick from',
+  policyAddChoice: 'Add choice',
+  policyRemoveChoice: (minutes) => `Remove ${minutes} minutes`,
+  policyBooking: 'Booking',
+  policyNotice: 'Least notice (minutes)',
+  policyNoticeHint: 'The soonest a time can be booked, counted from now.',
+  policyHorizon: 'How far ahead (days)',
+  policyHold: 'Hold a picked time for (minutes)',
+  policySeedWeek: 'The week a new person starts with',
+  policySeedWeekHint: 'Also the hours a day gets when someone turns it on.',
+  policyObserveHolidays: "Close on a person's public holidays unless they choose otherwise",
+  policySave: 'Save rules',
+  policySaved: 'Saved',
+  policyUseDefault: 'Use the standard rules',
+  policyIsDefault: 'Using the standard rules',
+  policyFailed: 'Those scheduling rules did not save. Please try again.',
+  rulesTitle: 'Public holidays by place',
+  rulesIntro: 'The places people can observe holidays for, and the rule that gives each holiday its date. Every product uses these.',
+  rulesLoading: 'Loading the places...',
+  rulesPlace: 'Place',
+  rulesPlaceCode: 'Code (e.g. KE or CA-ON)',
+  rulesPlaceName: 'Place name',
+  rulesAddPlace: 'Add place',
+  rulesNone: 'No holidays yet.',
+  rulesNoDate: 'Not this year',
+  rulesEdit: 'Edit',
+  rulesRemove: 'Remove',
+  rulesConfirmRemove: (name) => `Remove ${name}? Its dates stop closing calendars.`,
+  rulesAdd: 'Add holiday',
+  rulesChange: 'Change holiday',
+  rulesSave: 'Save holiday',
+  rulesName: 'Name',
+  rulesKind: 'Falls on',
+  rulesKindName: (kind) => ({ fixed: 'The same date every year', nth_weekday: 'A weekday of the month (e.g. 2nd Monday)', last_weekday: 'The last weekday of the month', weekday_on_or_before: 'A weekday on or before a date', easter_offset: 'Days from Easter Sunday' })[kind],
+  rulesNth: 'Which one (1 to 5)',
+  rulesWeekday: 'Weekday',
+  rulesMonth: 'Month',
+  rulesDay: 'Day',
+  rulesEasterDays: 'Days from Easter (Good Friday is -2)',
+  rulesActive: 'In use',
+  rulesWeekdayName: (d) => ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][d - 1] ?? String(d),
+  rulesMonthName: (m) => ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][m - 1] ?? String(m),
+  rulesDescribe: (kind, p) => {
+    const day = (d?: number) => ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][(d ?? 1) - 1];
+    const month = (m?: number) => ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][(m ?? 1) - 1];
+    const nth = ['', 'first', 'second', 'third', 'fourth', 'fifth'][p.n ?? 1];
+    switch (kind) {
+      case 'fixed': return `${month(p.month)} ${p.day}`;
+      case 'nth_weekday': return `The ${nth} ${day(p.weekday)} of ${month(p.month)}`;
+      case 'last_weekday': return `The last ${day(p.weekday)} of ${month(p.month)}`;
+      case 'weekday_on_or_before': return `The ${day(p.weekday)} on or before ${month(p.month)} ${p.day}`;
+      case 'easter_offset': return p.days === 0 ? 'Easter Sunday' : `${Math.abs(p.days ?? 0)} days ${(p.days ?? 0) < 0 ? 'before' : 'after'} Easter Sunday`;
+      default: return kind;
+    }
+  },
+  rulesPreview: (year) => `Dates in ${year}`,
+  rulesFailed: 'That holiday change did not save. Please try again.',
+  connTitle: 'Connected calendars',
+  connIntro: 'Busy time on a connected calendar keeps you from being double-booked, in every product you use.',
+  connLoading: 'Loading your calendars...',
+  connNone: 'No calendar connected yet.',
+  connProvider: (p) => (p === 'google' ? 'Google Calendar' : 'Outlook Calendar'),
+  connNoEmail: 'Connected account',
+  connNeedsReauth: 'Needs reconnecting: busy time is not being read.',
+  connSynced: (iso) => `Busy time read ${new Date(iso).toLocaleString()}`,
+  connNotSyncedYet: 'Reading busy time for the first time...',
+  connReconnect: 'Reconnect',
+  connDisconnect: 'Disconnect',
+  connConfirmDisconnect: (provider, email) => `Disconnect ${provider}${email ? ` (${email})` : ''}? Its busy time stops counting.`,
+  connConnect: (provider) => `Connect ${provider}`,
+  connFailed: 'That did not work. Please try again.',
   availTitle: 'Availability',
   availIntro: (zone) => `When people can book time with you. Times are on ${zone} time.`,
   availTabWeekly: 'Weekly hours',
@@ -304,8 +455,12 @@ export const DEFAULT_LABELS: CalendarLabels = {
   availDayOff: 'Unavailable',
   availAddHours: 'Add hours',
   availRemoveHours: (day, start, end) => `Remove ${start} to ${end} on ${day}`,
-  availCopyWeekdays: 'Copy to weekdays',
-  availCopyAll: 'Copy to every day',
+  availBuffer: 'Time kept free around each meeting',
+  availBufferHelp: 'A day can keep a different break: set it on that day.',
+  availDayBuffer: 'Break',
+  availDayBufferFor: (day) => `Break around meetings on ${day}`,
+  availBufferSameAsDefault: (minutes) => `Usual (${minutes} min)`,
+  availMinutes: (minutes) => `${minutes} min`,
   availOpenDay: (day) => `Take meetings on ${day}`,
   availDatesIntro: "Change one date's hours without touching your weekly pattern, or close it for the day.",
   availDate: 'Date',
@@ -352,6 +507,9 @@ export interface CalendarClassNames {
   holidayEditor: string;
   reminderEditor: string;
   availabilityEditor: string;
+  policyEditor: string;
+  holidayRulesEditor: string;
+  connectionsPanel: string;
 }
 
 export type ColorScheme = 'light' | 'dark' | 'auto';

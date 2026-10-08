@@ -1,32 +1,51 @@
-import type { AvailabilitySpec, DayName } from '../../types';
-import { dayWindows, type EditorAction } from '../../hooks/useAvailabilityEditor';
+import type { AvailabilitySpec, DayName, SchedulingPolicy } from '../../types';
+import { dayGap, dayWindows, type EditorAction } from '../../hooks/useAvailabilityEditor';
 import { cx, useCalendarUi } from '../../theme';
 import { WEEK, minutesOf } from './WeekRibbon';
 
-const WEEKDAYS: DayName[] = ['mon', 'tue', 'wed', 'thu', 'fri'];
+/**
+ * The hours a day gets when it is turned on: the product's seed week for that day, else its first
+ * seed row (the policy always has one), so no time of day is written into the component.
+ */
+function seedWindow(policy: SchedulingPolicy, day: DayName): [string, string] {
+  const row = policy.seed_weekly.find((r) => r.days.includes(day)) ?? policy.seed_weekly[0];
 
-/** The next sensible window after the day's last one (an hour later, three hours long). */
-function nextWindow(windows: [string, string][]): [string, string] {
-  if (windows.length === 0) return ['09:00', '17:00'];
+  return row ? [row.start, row.end] : ['', ''];
+}
+
+/** The next window after the day's last one: an hour later, as long as the seed window. */
+function nextWindow(windows: [string, string][], seed: [string, string]): [string, string] {
+  if (windows.length === 0) return seed;
+  const length = Math.max(minutesOf(seed[1]) - minutesOf(seed[0]), 60);
   const end = minutesOf(windows[windows.length - 1]![1]);
   const start = Math.min(end + 60, 23 * 60);
-  const stop = Math.min(start + 180, 24 * 60 - 1);
+  const stop = Math.min(start + length, 24 * 60 - 1);
   const fmt = (m: number) => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
 
   return [fmt(start), fmt(stop)];
 }
 
-/** One row per weekday: open or not, and each window it is open for. */
-export function WeeklyHours({ spec, edit, disabled }: { spec: AvailabilitySpec; edit: (a: EditorAction) => void; disabled?: boolean }) {
+/** One row per weekday: open or not, each window it is open for, and its own buffer if it has one. */
+export function WeeklyHours({ spec, policy, edit, disabled, dayBuffers = true }: {
+  spec: AvailabilitySpec;
+  policy: SchedulingPolicy;
+  edit: (a: EditorAction) => void;
+  disabled?: boolean;
+  /** Show each day's own break (off where the week is a template, e.g. the policy's seed week). */
+  dayBuffers?: boolean;
+}) {
   const { labels, classNames } = useCalendarUi();
   const btn = cx('cal-btn', classNames.button);
+  const scheduleBuffer = spec.buffer ?? policy.default_buffer_minutes;
 
   return (
     <div className="cal-avail__days">
       {WEEK.map((day) => {
         const windows = dayWindows(spec, day);
         const name = labels.availDayNames[day];
+        const gap = dayGap(spec, day);
         const set = (next: [string, string][]) => edit({ type: 'setDayWindows', day, windows: next });
+        const choices = gap === undefined || policy.buffer_choices.includes(gap) ? policy.buffer_choices : [...policy.buffer_choices, gap].sort((a, b) => a - b);
 
         return (
           <div key={day} className={cx('cal-avail__day', windows.length === 0 && 'cal-avail__day--off')}>
@@ -36,7 +55,7 @@ export function WeeklyHours({ spec, edit, disabled }: { spec: AvailabilitySpec; 
                 checked={windows.length > 0}
                 disabled={disabled}
                 aria-label={labels.availOpenDay(name)}
-                onChange={(e) => set(e.target.checked ? [nextWindow([])] : [])}
+                onChange={(e) => set(e.target.checked ? [seedWindow(policy, day)] : [])}
               />
               <span>{name}</span>
             </label>
@@ -78,19 +97,26 @@ export function WeeklyHours({ spec, edit, disabled }: { spec: AvailabilitySpec; 
             </div>
 
             <div className="cal-avail__day-actions">
-              <button type="button" className={btn} disabled={disabled} onClick={() => set([...windows, nextWindow(windows)])}>
+              {dayBuffers && windows.length > 0 ? (
+                <label className="cal-avail__day-gap">
+                  <span>{labels.availDayBuffer}</span>
+                  <select
+                    className="cal-input"
+                    value={gap === undefined ? '' : String(gap)}
+                    disabled={disabled}
+                    aria-label={labels.availDayBufferFor(name)}
+                    onChange={(ev) => edit({ type: 'setDayGap', day, minutes: ev.target.value === '' ? null : Number(ev.target.value) })}
+                  >
+                    <option value="">{labels.availBufferSameAsDefault(scheduleBuffer)}</option>
+                    {choices.map((m) => (
+                      <option key={m} value={String(m)}>{labels.availMinutes(m)}</option>
+                    ))}
+                  </select>
+                </label>
+              ) : null}
+              <button type="button" className={btn} disabled={disabled} onClick={() => set([...windows, nextWindow(windows, seedWindow(policy, day))])}>
                 {labels.availAddHours}
               </button>
-              {windows.length > 0 ? (
-                <button
-                  type="button"
-                  className={cx(btn, 'cal-btn--ghost')}
-                  disabled={disabled}
-                  onClick={() => edit({ type: 'copyDay', day, to: (WEEKDAYS.includes(day) ? WEEKDAYS : WEEK).filter((d) => d !== day) })}
-                >
-                  {WEEKDAYS.includes(day) ? labels.availCopyWeekdays : labels.availCopyAll}
-                </button>
-              ) : null}
             </div>
           </div>
         );

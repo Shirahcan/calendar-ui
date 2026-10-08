@@ -1,8 +1,20 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { AvailabilityEditor } from '../src/components/AvailabilityEditor';
-import { dayWindows, reduceSpec } from '../src/hooks/useAvailabilityEditor';
-import type { AvailabilitySpec } from '../src/types';
+import { dayGap, dayWindows, reduceSpec } from '../src/hooks/useAvailabilityEditor';
+import type { AvailabilitySpec, SchedulingPolicy } from '../src/types';
+
+const POLICY: SchedulingPolicy = {
+  min_buffer_minutes: 5,
+  max_buffer_minutes: 120,
+  default_buffer_minutes: 10,
+  buffer_choices: [5, 10, 15, 30],
+  min_notice_minutes: 60,
+  horizon_days: 365,
+  hold_seconds: 300,
+  seed_weekly: [{ days: ['mon', 'tue', 'wed', 'thu'], start: '08:30', end: '16:30' }, { days: ['fri'], start: '09:00', end: '13:00' }],
+  observe_holidays_by_default: true,
+};
 
 const BASE: AvailabilitySpec = {
   schema: 1,
@@ -25,21 +37,34 @@ describe('the availability reducer', () => {
     expect(spec.weekly?.some((r) => r.valid_from === '2026-11-01')).toBe(true);
   });
 
-  it('copies a day to others and keeps holiday work days only within the same region', () => {
-    let spec = reduceSpec(BASE, { type: 'copyDay', day: 'mon', to: ['thu', 'fri'] });
-    expect(dayWindows(spec, 'fri')).toEqual([['09:00', '12:00'], ['13:00', '17:00']]);
-
-    spec = reduceSpec(spec, { type: 'setHolidayWork', date: '2026-12-25', working: true });
+  it('keeps holiday work days within the same region, and the place when holidays are turned off', () => {
+    let spec = reduceSpec(BASE, { type: 'setHolidayWork', date: '2026-12-25', working: true });
     expect(spec.holidays?.work).toEqual(['2026-10-12', '2026-12-25']);
     expect(reduceSpec(spec, { type: 'setHolidays', region: 'CA-ON' }).holidays?.work).toEqual(['2026-10-12', '2026-12-25']);
     expect(reduceSpec(spec, { type: 'setHolidays', region: 'NG' }).holidays?.work).toBeUndefined();
+    expect(reduceSpec(spec, { type: 'setHolidays', region: null }).holidays).toEqual({ region: 'CA-ON', observe: false, work: ['2026-10-12', '2026-12-25'] });
+  });
+
+  it("sets the schedule buffer, and one day's own break without touching the days it shared a rule with", () => {
+    let spec = reduceSpec(BASE, { type: 'setBuffer', minutes: 20 });
+    expect(spec.buffer).toBe(20);
+    expect(reduceSpec(spec, { type: 'setBuffer', minutes: null }).buffer).toBeUndefined();
+
+    spec = reduceSpec(spec, { type: 'setDayGap', day: 'tue', minutes: 30 });
+    expect(dayGap(spec, 'tue')).toBe(30);
+    expect(dayGap(spec, 'mon')).toBe(15);
+    expect(dayWindows(spec, 'mon')).toEqual([['09:00', '12:00'], ['13:00', '17:00']]);
+
+    spec = reduceSpec(spec, { type: 'setDayGap', day: 'mon', minutes: null });
+    expect(dayGap(spec, 'mon')).toBeUndefined();
+    expect(spec.weekly?.some((r) => r.valid_from === '2026-11-01')).toBe(true);
   });
 });
 
-function adapter(initial: AvailabilitySpec) {
+function adapter(initial: AvailabilitySpec, regions = [{ code: 'CA-ON', name: 'Ontario' }]) {
   let held = initial;
   return {
-    load: vi.fn(async () => held),
+    load: vi.fn(async () => ({ spec: held, policy: POLICY, regions })),
     save: vi.fn(async (s: AvailabilitySpec) => {
       held = s;
       return s;
@@ -61,7 +86,8 @@ describe('AvailabilityEditor', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Save availability' }));
     await waitFor(() => expect(a.save).toHaveBeenCalledTimes(1));
-    expect(dayWindows(a.save.mock.calls[0]![0], 'fri')).toEqual([['09:00', '17:00']]);
+    // A day turned on gets the product's seed hours for that day, not a time written in the component.
+    expect(dayWindows(a.save.mock.calls[0]![0], 'fri')).toEqual([['09:00', '13:00']]);
     await screen.findByText('Saved');
   });
 
@@ -77,7 +103,7 @@ describe('AvailabilityEditor', () => {
 
   it('lets a person choose which public holidays to work', async () => {
     const a = adapter(BASE);
-    render(<AvailabilityEditor adapter={a} regions={[{ code: 'CA-ON', label: 'Ontario' }]} />);
+    render(<AvailabilityEditor adapter={a} />);
     await screen.findByLabelText('Your week at a glance');
 
     fireEvent.click(screen.getByRole('tab', { name: 'Public holidays' }));
@@ -108,6 +134,39 @@ describe('AvailabilityEditor', () => {
     const saved = a.save.mock.calls[0]![0];
     expect(saved.overrides).toEqual([{ date: '2026-11-03', windows: [] }]);
     expect(saved.blocks).toEqual([{ from: '2026-12-24', to: '2026-12-26' }]);
+  });
+
+  it("saves the usual buffer and a day's own break from the product's choices, with no copy buttons", async () => {
+    const a = adapter(BASE);
+    render(<AvailabilityEditor adapter={a} />);
+    await screen.findByLabelText('Your week at a glance');
+
+    expect(screen.queryByText('Copy to weekdays')).toBeNull();
+    const usual = screen.getByLabelText('Time kept free around each meeting', { exact: false }) as HTMLSelectElement;
+    expect(usual.value).toBe('10');
+    expect(Array.from(usual.options).map((o) => o.value)).toEqual(['5', '10', '15', '30']);
+    fireEvent.change(usual, { target: { value: '15' } });
+
+    const tuesday = screen.getByLabelText('Break around meetings on Tuesday') as HTMLSelectElement;
+    expect(tuesday.value).toBe('15');
+    fireEvent.change(tuesday, { target: { value: '30' } });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Save availability' }));
+    await waitFor(() => expect(a.save).toHaveBeenCalled());
+    const saved = a.save.mock.calls[0]![0];
+    expect(saved.buffer).toBe(15);
+    expect(dayGap(saved, 'tue')).toBe(30);
+    expect(dayGap(saved, 'mon')).toBe(15);
+  });
+
+  it('never shows "no holidays" for a list it could not read', async () => {
+    const a = { ...adapter(BASE), holidays: vi.fn(async () => { throw new Error('down'); }) };
+    render(<AvailabilityEditor adapter={a} />);
+    await screen.findByLabelText('Your week at a glance');
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Public holidays' }));
+    expect((await screen.findByRole('alert')).textContent).toBeTruthy();
+    expect(screen.queryByText('No public holidays', { exact: false })).toBeNull();
   });
 
   it('says why it could not load', async () => {

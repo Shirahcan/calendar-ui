@@ -20,8 +20,10 @@ export type EditorAction =
   | { type: 'setHolidays'; region: string | null }
   /** Replace one weekday's hours (rules with their own validity dates are left alone). */
   | { type: 'setDayWindows'; day: DayName; windows: Window[] }
-  /** Give other weekdays the same hours as this one. */
-  | { type: 'copyDay'; day: DayName; to: DayName[] }
+  /** The schedule's own buffer (minutes kept free around every meeting); null = none of its own. */
+  | { type: 'setBuffer'; minutes: number | null }
+  /** One weekday's own buffer, written as that day's `gap`; null = the schedule's buffer. */
+  | { type: 'setDayGap'; day: DayName; minutes: number | null }
   | { type: 'setHolidayWork'; date: string; working: boolean };
 
 const DAYS: DayName[] = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
@@ -62,6 +64,28 @@ function withDayWindows(spec: AvailabilitySpec, day: DayName, windows: Window[])
   return { ...spec, weekly: [...kept, ...added] };
 }
 
+/** A weekday's own buffer: the `gap` its every-week rules share, or undefined for the schedule's. */
+export function dayGap(spec: AvailabilitySpec, day: DayName): number | undefined {
+  return (spec.weekly ?? []).find((r) => r.days.includes(day) && !r.valid_from && !r.valid_until && r.gap !== undefined)?.gap;
+}
+
+/** Set (or clear) one weekday's buffer. A rule shared with other days is split so they keep theirs. */
+function withDayGap(spec: AvailabilitySpec, day: DayName, minutes: number | null): AvailabilitySpec {
+  const out: WeeklyRule[] = [];
+  for (const r of spec.weekly ?? []) {
+    if (!r.days.includes(day) || r.valid_from || r.valid_until) {
+      out.push(r);
+      continue;
+    }
+    const others = r.days.filter((d) => d !== day);
+    if (others.length) out.push({ ...r, days: others });
+    const { gap: _old, ...base } = r;
+    out.push(minutes === null ? { ...base, days: [day] } : { ...base, days: [day], gap: minutes });
+  }
+
+  return { ...spec, weekly: out };
+}
+
 function upsertDated(rows: { date: string; windows: Window[] }[] | undefined, date: string, windows: Window[]) {
   return [...(rows ?? []).filter((r) => r.date !== date), { date, windows }].sort((a, b) => a.date.localeCompare(b.date));
 }
@@ -95,6 +119,10 @@ export function reduceSpec(spec: AvailabilitySpec, action: EditorAction): Availa
     case 'removeBlock':
       return { ...spec, blocks: (spec.blocks ?? []).filter((_, i) => i !== action.index) };
     case 'setHolidays': {
+      // Not observing keeps the place (and the days chosen to work), so ticking it again returns to it.
+      if (action.region === null) {
+        return spec.holidays ? { ...spec, holidays: { ...spec.holidays, observe: false } } : spec;
+      }
       const { holidays: _drop, ...rest } = spec;
       // A new region keeps the days already chosen to work only when it is the same region.
       const work = spec.holidays?.region === action.region ? spec.holidays?.work : undefined;
@@ -103,10 +131,13 @@ export function reduceSpec(spec: AvailabilitySpec, action: EditorAction): Availa
     }
     case 'setDayWindows':
       return withDayWindows(spec, action.day, action.windows);
-    case 'copyDay': {
-      const source = dayWindows(spec, action.day);
-      return action.to.reduce((s, d) => withDayWindows(s, d, source), spec);
+    case 'setBuffer': {
+      const { buffer: _drop, ...rest } = spec;
+
+      return action.minutes === null ? rest : { ...rest, buffer: action.minutes };
     }
+    case 'setDayGap':
+      return withDayGap(spec, action.day, action.minutes);
     case 'setHolidayWork': {
       if (!spec.holidays) return spec;
       const rest = (spec.holidays.work ?? []).filter((d) => d !== action.date);
