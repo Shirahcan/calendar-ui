@@ -12,7 +12,7 @@
  */
 .cal-root { display: contents; }
 
-:where(.cal-root, :is(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-avail, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad, .cal-dock, .cal-holidays, .cal-reminders, .cal-policy, .cal-rules, .cal-conns):not(.cal-root *)) {
+:where(.cal-root, :is(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-avail, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad, .cal-dock, .cal-holidays, .cal-reminders, .cal-policy, .cal-rules, .cal-conns, .cal-links):not(.cal-root *)) {
   --cal-accent: #4361ee;
   --cal-accent-ink: #ffffff;
   --cal-surface: #ffffff;
@@ -28,14 +28,14 @@
   --cal-hour-height: 48px;
 }
 
-:where(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-avail, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad, .cal-dock, .cal-holidays, .cal-reminders, .cal-policy, .cal-rules, .cal-conns) {
+:where(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-avail, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad, .cal-dock, .cal-holidays, .cal-reminders, .cal-policy, .cal-rules, .cal-conns, .cal-links) {
   font-family: var(--cal-font);
   color: var(--cal-ink);
 }
 
 /* Dark: the OS decides for a component used alone; a provider decides for everything inside it. */
 @media (prefers-color-scheme: dark) {
-  :where(:is(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-avail, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad, .cal-dock, .cal-holidays, .cal-reminders, .cal-policy, .cal-rules, .cal-conns):not(.cal-root *)) {
+  :where(:is(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-avail, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad, .cal-dock, .cal-holidays, .cal-reminders, .cal-policy, .cal-rules, .cal-conns, .cal-links):not(.cal-root *)) {
     --cal-surface: #0f172a;
     --cal-surface-muted: #1e293b;
     --cal-border: #334155;
@@ -284,6 +284,37 @@
 .cal-avail__bar-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 
 /* Scheduling policy, holiday rules and connections: the same card language as reminders. */
+/* Booking links: the list, and the create/edit dialog that stays inside the viewport. */
+.cal-links { display: grid; gap: 14px; padding: 20px; border: 1px solid var(--cal-border); border-radius: var(--cal-radius); background: var(--cal-surface); min-width: 0; }
+.cal-links__head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.cal-links__title { margin: 0; font-size: 16px; font-weight: 600; }
+.cal-links__intro, .cal-links__note, .cal-links__hint { margin: 0; font-size: 13px; color: var(--cal-ink-muted); }
+.cal-links__hint { font-size: 12px; }
+.cal-links__error { margin: 0; font-size: 13px; color: var(--cal-danger, #b91c1c); }
+.cal-links__list { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.cal-links__item { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border: 1px solid var(--cal-border); border-radius: calc(var(--cal-radius) * 0.6); min-width: 0; }
+.cal-links__item--off { opacity: 0.6; }
+.cal-links__swatch { flex: none; width: 10px; height: 36px; border-radius: 999px; }
+.cal-links__main { display: grid; gap: 2px; flex: 1; min-width: 0; }
+.cal-links__name { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: var(--cal-ink); }
+.cal-links__badge { padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; background: var(--cal-accent); color: var(--cal-accent-ink, #fff); }
+.cal-links__badge--off { background: var(--cal-border); color: var(--cal-ink-muted); }
+.cal-links__meta { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12px; color: var(--cal-ink-muted); }
+.cal-links__slug { overflow-wrap: anywhere; }
+.cal-links__field { display: grid; gap: 4px; align-content: start; font-size: 12px; color: var(--cal-ink-muted); min-width: 0; }
+.cal-links__row { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: 12px; }
+.cal-links__check { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--cal-ink); }
+.cal-links__color { padding: 2px; height: 38px; }
+.cal-linkdlg { width: min(36rem, calc(100vw - 32px)); max-height: 90vh; padding: 0; border: 1px solid var(--cal-border); border-radius: var(--cal-radius); background: var(--cal-surface); color: var(--cal-ink); overflow: hidden; }
+.cal-linkdlg[open] { display: flex; flex-direction: column; }
+.cal-linkdlg::backdrop { background: rgb(15 23 42 / 0.45); }
+.cal-linkdlg__form { display: flex; flex-direction: column; flex: 1; min-height: 0; max-height: 90vh; }
+.cal-linkdlg__head, .cal-linkdlg__foot { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 16px 20px; }
+.cal-linkdlg__head h3 { margin: 0; font-size: 16px; font-weight: 600; }
+.cal-linkdlg__foot { justify-content: flex-end; border-top: 1px solid var(--cal-border); }
+.cal-linkdlg__body { flex: 1; min-height: 0; overflow-y: auto; display: grid; gap: 12px; align-content: start; padding: 4px 20px 16px; }
+.cal-linkdlg__close { border: 0; background: transparent; font-size: 22px; line-height: 1; color: var(--cal-ink-muted); cursor: pointer; outline: none; }
+
 .cal-policy, .cal-rules, .cal-conns { display: grid; gap: 14px; padding: 20px; border: 1px solid var(--cal-border); border-radius: var(--cal-radius); background: var(--cal-surface); min-width: 0; }
 .cal-policy__title, .cal-rules__title, .cal-conns__title { margin: 0; font-size: 16px; font-weight: 600; }
 .cal-policy__intro, .cal-policy__note, .cal-policy__hint, .cal-rules__intro, .cal-rules__note, .cal-conns__intro, .cal-conns__note { margin: 0; font-size: 13px; color: var(--cal-ink-muted); }

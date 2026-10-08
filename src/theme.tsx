@@ -221,6 +221,53 @@ export interface CalendarLabels {
   connConfirmDisconnect: (provider: string, email: string | null) => string;
   connConnect: (provider: string) => string;
   connFailed: string;
+  // Booking links (BookingLinksManager, BookingLinkEditor)
+  linksTitle: string;
+  linksIntro: string;
+  linksLoading: string;
+  linksNone: string;
+  linkNew: string;
+  linkEdit: string;
+  linkCopy: string;
+  linkCopied: string;
+  linkCopyFailed: string;
+  linkMakeDefault: string;
+  linkSwitchOff: string;
+  linkSwitchOn: string;
+  linkDelete: string;
+  linkConfirmDelete: (name: string) => string;
+  linkDeleted: string;
+  linkSaved: string;
+  linkCreated: string;
+  linkFailed: string;
+  linkSaveFailed: string;
+  linkActionsFor: (name: string) => string;
+  linkDefaultBadge: string;
+  linkOffBadge: string;
+  linkDaysAheadShort: (days: number) => string;
+  linkDailyCapShort: (n: number) => string;
+  linkCreateTitle: string;
+  linkEditTitle: string;
+  linkClose: string;
+  linkName: string;
+  linkSlug: string;
+  linkSlugPlaceholder: string;
+  linkSlugHelp: string;
+  linkDescription: string;
+  linkDuration: string;
+  linkColor: string;
+  linkBufferBefore: string;
+  linkBufferAfter: string;
+  linkBufferHelp: (min: number, max: number) => string;
+  linkDaysAhead: string;
+  linkDailyCap: string;
+  linkUsual: string;
+  linkUnlimited: string;
+  linkActive: string;
+  linkDefault: string;
+  linkCancel: string;
+  linkSave: string;
+  linkCreate: string;
   // Availability (AvailabilityEditor)
   availTitle: string;
   availIntro: (zone: string) => string;
@@ -448,6 +495,52 @@ export const DEFAULT_LABELS: CalendarLabels = {
   connConfirmDisconnect: (provider, email) => `Disconnect ${provider}${email ? ` (${email})` : ''}? Its busy time stops counting.`,
   connConnect: (provider) => `Connect ${provider}`,
   connFailed: 'That did not work. Please try again.',
+  linksTitle: 'Booking links',
+  linksIntro: 'Each link is a way to book time with you, with its own length and rules.',
+  linksLoading: 'Loading your links...',
+  linksNone: 'No booking links yet. Create one to start taking bookings.',
+  linkNew: 'Create link',
+  linkEdit: 'Edit',
+  linkCopy: 'Copy reference',
+  linkCopied: 'Reference copied',
+  linkCopyFailed: 'The reference could not be copied. Select it and copy it instead.',
+  linkMakeDefault: 'Make default',
+  linkSwitchOff: 'Switch off',
+  linkSwitchOn: 'Switch on',
+  linkDelete: 'Delete',
+  linkConfirmDelete: (name) => `Delete "${name}"? It stops taking bookings. Meetings already booked through it stay booked.`,
+  linkDeleted: 'Link deleted',
+  linkSaved: 'Link saved',
+  linkCreated: 'Link created',
+  linkFailed: 'That did not work. Please try again.',
+  linkSaveFailed: 'The link could not be saved.',
+  linkActionsFor: (name) => `Actions for ${name}`,
+  linkDefaultBadge: 'Default',
+  linkOffBadge: 'Off',
+  linkDaysAheadShort: (days) => `up to ${days} days ahead`,
+  linkDailyCapShort: (n) => `at most ${n} a day`,
+  linkCreateTitle: 'Create booking link',
+  linkEditTitle: 'Edit booking link',
+  linkClose: 'Close',
+  linkName: 'Name',
+  linkSlug: 'Reference',
+  linkSlugPlaceholder: 'Made from the name',
+  linkSlugHelp: 'Your own short reference for this link. Lowercase letters, numbers and dashes.',
+  linkDescription: 'Description',
+  linkDuration: 'Length',
+  linkColor: 'Colour',
+  linkBufferBefore: 'Break before (minutes)',
+  linkBufferAfter: 'Break after (minutes)',
+  linkBufferHelp: (min, max) => `Leave empty to keep your usual break, or set ${min} to ${max} minutes for this link.`,
+  linkDaysAhead: 'Bookable up to (days ahead)',
+  linkDailyCap: 'Most bookings a day',
+  linkUsual: 'Usual',
+  linkUnlimited: 'No limit',
+  linkActive: 'Taking bookings',
+  linkDefault: 'Default link',
+  linkCancel: 'Cancel',
+  linkSave: 'Save changes',
+  linkCreate: 'Create link',
   availTitle: 'Availability',
   availIntro: (zone) => `When people can book time with you. Times are on ${zone} time.`,
   availTabWeekly: 'Weekly hours',
@@ -514,6 +607,9 @@ export interface CalendarClassNames {
   policyEditor: string;
   holidayRulesEditor: string;
   connectionsPanel: string;
+  linksManager: string;
+  linkEditor: string;
+  input: string;
 }
 
 export type ColorScheme = 'light' | 'dark' | 'auto';
