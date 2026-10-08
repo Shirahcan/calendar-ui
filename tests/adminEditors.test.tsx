@@ -84,8 +84,11 @@ describe('HolidayRulesEditor', () => {
     await waitFor(() => expect(a.save).toHaveBeenCalledWith('CA', null, { name: 'Civic Holiday', kind: 'nth_weekday', params: { month: 8, weekday: 1, n: 1 }, active: true }));
     expect(await screen.findByText('The first Monday of August')).toBeTruthy();
 
-    const row = screen.getByText('Canada Day', { selector: '.cal-rules__name' }).closest('li')!;
-    fireEvent.click(within(row).getByRole('button', { name: 'Remove' }));
+    // Row actions sit behind one kebab; Remove is last and asks first.
+    fireEvent.click(screen.getByRole('button', { name: 'Actions for Canada Day' }));
+    const items = screen.getAllByRole('menuitem').map((m) => m.textContent);
+    expect(items).toEqual(['Edit', 'Remove']);
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Remove' }));
     await waitFor(() => expect(a.remove).toHaveBeenCalledWith('CA', 1));
     expect(confirm).toHaveBeenCalled();
   });
@@ -119,12 +122,14 @@ describe('CalendarConnectionsPanel', () => {
     render(<CalendarConnectionsPanel adapter={a} confirmDisconnect={async () => true} />);
 
     expect(await screen.findByText('Needs reconnecting: busy time is not being read.')).toBeTruthy();
-    fireEvent.click(screen.getByRole('button', { name: 'Reconnect' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Actions for Outlook Calendar' }));
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Reconnect' }));
     await waitFor(() => expect(a.connect).toHaveBeenCalledWith('microsoft'));
 
     fireEvent.click(screen.getByRole('button', { name: 'Connect Google Calendar' }));
     await waitFor(() => expect(a.connect).toHaveBeenLastCalledWith('google'));
 
+    // A row with one action keeps it inline.
     fireEvent.click(within(screen.getByText('Google Calendar', { selector: '.cal-conns__provider' }).closest('li')!).getByRole('button', { name: 'Disconnect' }));
     await waitFor(() => expect(a.disconnect).toHaveBeenCalledWith(7));
     await waitFor(() => expect(screen.queryByText('Google Calendar', { selector: '.cal-conns__provider' })).toBeNull());

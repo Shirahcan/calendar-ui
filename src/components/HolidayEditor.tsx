@@ -1,6 +1,7 @@
 import { useId, useState } from 'react';
 import type { HolidayEditorState, HolidayRow } from '../hooks/useHolidayEditor';
 import { cx, useCalendarUi } from '../theme';
+import { errorText } from '../errorText';
 
 export interface HolidayEditorProps {
   /** From useHolidayEditor. */
@@ -33,7 +34,7 @@ export function HolidayEditor({ editor, regions, confirmRemove, describeError, c
   const ids = useId();
   const [date, setDate] = useState('');
   const [name, setName] = useState('');
-  const describe = describeError ?? ((e: unknown) => (e instanceof Error && e.message ? e.message : labels.holidayFailed));
+  const describe = describeError ?? ((e: unknown) => errorText(e, labels.holidayFailed));
   const ask = confirmRemove ?? (async (_row: HolidayRow, q: string) => (typeof window === 'undefined' ? false : window.confirm(q)));
 
   const btn = cx('cal-btn', classNames.button);

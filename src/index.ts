@@ -1,4 +1,5 @@
 export * from './types';
+export { errorText } from './errorText';
 export { CalendarUiProvider, DEFAULT_LABELS, cx, reminderLeadLabel, themeStyle, useCalendarUi } from './theme';
 export type { CalendarClassNames, CalendarLabels, CalendarTheme, CalendarUiConfig, CalendarUiProviderProps, ColorScheme, ResolvedCalendarUi } from './theme';
 export { dayKey, eventsToItems, formatIn, gridDays, inZone, itemsOn, minutesIntoDay, shiftAnchor, slotsByDay } from './time';
@@ -54,6 +55,8 @@ export { ReminderPolicyEditor } from './components/ReminderPolicyEditor';
 export type { ReminderPolicy, ReminderPolicyAdapter, ReminderPolicyEditorProps } from './components/ReminderPolicyEditor';
 export { SchedulingPolicyEditor } from './components/SchedulingPolicyEditor';
 export { HolidayRulesEditor } from './components/HolidayRulesEditor';
+export { RowMenu } from './components/RowMenu';
+export type { RowMenuItem } from './components/RowMenu';
 export type { HolidayRule, HolidayRuleInput, HolidayRuleKind, HolidayRulesAdapter, HolidayRulesEditorProps } from './components/HolidayRulesEditor';
 export { CalendarConnectionsPanel } from './components/CalendarConnectionsPanel';
 export type { CalendarConnection, CalendarConnectionsAdapter, CalendarConnectionsPanelProps, CalendarProvider } from './components/CalendarConnectionsPanel';

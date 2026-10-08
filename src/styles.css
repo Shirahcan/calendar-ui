@@ -312,8 +312,18 @@
 .cal-conns__item--warn .cal-conns__status { color: var(--cal-danger, #b91c1c); }
 .cal-rules__dates li { font-size: 13px; color: var(--cal-ink); }
 .cal-rules__dates li span { display: inline-block; min-width: 6.5rem; color: var(--cal-ink-muted); }
-.cal-btn--danger { color: var(--cal-danger, #b91c1c); }
 @media (max-width: 640px) {
   .cal-rules__item, .cal-conns__item { grid-template-columns: minmax(0, 1fr); gap: 4px; }
   .cal-rules__item-actions, .cal-conns__actions { justify-content: flex-start; }
 }
+
+/* A row's actions behind one kebab (RowMenu). */
+.cal-rowmenu { position: relative; display: inline-flex; }
+.cal-rowmenu__trigger { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; padding: 0; border: 0; border-radius: 999px; background: transparent; color: var(--cal-ink-muted); cursor: pointer; outline: none; }
+.cal-rowmenu__trigger:hover, .cal-rowmenu__trigger[aria-expanded="true"] { background: var(--cal-surface-muted); color: var(--cal-ink); }
+.cal-rowmenu__trigger:focus-visible { box-shadow: 0 0 0 3px color-mix(in srgb, var(--cal-accent) 35%, transparent); }
+.cal-rowmenu__list { position: absolute; right: 0; top: calc(100% + 4px); z-index: 30; min-width: 10rem; display: grid; padding: 4px; border: 1px solid var(--cal-border); border-radius: 12px; background: var(--cal-surface-solid, #fff); box-shadow: 0 10px 30px rgb(15 23 42 / 0.12); }
+.cal-rowmenu__item { display: block; width: 100%; padding: 8px 12px; border: 0; border-radius: 8px; background: transparent; color: var(--cal-ink); font: inherit; font-size: 13px; text-align: left; cursor: pointer; white-space: nowrap; outline: none; }
+.cal-rowmenu__item:hover, .cal-rowmenu__item:focus-visible { background: var(--cal-surface-muted); }
+.cal-rowmenu__item--danger { color: var(--cal-danger, #b91c1c); }
+.cal-rowmenu__sep { display: block; height: 1px; margin: 4px 0; background: var(--cal-border); }

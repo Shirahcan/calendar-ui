@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useId, useState } from 'react';
 import { cx, useCalendarUi } from '../theme';
+import { errorText } from '../errorText';
 
 /** A product's booking reminder times, as calendar-service reports them (GET /v1/reminders/policy). */
 export interface ReminderPolicy {
@@ -50,7 +51,7 @@ export function ReminderPolicyEditor({ adapter, describeError, className }: Remi
   const [error, setError] = useState<unknown>(null);
   const [problem, setProblem] = useState<string | null>(null);
   const [justSaved, setJustSaved] = useState(false);
-  const describe = describeError ?? ((e: unknown) => (e instanceof Error && e.message ? e.message : labels.reminderFailed));
+  const describe = describeError ?? ((e: unknown) => errorText(e, labels.reminderFailed));
 
   const adopt = useCallback((p: ReminderPolicy) => {
     setSaved(p);

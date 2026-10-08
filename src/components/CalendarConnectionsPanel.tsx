@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useId, useState } from 'react';
 import { cx, useCalendarUi } from '../theme';
+import { RowMenu } from './RowMenu';
+import { errorText } from '../errorText';
 
 export type CalendarProvider = 'google' | 'microsoft';
 
@@ -48,7 +50,7 @@ export function CalendarConnectionsPanel({ adapter, providers = ['google', 'micr
   const [rows, setRows] = useState<CalendarConnection[] | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<unknown>(null);
-  const describe = describeError ?? ((e: unknown) => (e instanceof Error && e.message ? e.message : labels.connFailed));
+  const describe = describeError ?? ((e: unknown) => errorText(e, labels.connFailed));
   const ask = confirmDisconnect ?? (async (_c: CalendarConnection, q: string) => (typeof window === 'undefined' ? false : window.confirm(q)));
 
   const reload = useCallback(async () => {
@@ -79,6 +81,13 @@ export function CalendarConnectionsPanel({ adapter, providers = ['google', 'micr
     }
   };
 
+  const disconnect = (c: CalendarConnection) => act(async () => {
+    if (await ask(c, labels.connConfirmDisconnect(labels.connProvider(c.provider), c.account_email))) {
+      await adapter.disconnect(c.id);
+      await reload();
+    }
+  });
+
   const btn = cx('cal-btn', classNames.button);
   const primary = cx('cal-btn cal-btn--primary', classNames.button, classNames.buttonPrimary);
 
@@ -104,21 +113,17 @@ export function CalendarConnectionsPanel({ adapter, providers = ['google', 'micr
                 {c.last_error && c.status === 'needs_reauth' ? <span className="cal-conns__why">{c.last_error}</span> : null}
                 <span className="cal-conns__actions">
                   {c.status === 'needs_reauth' || c.reconnect_recommended ? (
-                    <button type="button" className={btn} disabled={busy} onClick={() => void act(() => adapter.connect(c.provider))}>{labels.connReconnect}</button>
-                  ) : null}
-                  <button
-                    type="button"
-                    className={cx(btn, 'cal-btn--danger')}
-                    disabled={busy}
-                    onClick={() => void act(async () => {
-                      if (await ask(c, labels.connConfirmDisconnect(labels.connProvider(c.provider), c.account_email))) {
-                        await adapter.disconnect(c.id);
-                        await reload();
-                      }
-                    })}
-                  >
-                    {labels.connDisconnect}
-                  </button>
+                    <RowMenu
+                      label={labels.connActionsFor(labels.connProvider(c.provider))}
+                      disabled={busy}
+                      items={[
+                        { label: labels.connReconnect, onSelect: () => void act(() => adapter.connect(c.provider)) },
+                        { label: labels.connDisconnect, danger: true, onSelect: () => void disconnect(c) },
+                      ]}
+                    />
+                  ) : (
+                    <button type="button" className={btn} disabled={busy} onClick={() => void disconnect(c)}>{labels.connDisconnect}</button>
+                  )}
                 </span>
               </li>
             ))}

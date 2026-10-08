@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useId, useState } from 'react';
 import { cx, useCalendarUi } from '../theme';
+import { errorText } from '../errorText';
 import type { AvailabilitySpec, SchedulingPolicy } from '../types';
 import { reduceSpec } from '../hooks/useAvailabilityEditor';
 import { WeeklyHours } from './availability/WeeklyHours';
@@ -41,7 +42,7 @@ export function SchedulingPolicyEditor({ adapter, describeError, className }: Sc
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<unknown>(null);
   const [justSaved, setJustSaved] = useState(false);
-  const describe = describeError ?? ((e: unknown) => (e instanceof Error && e.message ? e.message : labels.policyFailed));
+  const describe = describeError ?? ((e: unknown) => errorText(e, labels.policyFailed));
 
   const adopt = useCallback((s: SchedulingPolicyState) => {
     setSaved(s);

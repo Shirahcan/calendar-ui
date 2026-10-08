@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useId, useState } from 'react';
 import { cx, useCalendarUi } from '../theme';
+import { errorText } from '../errorText';
 import type { HolidayRegion } from '../types';
 import type { HolidayDay } from '../hooks/useAvailabilitySchedule';
+import { RowMenu } from './RowMenu';
 
 export type HolidayRuleKind = 'fixed' | 'nth_weekday' | 'last_weekday' | 'weekday_on_or_before' | 'easter_offset';
 
@@ -75,7 +77,7 @@ export function HolidayRulesEditor({ adapter, confirmRemove, describeError, clas
   const [preview, setPreview] = useState<HolidayDay[] | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<unknown>(null);
-  const describe = describeError ?? ((e: unknown) => (e instanceof Error && e.message ? e.message : labels.rulesFailed));
+  const describe = describeError ?? ((e: unknown) => errorText(e, labels.rulesFailed));
   const ask = confirmRemove ?? (async (_r: HolidayRule, q: string) => (typeof window === 'undefined' ? false : window.confirm(q)));
 
   const run = useCallback(async <T,>(work: () => Promise<T>): Promise<T | undefined> => {
@@ -187,8 +189,14 @@ export function HolidayRulesEditor({ adapter, confirmRemove, describeError, clas
                   <span className="cal-rules__how">{labels.rulesDescribe(r.kind, r.params)}</span>
                   <span className="cal-rules__next">{r.next ?? labels.rulesNoDate}</span>
                   <span className="cal-rules__item-actions">
-                    <button type="button" className={btn} disabled={busy} onClick={() => { setEditing(r.id); setForm({ name: r.name, kind: r.kind, params: r.params, active: r.active }); }}>{labels.rulesEdit}</button>
-                    <button type="button" className={cx(btn, 'cal-btn--danger')} disabled={busy} onClick={() => void remove(r)}>{labels.rulesRemove}</button>
+                    <RowMenu
+                      label={labels.rulesActionsFor(r.name)}
+                      disabled={busy}
+                      items={[
+                        { label: labels.rulesEdit, onSelect: () => { setEditing(r.id); setForm({ name: r.name, kind: r.kind, params: r.params, active: r.active }); } },
+                        { label: labels.rulesRemove, danger: true, onSelect: () => void remove(r) },
+                      ]}
+                    />
                   </span>
                 </li>
               ))}

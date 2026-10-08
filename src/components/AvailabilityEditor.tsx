@@ -1,6 +1,7 @@
 import { useId, useState, type ReactNode } from 'react';
 import { useAvailabilitySchedule, type AvailabilityAdapter } from '../hooks/useAvailabilitySchedule';
 import { cx, useCalendarUi } from '../theme';
+import { errorText } from '../errorText';
 import { DateChanges } from './availability/DateChanges';
 import { PublicHolidays } from './availability/PublicHolidays';
 import { TimeOff } from './availability/TimeOff';
@@ -43,7 +44,7 @@ export function AvailabilityEditor({ adapter, sections = ['weekly', 'dates', 'ti
   const ids = useId();
   const s = useAvailabilitySchedule(adapter);
   const [tab, setTab] = useState<AvailabilitySection>(sections[0] ?? 'weekly');
-  const describe = describeError ?? ((e: unknown) => (e instanceof Error && e.message ? e.message : labels.availFailed));
+  const describe = describeError ?? ((e: unknown) => errorText(e, labels.availFailed));
   const busy = s.saving || !s.ready;
   const titles: Record<AvailabilitySection, string> = {
     weekly: labels.availTabWeekly,

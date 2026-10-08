@@ -185,6 +185,7 @@ export interface CalendarLabels {
   rulesNone: string;
   rulesNoDate: string;
   rulesEdit: string;
+  rulesActionsFor: (name: string) => string;
   rulesRemove: string;
   rulesConfirmRemove: (name: string) => string;
   rulesAdd: string;
@@ -215,6 +216,7 @@ export interface CalendarLabels {
   connSynced: (iso: string) => string;
   connNotSyncedYet: string;
   connReconnect: string;
+  connActionsFor: (provider: string) => string;
   connDisconnect: string;
   connConfirmDisconnect: (provider: string, email: string | null) => string;
   connConnect: (provider: string) => string;
@@ -399,6 +401,7 @@ export const DEFAULT_LABELS: CalendarLabels = {
   rulesNone: 'No holidays yet.',
   rulesNoDate: 'Not this year',
   rulesEdit: 'Edit',
+  rulesActionsFor: (name) => `Actions for ${name}`,
   rulesRemove: 'Remove',
   rulesConfirmRemove: (name) => `Remove ${name}? Its dates stop closing calendars.`,
   rulesAdd: 'Add holiday',
@@ -440,6 +443,7 @@ export const DEFAULT_LABELS: CalendarLabels = {
   connSynced: (iso) => `Busy time read ${new Date(iso).toLocaleString()}`,
   connNotSyncedYet: 'Reading busy time for the first time...',
   connReconnect: 'Reconnect',
+  connActionsFor: (provider) => `Actions for ${provider}`,
   connDisconnect: 'Disconnect',
   connConfirmDisconnect: (provider, email) => `Disconnect ${provider}${email ? ` (${email})` : ''}? Its busy time stops counting.`,
   connConnect: (provider) => `Connect ${provider}`,
