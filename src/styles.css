@@ -12,7 +12,7 @@
  */
 .cal-root { display: contents; }
 
-:where(.cal-root, :is(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-avail, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad, .cal-dock, .cal-holidays, .cal-reminders, .cal-policy, .cal-rules, .cal-conns, .cal-links, .cal-notes, .cal-pads, .cal-paddlg, .cal-confirm):not(.cal-root *)) {
+:where(.cal-root, :is(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-avail, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad, .cal-dock, .cal-holidays, .cal-reminders, .cal-policy, .cal-rules, .cal-conns, .cal-links, .cal-notes, .cal-pads, .cal-paddlg, .cal-confirm, .cal-meeting, .cal-meeting-side):not(.cal-root *)) {
   --cal-accent: #4361ee;
   --cal-accent-ink: #ffffff;
   --cal-surface: #ffffff;
@@ -419,3 +419,24 @@
 .cal-confirm::backdrop { background: rgb(15 23 42 / 0.45); }
 .cal-confirm__question { margin: 0 0 16px; font-size: 14px; line-height: 1.5; }
 .cal-confirm__actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+
+/* The meeting page's panels (plan MP1). */
+.cal-meeting, .cal-meeting-side { display: grid; gap: 14px; padding: 20px; border: 1px solid var(--cal-border); border-radius: var(--cal-radius); background: var(--cal-surface); color: var(--cal-ink); min-width: 0; }
+.cal-meeting__status { justify-self: start; padding: 3px 12px; border-radius: 999px; border: 1px solid var(--cal-border); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.02em; }
+.cal-meeting__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 12px; }
+.cal-meeting__row { display: grid; gap: 2px; align-content: start; padding: 12px 14px; border: 1px solid var(--cal-border); border-radius: calc(var(--cal-radius) * 0.6); min-width: 0; }
+.cal-meeting-side .cal-meeting__row { padding: 0; border: 0; }
+.cal-meeting__label { display: flex; align-items: center; gap: 6px; margin: 0; font-size: 12px; font-weight: 600; color: var(--cal-ink-muted); text-transform: uppercase; letter-spacing: 0.02em; }
+.cal-meeting__value { margin: 0; font-size: 14px; font-weight: 600; color: var(--cal-ink); }
+.cal-meeting-side .cal-meeting__value { font-weight: 400; }
+.cal-meeting__hint { margin: 0; font-size: 12px; color: var(--cal-ink-muted); }
+.cal-meeting__about, .cal-meeting__cancelled { display: grid; gap: 4px; padding: 12px 14px; border: 1px solid var(--cal-border); border-radius: calc(var(--cal-radius) * 0.6); }
+.cal-meeting__cancelled { border-color: var(--cal-danger); }
+.cal-meeting__text { margin: 0; font-size: 14px; white-space: pre-wrap; overflow-wrap: anywhere; color: var(--cal-ink); }
+.cal-meeting-side__title { margin: 0; font-size: 16px; font-weight: 600; }
+.cal-meeting-side__person { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.cal-meeting-side__who { min-width: 0; }
+.cal-meeting-side__name { margin: 0; font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cal-meeting-side__email { margin: 0; font-size: 12px; color: var(--cal-ink-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cal-meeting-side__action { width: 100%; justify-content: center; }
+.cal-meeting-side__action--danger { color: var(--cal-danger); }

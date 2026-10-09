@@ -123,6 +123,27 @@ export interface CalendarLabels {
   padReviewDiscard: string;
   padReviewDiscardAsk: string;
   padReviewOpenMeeting: string;
+  /* The meeting page's panels (plan MP1) */
+  meetingDate: string;
+  meetingTime: string;
+  meetingWhere: string;
+  meetingLink: string;
+  meetingAbout: string;
+  meetingCancelReason: string;
+  meetingPeople: string;
+  meetingDetails: string;
+  meetingActions: string;
+  meetingLength: string;
+  meetingMinutes: (minutes: number) => string;
+  meetingTimesShownIn: string;
+  meetingBooked: string;
+  meetingLinkNone: string;
+  meetingLinkNoneHint: string;
+  meetingLinkClosed: string;
+  meetingLinkOpen: string;
+  meetingLinkOpenHint: string;
+  meetingLinkOpensAt: (time: string) => string;
+  meetingLinkOpensHint: (leadMinutes: number) => string;
   /* Meeting notes (plan N2) */
   notesTitle: string;
   notesEmpty: string;
@@ -431,6 +452,26 @@ export const DEFAULT_LABELS: CalendarLabels = {
   padReviewDiscard: 'Discard notes',
   padReviewDiscardAsk: 'Discard these call notes for good? This cannot be undone.',
   padReviewOpenMeeting: 'Open meeting',
+  meetingDate: 'Date',
+  meetingTime: 'Time',
+  meetingWhere: 'Where',
+  meetingLink: 'Meeting link',
+  meetingAbout: 'About',
+  meetingCancelReason: 'Cancellation reason',
+  meetingPeople: 'People',
+  meetingDetails: 'Details',
+  meetingActions: 'Actions',
+  meetingLength: 'Length',
+  meetingMinutes: (minutes) => `${minutes} minutes`,
+  meetingTimesShownIn: 'Times shown in',
+  meetingBooked: 'Booked',
+  meetingLinkNone: 'No video link',
+  meetingLinkNoneHint: 'This meeting is not a video call.',
+  meetingLinkClosed: 'Closed',
+  meetingLinkOpen: 'Open now',
+  meetingLinkOpenHint: 'Join from this page.',
+  meetingLinkOpensAt: (time) => `Opens at ${time}`,
+  meetingLinkOpensHint: (lead) => (lead > 0 ? `${lead} minutes before the start. Join from this page then.` : 'Join from this page then.'),
   notesTitle: 'Notes',
   notesEmpty: 'No notes yet.',
   notesLoading: 'Loading notes…',
@@ -696,6 +737,7 @@ export interface CalendarClassNames {
   linkEditor: string;
   input: string;
   notes: string;
+  meeting: string;
   pendingPads: string;
   padReview: string;
   proposal: string;
