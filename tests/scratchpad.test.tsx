@@ -167,7 +167,7 @@ describe('the product decides where the pad is filed', () => {
     const request = vi.fn(async (method: string) => (method === 'GET' ? { data: { content: 'pad', targets: [{ key: 'k', label: 'L' }] } } : { data: {} }));
     const adapter = kitScratchpadAdapter({ path: '/v1/calendar/meetings/m-1/', request: request as never });
 
-    expect(await adapter.load()).toEqual({ content: 'pad', targets: [{ key: 'k', label: 'L' }] });
+    expect(await adapter.load()).toEqual({ content: 'pad', targets: [{ key: 'k', label: 'L' }], actions: [] });
     await adapter.saveDraft('more');
     await adapter.commit!('more', 'k');
     expect(request.mock.calls).toEqual([

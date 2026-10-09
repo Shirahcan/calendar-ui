@@ -105,6 +105,44 @@ export interface CalendarLabels {
   wrapUpDiscardConfirm: string;
   wrapUpDiscardYes: string;
   wrapUpDiscardNo: string;
+  /* A pad action's proposal (plan N5) */
+  proposalTitle: (action: string) => string;
+  proposalYours: string;
+  proposalTheirs: string;
+  proposalAccept: string;
+  proposalDismiss: string;
+  proposalWorking: string;
+  /* Unsettled pads (plan N4) */
+  pendingPadsTitle: (count: number) => string;
+  pendingPadsHint: string;
+  pendingPadsReview: string;
+  pendingPadsDismiss: string;
+  padReviewTitle: (meeting: string) => string;
+  padReviewHint: string;
+  padReviewClose: string;
+  padReviewDiscard: string;
+  padReviewDiscardAsk: string;
+  padReviewOpenMeeting: string;
+  /* Meeting notes (plan N2) */
+  notesTitle: string;
+  notesEmpty: string;
+  notesLoading: string;
+  notesPlaceholder: string;
+  notesPrivate: string;
+  notesPrivateHint: string;
+  notesAdd: string;
+  notesAdding: string;
+  notesSave: string;
+  notesCancel: string;
+  notesMenu: string;
+  notesEdit: string;
+  notesCopy: string;
+  notesCopied: string;
+  notesDelete: string;
+  notesDeleteAsk: string;
+  notesPrivateBadge: string;
+  notesSomeone: string;
+  notesFailed: string;
   holidayTitle: string;
   holidayRegion: string;
   holidayYear: string;
@@ -377,6 +415,41 @@ export const DEFAULT_LABELS: CalendarLabels = {
   wrapUpDiscardConfirm: 'Discard these notes for good?',
   wrapUpDiscardYes: 'Discard',
   wrapUpDiscardNo: 'Keep them',
+  proposalTitle: (action) => action,
+  proposalYours: 'Your notes',
+  proposalTheirs: 'Suggested',
+  proposalAccept: 'Use this version',
+  proposalDismiss: 'Keep mine',
+  proposalWorking: 'Working on it…',
+  pendingPadsTitle: (count) => (count === 1 ? 'You have call notes that are not saved anywhere yet' : `You have ${count} sets of call notes that are not saved anywhere yet`),
+  pendingPadsHint: 'Review them and save them where they belong, or discard them.',
+  pendingPadsReview: 'Review',
+  pendingPadsDismiss: 'Hide for now',
+  padReviewTitle: (meeting) => `Call notes: ${meeting}`,
+  padReviewHint: 'Only you see these. Changes are kept as you type.',
+  padReviewClose: 'Close',
+  padReviewDiscard: 'Discard notes',
+  padReviewDiscardAsk: 'Discard these call notes for good? This cannot be undone.',
+  padReviewOpenMeeting: 'Open meeting',
+  notesTitle: 'Notes',
+  notesEmpty: 'No notes yet.',
+  notesLoading: 'Loading notes…',
+  notesPlaceholder: 'Write a note about this meeting…',
+  notesPrivate: 'Only visible to me',
+  notesPrivateHint: 'Private notes are never shown to anyone else.',
+  notesAdd: 'Add note',
+  notesAdding: 'Adding…',
+  notesSave: 'Save',
+  notesCancel: 'Cancel',
+  notesMenu: 'Note actions',
+  notesEdit: 'Edit',
+  notesCopy: 'Copy text',
+  notesCopied: 'Copied.',
+  notesDelete: 'Delete',
+  notesDeleteAsk: 'Delete this note? This cannot be undone.',
+  notesPrivateBadge: 'Private',
+  notesSomeone: 'Someone',
+  notesFailed: 'That did not work. Please try again.',
   holidayTitle: 'Public holidays',
   holidayRegion: 'Country or province',
   holidayYear: 'Year',
@@ -622,6 +695,10 @@ export interface CalendarClassNames {
   linksManager: string;
   linkEditor: string;
   input: string;
+  notes: string;
+  pendingPads: string;
+  padReview: string;
+  proposal: string;
 }
 
 export type ColorScheme = 'light' | 'dark' | 'auto';

@@ -23,8 +23,24 @@ export interface ScratchpadCommitTarget {
   label: string;
 }
 
-/** What `load` may return: the text alone, or the text and where it can be filed. */
-export type ScratchpadLoaded = string | { content: string; targets?: ScratchpadCommitTarget[] };
+/**
+ * Something the PRODUCT offers on the pad's text ("Clean up with Porter"). It only proposes: the
+ * person sees the proposal beside their own text and accepts, edits or dismisses it.
+ */
+export interface ScratchpadAction {
+  key: string;
+  label: string;
+}
+
+/** What `load` may return: the text alone, or the text with where it can be filed and what can be done to it. */
+export type ScratchpadLoaded = string | { content: string; targets?: ScratchpadCommitTarget[]; actions?: ScratchpadAction[] };
+
+/** A product action's proposal for the pad, waiting for the person to decide. */
+export interface ScratchpadProposal {
+  action: string;
+  label: string;
+  text: string;
+}
 
 export interface ScratchpadAdapter {
   /** The person's saved pad ('' when there is none), optionally with its targets. */
@@ -34,6 +50,10 @@ export interface ScratchpadAdapter {
   commit?: (text: string, target?: string) => Promise<void>;
   /** Where the pad can be filed, when known up front (a `load` answer with targets replaces these). */
   targets?: ScratchpadCommitTarget[];
+  /** A product action's proposed text (never applied by the hook until the person accepts it). */
+  propose?: (text: string, action: string) => Promise<string>;
+  /** Discard the pad for good (absent: it is saved empty). */
+  discard?: () => Promise<void>;
   /** Fire-and-forget save while the page goes away (fetch keepalive). False when it could not try. */
   saveOnUnload?: (text: string) => boolean;
   /** Empty the pad after a commit (default true). */
@@ -65,6 +85,15 @@ export interface MeetingScratchpadState {
   keep: () => Promise<boolean>;
   /** Empty the pad, saved empty. Resolves true once it is. */
   discard: () => Promise<boolean>;
+  /** The product's actions on the text ("Clean up with Porter"). */
+  actions: ScratchpadAction[];
+  /** Ask an action for a proposal; it waits in `proposal` for the person. */
+  propose: (action: string) => Promise<void>;
+  proposing: string | null;
+  proposal: ScratchpadProposal | null;
+  /** Use the proposal as the pad's text (saved at once). */
+  acceptProposal: () => Promise<void>;
+  dismissProposal: () => void;
 }
 
 export function useMeetingScratchpad(adapter: ScratchpadAdapter): MeetingScratchpadState {
@@ -74,6 +103,9 @@ export function useMeetingScratchpad(adapter: ScratchpadAdapter): MeetingScratch
   const [commits, setCommits] = useState(0);
   const [error, setError] = useState<unknown>(null);
   const [loadedTargets, setLoadedTargets] = useState<ScratchpadCommitTarget[] | null>(null);
+  const [actions, setActions] = useState<ScratchpadAction[]>([]);
+  const [proposing, setProposing] = useState<string | null>(null);
+  const [proposal, setProposal] = useState<ScratchpadProposal | null>(null);
 
   // The adapter is usually an inline object; read the latest through a ref so effects stay stable.
   const adapterRef = useRef(adapter);
@@ -92,6 +124,7 @@ export function useMeetingScratchpad(adapter: ScratchpadAdapter): MeetingScratch
         if (!alive) return;
         const content = typeof loaded === 'string' ? loaded : loaded.content;
         if (typeof loaded !== 'string' && loaded.targets) setLoadedTargets(loaded.targets);
+        if (typeof loaded !== 'string' && loaded.actions) setActions(loaded.actions);
         latest.current = content;
         saved.current = content;
         setTextState(content);
@@ -186,7 +219,9 @@ export function useMeetingScratchpad(adapter: ScratchpadAdapter): MeetingScratch
       timer.current = null;
     }
     try {
-      await adapterRef.current.saveDraft('');
+      const drop = adapterRef.current.discard;
+      await (drop ? drop() : adapterRef.current.saveDraft(''));
+      setProposal(null);
       latest.current = '';
       saved.current = '';
       setTextState('');
@@ -199,6 +234,32 @@ export function useMeetingScratchpad(adapter: ScratchpadAdapter): MeetingScratch
       return false;
     }
   }, []);
+
+  const propose = useCallback(async (action: string): Promise<void> => {
+    const run = adapterRef.current.propose;
+    const value = latest.current;
+    if (!run || value.trim() === '') return;
+    setProposing(action);
+    try {
+      const proposed = await run(value, action);
+      setError(null);
+      setProposal({ action, label: actions.find((a) => a.key === action)?.label ?? action, text: proposed });
+    } catch (e) {
+      setError(e);
+    } finally {
+      setProposing(null);
+    }
+  }, [actions]);
+
+  const acceptProposal = useCallback(async (): Promise<void> => {
+    if (!proposal) return;
+    latest.current = proposal.text;
+    setTextState(proposal.text);
+    setProposal(null);
+    await flush();
+  }, [proposal, flush]);
+
+  const dismissProposal = useCallback(() => setProposal(null), []);
 
   return {
     text,
@@ -216,5 +277,11 @@ export function useMeetingScratchpad(adapter: ScratchpadAdapter): MeetingScratch
     commit,
     keep,
     discard,
+    actions: adapter.propose ? actions : [],
+    propose,
+    proposing,
+    proposal,
+    acceptProposal,
+    dismissProposal,
   };
 }

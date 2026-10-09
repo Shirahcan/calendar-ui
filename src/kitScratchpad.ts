@@ -1,4 +1,4 @@
-import type { ScratchpadAdapter, ScratchpadCommitTarget } from './hooks/useMeetingScratchpad';
+import type { ScratchpadAction, ScratchpadAdapter, ScratchpadCommitTarget } from './hooks/useMeetingScratchpad';
 
 /**
  * The adapter for calendar-client's scratchpad kit (CalendarKit::scratchpadRoutes), so no
@@ -10,13 +10,13 @@ export interface KitScratchpadOptions {
   /** The prefix the routes were mounted under plus the meeting id: `/v1/calendar/meetings/123`. */
   path: string;
   /** The product's request function; resolves the parsed JSON body, rejects on an error status. */
-  request: <T>(method: 'GET' | 'PUT' | 'POST', path: string, body?: unknown) => Promise<T>;
+  request: <T>(method: 'GET' | 'PUT' | 'POST' | 'PATCH' | 'DELETE', path: string, body?: unknown) => Promise<T>;
   saveOnUnload?: (text: string) => boolean;
   idleMs?: number;
 }
 
 interface KitPad {
-  data: { content?: string | null; targets?: ScratchpadCommitTarget[] };
+  data: { content?: string | null; targets?: ScratchpadCommitTarget[]; actions?: ScratchpadAction[] };
 }
 
 export function kitScratchpadAdapter({ path, request, saveOnUnload, idleMs }: KitScratchpadOptions): ScratchpadAdapter {
@@ -25,13 +25,20 @@ export function kitScratchpadAdapter({ path, request, saveOnUnload, idleMs }: Ki
   return {
     load: async () => {
       const pad = await request<KitPad>('GET', base);
-      return { content: pad.data.content ?? '', targets: pad.data.targets ?? [] };
+      return { content: pad.data.content ?? '', targets: pad.data.targets ?? [], actions: pad.data.actions ?? [] };
     },
     saveDraft: async (text) => {
       await request('PUT', base, { content: text });
     },
     commit: async (text, target) => {
       await request('POST', `${base}/commit`, { target, content: text });
+    },
+    propose: async (text, action) => {
+      const res = await request<{ data: { proposal: string } }>('POST', `${base}/propose`, { action, content: text });
+      return res.data.proposal;
+    },
+    discard: async () => {
+      await request('DELETE', base);
     },
     saveOnUnload,
     idleMs,

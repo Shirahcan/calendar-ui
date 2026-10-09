@@ -1,6 +1,7 @@
 import { useId } from 'react';
 import type { MeetingScratchpadState } from '../hooks/useMeetingScratchpad';
 import { cx, useCalendarUi } from '../theme';
+import { PadActions, PadProposal } from './PadProposal';
 
 export interface MeetingScratchpadProps {
   /** From useMeetingScratchpad. */
@@ -50,6 +51,8 @@ export function MeetingScratchpad({ scratchpad: pad, describeError, className }:
         onChange={(e) => pad.setText(e.target.value)}
         onBlur={() => void pad.flush()}
       />
+      <PadActions scratchpad={pad} />
+      <PadProposal scratchpad={pad} />
       {pad.error != null && <p className="cal-scratchpad__error" role="alert">{describe(pad.error)}</p>}
       {pad.canCommit && (
         <div className="cal-scratchpad__actions">
