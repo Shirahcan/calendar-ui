@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { formatIn } from '../time';
 import type { Slot } from '../types';
 import { cx, useCalendarUi } from '../theme';
-import { zoneCity, zoneLabel as namedZone } from '../zoned';
+import { zoneCity, zoneLabel as namedZone, zoneLongName } from '../zoned';
 
 export interface SlotPickerProps {
   /** From useSlots: slots grouped by the viewer's local day. */
@@ -37,7 +37,7 @@ export function SlotPicker({ byDay, viewerZone, hostZone, onPick, selected, disa
 
   return (
     <div className={cx('cal-slots', classNames.slots, className)}>
-      <p className="cal-slots__zone">{labels.timesIn(namedZone(firstStart, viewerZone))}</p>
+      <p className="cal-slots__zone">{labels.timesIn(zoneLongName(firstStart, viewerZone))}</p>
       {[...byDay.entries()].map(([key, slots]) => (
         <section key={key} className="cal-slots__day" aria-label={formatIn(slots[0]!.start_utc, viewerZone, 'EEEE d MMMM yyyy')}>
           <h4 className="cal-slots__dayhead">{formatIn(slots[0]!.start_utc, viewerZone, 'EEE d MMM')}</h4>

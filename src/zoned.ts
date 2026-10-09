@@ -1,5 +1,6 @@
 import { TZDate } from '@date-fns/tz';
 import { dayKey } from './time';
+import { ZONE_ABBREVIATIONS } from './zoneAbbreviations';
 
 /**
  * Times as people read them: on one clock, and always saying which.
@@ -21,24 +22,48 @@ const tzPart = (value: Instant, zone: string, style: 'short' | 'long'): string =
     .formatToParts(asDate(value))
     .find((p) => p.type === 'timeZoneName')?.value ?? zone;
 
+/** Minutes east of UTC for `zone` at `date`. */
+const offsetMinutes = (date: Date, zone: string): number => {
+  const name = new Intl.DateTimeFormat('en-US', { timeZone: zone, timeZoneName: 'longOffset' }).formatToParts(date)
+    .find((p) => p.type === 'timeZoneName')?.value ?? 'GMT';
+  const m = /GMT([+-])(\d{2}):?(\d{2})?/.exec(name);
+  return m ? (m[1] === '-' ? -1 : 1) * (Number(m[2]) * 60 + Number(m[3] ?? 0)) : 0;
+};
+
+/** On summer time at that instant: its offset is above the zone's standard (the lower of January and July). */
+const onDaylightTime = (date: Date, zone: string): boolean => {
+  const y = date.getUTCFullYear();
+  const standard = Math.min(offsetMinutes(new Date(Date.UTC(y, 0, 1)), zone), offsetMinutes(new Date(Date.UTC(y, 6, 1)), zone));
+  return offsetMinutes(date, zone) > standard;
+};
+
 /**
- * The zone's NAME at that instant: its abbreviation where one exists ("EDT", "MDT", "GMT",
- * "UTC"), else its full name ("West Africa Standard Time", "Philippine Standard Time"). Never a
- * bare offset like "GMT+1", which names no place and reads as a typo. calendar-client's
- * ZonedTime applies the same ICU rule, so a screen and an email say the same thing.
+ * The zone's SHORT NAME at that instant (owner 2026-10-09: "WAT", never "West Africa Time"):
+ * ICU's English abbreviation where there is one ("EDT", "PST", "GMT", "UTC"), else the curated
+ * one (ZONE_ABBREVIATIONS: "WAT", "IST", "CEST", "AEDT"), else ICU's offset ("GMT+5") for a zone
+ * nobody has named. calendar-client's ZonedTime applies the same rule and table, so a screen and
+ * an email say the same thing.
  */
 export function zoneLabel(value: Instant, zone: string): string {
   const short = tzPart(value, zone, 'short');
+  if (!/^(GMT|UTC)[+-]/.test(short)) return short;
+  const known = ZONE_ABBREVIATIONS[zone];
+  if (!known) return short;
 
-  return /^(GMT|UTC)[+-]/.test(short) ? tzPart(value, zone, 'long') : short;
+  return known[1] && onDaylightTime(asDate(value), zone) ? known[1] : known[0];
 }
 
-/** "8:25 PM EDT", "8:25 PM West Africa Standard Time" */
+/** The zone's full name ("West Africa Standard Time"), for a sentence that names it ("Times shown in"). */
+export function zoneLongName(value: Instant, zone: string): string {
+  return tzPart(value, zone, 'long');
+}
+
+/** "8:25 PM EDT", "8:25 PM WAT" */
 export function formatZonedTime(value: Instant, zone: string): string {
   return `${asDate(value).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: zone })} ${zoneLabel(value, zone)}`;
 }
 
-/** "8:25 PM - 8:55 PM West Africa Standard Time": the zone once, at the end. */
+/** "8:25 PM - 8:55 PM WAT": the zone once, at the end. */
 export function formatZonedTimeRange(start: Instant, end: Instant, zone: string): string {
   const opts: Intl.DateTimeFormatOptions = { hour: 'numeric', minute: '2-digit', timeZone: zone };
 

@@ -6,21 +6,31 @@ describe('zoned formatting (the test process runs in Pacific/Kiritimati, UTC+14)
   const booked = '2026-09-28T19:25:00Z';
 
   it('always NAMES the clock it is on', () => {
-    expect(formatZonedTime(booked, 'Africa/Lagos')).toBe('8:25 PM West Africa Standard Time');
+    expect(formatZonedTime(booked, 'Africa/Lagos')).toBe('8:25 PM WAT');
     expect(formatZonedTime(booked, 'America/Toronto')).toBe('3:25 PM EDT');
     expect(zoneLabel('2026-12-01T12:00:00Z', 'America/Toronto')).toBe('EST');
-    // A name, never a bare offset.
-    expect(zoneLabel(booked, 'Asia/Manila')).toBe('Philippine Standard Time');
+    // A short name (owner 2026-10-09), never a bare offset where one is known.
+    expect(zoneLabel(booked, 'Asia/Manila')).toBe('PHT');
     expect(zoneLabel(booked, 'Africa/Accra')).toBe('GMT');
+    expect(zoneLabel(booked, 'Asia/Kolkata')).toBe('IST');
+    // Summer time where the zone keeps it.
+    expect(zoneLabel('2026-07-01T12:00:00Z', 'Europe/London')).toBe('BST');
+    expect(zoneLabel('2026-12-01T12:00:00Z', 'Europe/London')).toBe('GMT');
+    expect(zoneLabel('2026-07-01T12:00:00Z', 'Europe/Paris')).toBe('CEST');
+    expect(zoneLabel('2026-12-01T12:00:00Z', 'Europe/Paris')).toBe('CET');
+    expect(zoneLabel('2026-01-15T12:00:00Z', 'Australia/Sydney')).toBe('AEDT');
+    expect(zoneLabel('2026-07-15T12:00:00Z', 'Australia/Sydney')).toBe('AEST');
+    // A zone nobody has named keeps the offset rather than inventing letters.
+    expect(zoneLabel(booked, 'Indian/Chagos')).toMatch(/^GMT\+/);
   });
 
   it('reads the date on the zone calendar, never the machine one', () => {
     expect(formatZonedDate(booked, 'Africa/Lagos')).toBe('Monday, September 28, 2026');
-    expect(formatZonedDateTime('2026-10-05T20:00:00Z', 'Asia/Manila')).toBe('Tue, Oct 6, 2026, 4:00 AM Philippine Standard Time');
+    expect(formatZonedDateTime('2026-10-05T20:00:00Z', 'Asia/Manila')).toBe('Tue, Oct 6, 2026, 4:00 AM PHT');
   });
 
   it('labels a range once', () => {
-    expect(formatZonedTimeRange(booked, '2026-09-28T19:55:00Z', 'Africa/Lagos')).toBe('8:25 PM - 8:55 PM West Africa Standard Time');
+    expect(formatZonedTimeRange(booked, '2026-09-28T19:55:00Z', 'Africa/Lagos')).toBe('8:25 PM - 8:55 PM WAT');
   });
 
   it('keeps only the items on the viewer day', () => {
