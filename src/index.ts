@@ -46,6 +46,7 @@ export type { KitMeetingNotesOptions } from './kitMeetingNotes';
 export { MeetingNotesPanel } from './components/MeetingNotesPanel';
 export type { MeetingNotesPanelProps } from './components/MeetingNotesPanel';
 export { PendingPadsBanner, PadReviewDialog, usePendingPads } from './components/PendingPads';
+export { useConfirm } from './components/ConfirmDialog';
 export type { PendingPad, PendingPadsAdapter, PendingPadsBannerProps, PadReviewDialogProps } from './components/PendingPads';
 export { kitScratchpadAdapter } from './kitScratchpad';
 export type { KitScratchpadOptions } from './kitScratchpad';

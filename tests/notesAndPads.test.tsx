@@ -129,7 +129,6 @@ describe('PendingPadsBanner', () => {
     render(
       <PendingPadsBanner
         timezone="UTC"
-        confirmDiscard={async () => true}
         adapter={{ list: async () => pads, padFor: () => ({ load: async () => pad.content, saveDraft: vi.fn(), discard }) }}
       />,
     );
@@ -139,6 +138,9 @@ describe('PendingPadsBanner', () => {
     expect(await screen.findByDisplayValue('follow up on funds')).toBeTruthy();
 
     fireEvent.click(screen.getByRole('button', { name: 'Discard notes' }));
+    // The confirm is native and stacked on the review dialog (a portal dialog would be inert).
+    const confirm = await screen.findByRole('dialog', { name: 'Discard these call notes for good? This cannot be undone.' });
+    fireEvent.click(within(confirm).getByRole('button', { name: 'Discard notes' }));
     await waitFor(() => expect(discard).toHaveBeenCalled());
     await waitFor(() => expect(screen.queryByText('You have call notes that are not saved anywhere yet')).toBeNull());
   });

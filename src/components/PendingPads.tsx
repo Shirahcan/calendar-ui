@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useMeetingScratchpad, type ScratchpadAdapter } from '../hooks/useMeetingScratchpad';
 import { cx, useCalendarUi } from '../theme';
 import { formatZonedDateTime } from '../zoned';
+import { useConfirm } from './ConfirmDialog';
 import { MeetingScratchpad } from './MeetingScratchpad';
 
 /**
@@ -60,7 +61,10 @@ export interface PendingPadsBannerProps {
   timezone: string;
   /** How the product opens a meeting (a router push); defaults to following `href`. */
   onOpenMeeting?: (pad: PendingPad) => void;
-  /** Ask before discarding (the product's own dialog); defaults to window.confirm. */
+  /**
+   * Ask before discarding. Defaults to a native confirm stacked on the review dialog: a product's
+   * own portal dialog cannot be clicked while a native modal is open.
+   */
   confirmDiscard?: (question: string) => Promise<boolean>;
   describeError?: (error: unknown) => string;
   className?: string;
@@ -131,7 +135,8 @@ export function PadReviewDialog({ pad, adapter, onClose, onOpenMeeting, confirmD
   const { labels, classNames } = useCalendarUi();
   const dialog = useRef<HTMLDialogElement>(null);
   const scratchpad = useMeetingScratchpad(adapter);
-  const ask = confirmDiscard ?? (async (q: string) => (typeof window === 'undefined' ? false : window.confirm(q)));
+  const [confirmEl, nativeAsk] = useConfirm();
+  const ask = confirmDiscard ?? ((q: string) => nativeAsk(q, labels.padReviewDiscard));
 
   useEffect(() => {
     const d = dialog.current;
@@ -176,6 +181,7 @@ export function PadReviewDialog({ pad, adapter, onClose, onOpenMeeting, confirmD
           {labels.padReviewOpenMeeting}
         </button>
       </footer>
+      {confirmEl}
     </dialog>
   );
 }
