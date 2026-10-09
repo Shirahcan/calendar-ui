@@ -438,5 +438,5 @@
 .cal-meeting-side__who { min-width: 0; }
 .cal-meeting-side__name { margin: 0; font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cal-meeting-side__email { margin: 0; font-size: 12px; color: var(--cal-ink-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.cal-meeting-side__action { width: 100%; justify-content: center; }
+.cal-meeting-side__action { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; }
 .cal-meeting-side__action--danger { color: var(--cal-danger); }
