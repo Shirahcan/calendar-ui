@@ -12,7 +12,7 @@
  */
 .cal-root { display: contents; }
 
-:where(.cal-root, :is(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-avail, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad, .cal-dock, .cal-holidays, .cal-reminders, .cal-policy, .cal-rules, .cal-conns, .cal-links, .cal-notes, .cal-pads, .cal-paddlg, .cal-confirm, .cal-modal, .cal-meeting, .cal-meeting-side):not(.cal-root *)) {
+:where(.cal-root, :is(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-avail, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad, .cal-dock, .cal-holidays, .cal-reminders, .cal-policy, .cal-rules, .cal-conns, .cal-links, .cal-notes, .cal-pads, .cal-paddlg, .cal-confirm, .cal-modal, .cal-tools, .cal-meeting, .cal-meeting-side):not(.cal-root *)) {
   --cal-accent: #4361ee;
   --cal-accent-ink: #ffffff;
   --cal-surface: #ffffff;
@@ -28,14 +28,14 @@
   --cal-hour-height: 48px;
 }
 
-:where(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-avail, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad, .cal-dock, .cal-holidays, .cal-reminders, .cal-policy, .cal-rules, .cal-conns, .cal-links, .cal-notes, .cal-pads, .cal-paddlg, .cal-confirm, .cal-modal) {
+:where(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-avail, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad, .cal-dock, .cal-holidays, .cal-reminders, .cal-policy, .cal-rules, .cal-conns, .cal-links, .cal-notes, .cal-pads, .cal-paddlg, .cal-confirm, .cal-modal, .cal-tools) {
   font-family: var(--cal-font);
   color: var(--cal-ink);
 }
 
 /* Dark: the OS decides for a component used alone; a provider decides for everything inside it. */
 @media (prefers-color-scheme: dark) {
-  :where(:is(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-avail, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad, .cal-dock, .cal-holidays, .cal-reminders, .cal-policy, .cal-rules, .cal-conns, .cal-links, .cal-notes, .cal-pads, .cal-paddlg, .cal-confirm, .cal-modal):not(.cal-root *)) {
+  :where(:is(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-avail, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad, .cal-dock, .cal-holidays, .cal-reminders, .cal-policy, .cal-rules, .cal-conns, .cal-links, .cal-notes, .cal-pads, .cal-paddlg, .cal-confirm, .cal-modal, .cal-tools):not(.cal-root *)) {
     --cal-surface: #0f172a;
     --cal-surface-muted: #1e293b;
     --cal-border: #334155;
@@ -477,3 +477,27 @@
 .cal-meeting-side__names { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; color: var(--cal-ink-muted); }
 .cal-meeting-side__summary:focus-visible { outline: 2px solid var(--cal-accent); outline-offset: 4px; border-radius: 6px; }
 @media (prefers-reduced-motion: reduce) { .cal-meeting-side__summary::after { transition: none; } }
+
+/* Call tools and booking approval (plan P6e) */
+.cal-tools { display: grid; gap: 12px; padding: 20px; border: 1px solid var(--cal-border); border-radius: var(--cal-radius); background: var(--cal-surface); min-width: 0; }
+.cal-tools__title { margin: 0; font-size: 16px; font-weight: 600; }
+.cal-tools__intro { margin: 0; font-size: 13px; color: var(--cal-ink-muted); }
+.cal-tools__error { margin: 0; font-size: 13px; color: var(--cal-danger); }
+.cal-tools__list { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.cal-tools__item { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border: 1px solid var(--cal-border); border-radius: var(--cal-radius); background: var(--cal-surface); }
+.cal-tools__item.is-selected { border-color: var(--cal-accent); background: color-mix(in srgb, var(--cal-accent) 6%, var(--cal-surface)); }
+.cal-tools__what { display: grid; gap: 2px; min-width: 0; }
+.cal-tools__name { font-size: 14px; font-weight: 600; color: var(--cal-ink); }
+.cal-tools__hint { font-size: 12px; color: var(--cal-ink-muted); }
+.cal-tools__side { display: flex; align-items: center; gap: 6px; flex: none; }
+.cal-tools__side .cal-btn { padding: 6px 14px; font-size: 13px; white-space: nowrap; }
+.cal-tools__inuse { font-size: 12px; font-weight: 600; color: var(--cal-accent); white-space: nowrap; }
+.cal-approval__row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.cal-switch { display: inline-flex; align-items: center; gap: 8px; flex: none; padding: 3px 10px 3px 3px; border: 1px solid var(--cal-border); border-radius: var(--cal-radius-pill); background: var(--cal-surface-muted); color: var(--cal-ink-muted); font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; outline: none; }
+.cal-switch__knob { width: 20px; height: 20px; border-radius: 50%; background: var(--cal-border); transition: background 0.15s; }
+.cal-switch[aria-checked='true'] { border-color: var(--cal-accent); color: var(--cal-accent); }
+.cal-switch[aria-checked='true'] .cal-switch__knob { background: var(--cal-accent); }
+.cal-switch:focus-visible { outline: 2px solid var(--cal-accent); outline-offset: 2px; }
+.cal-switch:disabled { opacity: 0.6; cursor: default; }
+@media (max-width: 540px) { .cal-tools__item, .cal-approval__row { flex-direction: column; align-items: flex-start; } }
+@media (prefers-reduced-motion: reduce) { .cal-switch__knob { transition: none; } }

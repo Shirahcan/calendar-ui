@@ -307,6 +307,31 @@ export interface CalendarLabels {
   connConfirmDisconnect: (provider: string, email: string | null) => string;
   connConnect: (provider: string) => string;
   connFailed: string;
+  /* Which tool runs a person's calls, and whether they approve bookings (plan P6e) */
+  callToolsTitle: string;
+  callToolsIntro: string;
+  callToolsLoading: string;
+  /** The product's own video room ("Portify video"). */
+  callToolProductRoom: string;
+  callToolProductRoomHint: string;
+  callToolZoom: string;
+  callToolZoomHint: string;
+  callToolZoomConnectedAs: (email: string | null) => string;
+  callToolMeet: string;
+  callToolMeetHint: string;
+  callToolMeetNeedsCalendar: string;
+  callToolInUse: string;
+  callToolUse: string;
+  callToolConnect: string;
+  callToolActionsFor: (tool: string) => string;
+  callToolCopyEmail: string;
+  callToolDisconnect: string;
+  callToolConfirmDisconnect: (email: string | null) => string;
+  callToolFailed: string;
+  approvalTitle: string;
+  approvalHint: string;
+  approvalOn: string;
+  approvalOff: string;
   // Booking links (BookingLinksManager, BookingLinkEditor)
   linksTitle: string;
   linksIntro: string;
@@ -665,6 +690,29 @@ export const DEFAULT_LABELS: CalendarLabels = {
   connConfirmDisconnect: (provider, email) => `Disconnect ${provider}${email ? ` (${email})` : ''}? Its busy time stops counting.`,
   connConnect: (provider) => `Connect ${provider}`,
   connFailed: 'That did not work. Please try again.',
+  callToolsTitle: 'How your calls happen',
+  callToolsIntro: 'People still book with you here. Choose which tool runs the actual call. It applies to new bookings; meetings already booked keep their links.',
+  callToolsLoading: 'Loading your call tools...',
+  callToolProductRoom: 'Built-in video',
+  callToolProductRoomHint: 'Nothing to set up: the call link is made for you.',
+  callToolZoom: 'Zoom',
+  callToolZoomHint: 'Calls run on your own Zoom account.',
+  callToolZoomConnectedAs: (email) => `Connected as ${email ?? 'your Zoom account'}`,
+  callToolMeet: 'Google Meet',
+  callToolMeetHint: 'Calls run on your own Google account, added to the booking in your Google calendar.',
+  callToolMeetNeedsCalendar: 'Connect your Google calendar first: Google Meet runs on it.',
+  callToolInUse: 'In use',
+  callToolUse: 'Use this',
+  callToolConnect: 'Connect',
+  callToolActionsFor: (tool) => `Actions for ${tool}`,
+  callToolCopyEmail: 'Copy email',
+  callToolDisconnect: 'Disconnect',
+  callToolConfirmDisconnect: (email) => `Disconnect Zoom${email ? ` (${email})` : ''}? Its access is revoked in every product you use, and new bookings use built-in video. Meetings already booked keep their links.`,
+  callToolFailed: 'That did not work. Please try again.',
+  approvalTitle: 'Approve each booking',
+  approvalHint: 'When on, a new booking waits for you to approve it before it is confirmed, and the person is told it is pending.',
+  approvalOn: 'On',
+  approvalOff: 'Off',
   linksTitle: 'Booking links',
   linksIntro: 'Each link is a way to book time with you, with its own length and rules.',
   linksLoading: 'Loading your links...',

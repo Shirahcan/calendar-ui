@@ -74,6 +74,8 @@ export type { CancelMeetingDialogProps, MeetingQuickViewProps, RescheduleDialogP
 export type { RowMenuItem } from './components/RowMenu';
 export type { HolidayRule, HolidayRuleInput, HolidayRuleKind, HolidayRulesAdapter, HolidayRulesEditorProps } from './components/HolidayRulesEditor';
 export { CalendarConnectionsPanel } from './components/CalendarConnectionsPanel';
+export { BookingApprovalToggle, CallToolPicker } from './components/CallToolPicker';
+export type { BookingApprovalAdapter, CallToolAccount, CallToolKind, CallToolPickerProps, CallToolsAdapter, CallToolsState } from './components/CallToolPicker';
 export { BookingLinksManager } from './components/BookingLinksManager';
 export type { BookingLinkAction, BookingLinksAdapter, BookingLinksManagerProps } from './components/BookingLinksManager';
 export { BookingLinkEditor } from './components/BookingLinkEditor';
