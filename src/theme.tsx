@@ -141,6 +141,29 @@ export interface CalendarLabels {
   meetingMinutes: (minutes: number) => string;
   meetingTimesShownIn: string;
   meetingBooked: string;
+  /* The quick look at one meeting, and moving or cancelling it (plan M2) */
+  quickViewClose: string;
+  quickViewJoin: string;
+  quickViewOpenPage: string;
+  quickViewMore: string;
+  cancelTitle: string;
+  /** Who hears about it, in the reader's words ("Maria Garcia", "your consultant"). */
+  cancelWhoIsTold: (who: string) => string;
+  cancelReason: string;
+  cancelReasonHint: string;
+  cancelKeep: string;
+  cancelConfirm: string;
+  cancelFailed: string;
+  rescheduleTitle: string;
+  rescheduleNow: (when: string) => string;
+  reschedulePrevDay: string;
+  rescheduleNextDay: string;
+  rescheduleNoTimes: string;
+  rescheduleLoading: string;
+  rescheduleReason: string;
+  rescheduleConfirm: (time: string) => string;
+  reschedulePick: string;
+  rescheduleFailed: string;
   meetingLinkNone: string;
   meetingLinkNoneHint: string;
   meetingLinkClosed: string;
@@ -471,6 +494,27 @@ export const DEFAULT_LABELS: CalendarLabels = {
   meetingMinutes: (minutes) => `${minutes} minutes`,
   meetingTimesShownIn: 'Times shown in',
   meetingBooked: 'Booked',
+  quickViewClose: 'Close',
+  quickViewJoin: 'Join meeting',
+  quickViewOpenPage: 'Open meeting page',
+  quickViewMore: 'More actions',
+  cancelTitle: 'Cancel this meeting?',
+  cancelWhoIsTold: (who) => `${who} will be told it is cancelled, with your reason. This cannot be undone.`,
+  cancelReason: 'Reason',
+  cancelReasonHint: 'At least 5 characters.',
+  cancelKeep: 'Keep meeting',
+  cancelConfirm: 'Cancel meeting',
+  cancelFailed: 'The meeting could not be cancelled.',
+  rescheduleTitle: 'Move this meeting',
+  rescheduleNow: (when) => `Now: ${when}`,
+  reschedulePrevDay: 'Previous day',
+  rescheduleNextDay: 'Next day',
+  rescheduleNoTimes: 'No open times on this day. Try another day.',
+  rescheduleLoading: 'Finding open times…',
+  rescheduleReason: 'Reason (optional)',
+  rescheduleConfirm: (time) => `Move to ${time}`,
+  reschedulePick: 'Pick a new time',
+  rescheduleFailed: 'The meeting could not be moved.',
   meetingLinkNone: 'No video link',
   meetingLinkNoneHint: 'This meeting is not a video call.',
   meetingLinkClosed: 'Closed',

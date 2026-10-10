@@ -12,7 +12,7 @@
  */
 .cal-root { display: contents; }
 
-:where(.cal-root, :is(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-avail, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad, .cal-dock, .cal-holidays, .cal-reminders, .cal-policy, .cal-rules, .cal-conns, .cal-links, .cal-notes, .cal-pads, .cal-paddlg, .cal-confirm, .cal-meeting, .cal-meeting-side):not(.cal-root *)) {
+:where(.cal-root, :is(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-avail, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad, .cal-dock, .cal-holidays, .cal-reminders, .cal-policy, .cal-rules, .cal-conns, .cal-links, .cal-notes, .cal-pads, .cal-paddlg, .cal-confirm, .cal-modal, .cal-meeting, .cal-meeting-side):not(.cal-root *)) {
   --cal-accent: #4361ee;
   --cal-accent-ink: #ffffff;
   --cal-surface: #ffffff;
@@ -28,14 +28,14 @@
   --cal-hour-height: 48px;
 }
 
-:where(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-avail, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad, .cal-dock, .cal-holidays, .cal-reminders, .cal-policy, .cal-rules, .cal-conns, .cal-links, .cal-notes, .cal-pads, .cal-paddlg, .cal-confirm) {
+:where(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-avail, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad, .cal-dock, .cal-holidays, .cal-reminders, .cal-policy, .cal-rules, .cal-conns, .cal-links, .cal-notes, .cal-pads, .cal-paddlg, .cal-confirm, .cal-modal) {
   font-family: var(--cal-font);
   color: var(--cal-ink);
 }
 
 /* Dark: the OS decides for a component used alone; a provider decides for everything inside it. */
 @media (prefers-color-scheme: dark) {
-  :where(:is(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-avail, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad, .cal-dock, .cal-holidays, .cal-reminders, .cal-policy, .cal-rules, .cal-conns, .cal-links, .cal-notes, .cal-pads, .cal-paddlg, .cal-confirm):not(.cal-root *)) {
+  :where(:is(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-avail, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad, .cal-dock, .cal-holidays, .cal-reminders, .cal-policy, .cal-rules, .cal-conns, .cal-links, .cal-notes, .cal-pads, .cal-paddlg, .cal-confirm, .cal-modal):not(.cal-root *)) {
     --cal-surface: #0f172a;
     --cal-surface-muted: #1e293b;
     --cal-border: #334155;
@@ -444,3 +444,26 @@
 .cal-meeting-side__email { margin: 0; font-size: 12px; color: var(--cal-ink-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cal-meeting-side__action { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; }
 .cal-meeting-side__action--danger { color: var(--cal-danger); }
+
+/* One modal shell (quick view, cancel, reschedule): bounded to the viewport, header and footer
+   pinned, the body scrolls, so the footer's buttons are reachable on a short screen. */
+.cal-modal { width: min(32rem, calc(100vw - 32px)); max-height: 90vh; padding: 0; border: 1px solid var(--cal-border); border-radius: var(--cal-radius); background: var(--cal-surface); color: var(--cal-ink); overflow: hidden; }
+.cal-modal[open] { display: flex; flex-direction: column; }
+.cal-modal::backdrop { background: rgb(15 23 42 / 0.45); }
+.cal-modal__head, .cal-modal__foot { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 16px 20px; }
+.cal-modal__head h3 { margin: 0; font-size: 17px; font-weight: 600; }
+.cal-modal__headside { display: flex; align-items: center; gap: 4px; }
+.cal-modal__foot { border-top: 1px solid var(--cal-border); justify-content: flex-end; flex-wrap: wrap; }
+.cal-modal__body { flex: 1; min-height: 0; overflow-y: auto; padding: 4px 20px 16px; display: flex; flex-direction: column; gap: 14px; }
+.cal-modal__close { border: 0; background: transparent; font-size: 22px; line-height: 1; color: var(--cal-ink-muted); cursor: pointer; outline: none; }
+.cal-modal__text { margin: 0; font-size: 14px; line-height: 1.5; color: var(--cal-ink-muted); }
+.cal-modal__field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 500; }
+.cal-modal__field textarea { padding: 8px 12px; border: 1px solid var(--cal-border); border-radius: var(--cal-radius); background: var(--cal-surface); color: var(--cal-ink); font: inherit; font-weight: 400; resize: vertical; min-height: 72px; outline: none; }
+.cal-modal__field textarea:focus { border-color: var(--cal-accent); }
+.cal-modal__hint { margin: 0; font-size: 12px; font-weight: 400; color: var(--cal-ink-muted); }
+.cal-modal__error { margin: 0; font-size: 13px; color: var(--cal-danger); }
+.cal-modal__primary { width: 100%; justify-content: center; white-space: nowrap; }
+.cal-modal__day { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.cal-modal__day p { margin: 0; font-size: 14px; font-weight: 600; }
+.cal-modal__daynav { border: 1px solid var(--cal-border); background: var(--cal-surface); color: var(--cal-ink); border-radius: var(--cal-radius-pill); width: 32px; height: 32px; cursor: pointer; outline: none; }
+.cal-modal__daynav:disabled { opacity: 0.4; cursor: default; }
