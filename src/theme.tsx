@@ -131,6 +131,10 @@ export interface CalendarLabels {
   meetingAbout: string;
   meetingCancelReason: string;
   meetingPeople: string;
+  /** A person's answer before the call (`accepted`, `declined`, `pending`). */
+  meetingResponse: (response: string) => string | null;
+  /** Whether a person came (`attended`, `no_show`). */
+  meetingAttendance: (attendance: string) => string | null;
   meetingDetails: string;
   meetingActions: string;
   meetingLength: string;
@@ -459,6 +463,8 @@ export const DEFAULT_LABELS: CalendarLabels = {
   meetingAbout: 'About',
   meetingCancelReason: 'Cancellation reason',
   meetingPeople: 'People',
+  meetingResponse: (r) => ({ accepted: 'Confirmed', declined: 'Declined', pending: 'Awaiting answer' } as Record<string, string>)[r] ?? null,
+  meetingAttendance: (a) => ({ attended: 'Joined the call', no_show: 'Did not join' } as Record<string, string>)[a] ?? null,
   meetingDetails: 'Details',
   meetingActions: 'Actions',
   meetingLength: 'Length',

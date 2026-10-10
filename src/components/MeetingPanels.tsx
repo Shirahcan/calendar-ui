@@ -26,7 +26,11 @@ export interface MeetingView {
   about?: string | null;
   cancellation_reason?: string | null;
   booked_at?: string | null;
-  people: Array<{ role: string; name: string; email?: string | null }>;
+  /**
+   * Who is on the call. `attendance` (after the call) or else `response` (before it) shows as a
+   * small status beside the name: who came, or who has answered.
+   */
+  people: Array<{ role: string; name: string; email?: string | null; response?: string | null; attendance?: string | null }>;
 }
 
 /** What the meeting link means right now: open, when it opens, or why there is none. */
@@ -111,6 +115,11 @@ export function MeetingPeople({ meeting, avatar, className }: { meeting: Meeting
             <p className="cal-meeting__label">{p.role}</p>
             <p className="cal-meeting-side__name">{p.name}</p>
             {p.email && <p className="cal-meeting-side__email">{p.email}</p>}
+            {(() => {
+              const state = p.attendance ? labels.meetingAttendance(p.attendance) : p.response ? labels.meetingResponse(p.response) : null;
+              const key = p.attendance ?? p.response;
+              return state ? <p className="cal-meeting-side__state" data-state={key ?? undefined}>{state}</p> : null;
+            })()}
           </div>
         </div>
       ))}

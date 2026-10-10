@@ -40,6 +40,25 @@ describe('meeting page panels', () => {
     expect(screen.getByText('West Africa Standard Time')).toBeTruthy();
   });
 
+  it('says who has answered before the call, and who came after it', () => {
+    const before = meeting({ people: [
+      { role: 'Client', name: 'Maria Garcia', response: 'pending' },
+      { role: 'Consultant', name: 'Elena Rodriguez', response: 'accepted' },
+    ] });
+    const { rerender } = render(<MeetingPeople meeting={before} />);
+    expect(screen.getByText('Awaiting answer')).toBeTruthy();
+    expect(screen.getByText('Confirmed')).toBeTruthy();
+
+    // Attendance, once known, is what matters: it replaces the answer.
+    rerender(<MeetingPeople meeting={meeting({ people: [
+      { role: 'Client', name: 'Maria Garcia', response: 'accepted', attendance: 'no_show' },
+      { role: 'Consultant', name: 'Elena Rodriguez', attendance: 'attended' },
+    ] })} />);
+    expect(screen.getByText('Did not join')).toBeTruthy();
+    expect(screen.getByText('Joined the call')).toBeTruthy();
+    expect(screen.queryByText('Confirmed')).toBeNull();
+  });
+
   it('offers the product actions it is given, and nothing when there are none', () => {
     const cancel = vi.fn();
     const { container, rerender } = render(<MeetingActions actions={[{ key: 'cancel', label: 'Cancel meeting', onSelect: cancel, danger: true }]} />);
