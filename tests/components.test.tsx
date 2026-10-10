@@ -25,6 +25,18 @@ describe('SlotPicker', () => {
     expect(onPick).toHaveBeenCalledWith(slots[0]);
   });
 
+  it('can drop its zone line and day heading for a single day the page already names', () => {
+    const onPick = vi.fn();
+    const day = new Map([...slotsByDay(slots, 'Africa/Lagos').entries()].slice(0, 1));
+    const { container } = render(<SlotPicker byDay={day} viewerZone="Africa/Lagos" showZone={false} showDayHeading={false} onPick={onPick} />);
+
+    expect(screen.queryByText('Times in West Africa Standard Time')).toBeNull();
+    expect(container.querySelector('.cal-slots__dayhead')).toBeNull();
+    // Each button still names the day and the zone for a screen reader.
+    fireEvent.click(screen.getAllByRole('button', { name: /Monday 12 October, 2:00 PM WAT/ })[0]!);
+    expect(onPick).toHaveBeenCalledWith(slots[0]);
+  });
+
   it('says so when nothing is open', () => {
     render(<SlotPicker byDay={new Map()} viewerZone="UTC" onPick={() => undefined} emptyLabel="Nothing this week." />);
     expect(screen.getByText('Nothing this week.')).toBeTruthy();

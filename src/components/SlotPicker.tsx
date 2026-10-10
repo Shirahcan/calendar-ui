@@ -18,10 +18,16 @@ export interface SlotPickerProps {
   emptyLabel?: string;
   /** The inside of one time button, when a product needs it to look entirely different. */
   renderSlot?: (slot: Slot, info: { selected: boolean; time: string; hostTime: string | null }) => ReactNode;
+  /**
+   * For a single picked day whose page already names the date and the zone: hide the picker's own
+   * zone line and day heading. Every button still names its zone in its accessible name.
+   */
+  showZone?: boolean;
+  showDayHeading?: boolean;
   className?: string;
 }
 
-export function SlotPicker({ byDay, viewerZone, hostZone, onPick, selected, disabled, emptyLabel, renderSlot, className }: SlotPickerProps) {
+export function SlotPicker({ byDay, viewerZone, hostZone, onPick, selected, disabled, emptyLabel, renderSlot, showZone = true, showDayHeading = true, className }: SlotPickerProps) {
   const { labels, classNames, timePattern } = useCalendarUi();
 
   if (byDay.size === 0) {
@@ -37,10 +43,10 @@ export function SlotPicker({ byDay, viewerZone, hostZone, onPick, selected, disa
 
   return (
     <div className={cx('cal-slots', classNames.slots, className)}>
-      <p className="cal-slots__zone">{labels.timesIn(zoneLongName(firstStart, viewerZone))}</p>
+      {showZone && <p className="cal-slots__zone">{labels.timesIn(zoneLongName(firstStart, viewerZone))}</p>}
       {[...byDay.entries()].map(([key, slots]) => (
         <section key={key} className="cal-slots__day" aria-label={formatIn(slots[0]!.start_utc, viewerZone, 'EEEE d MMMM yyyy')}>
-          <h4 className="cal-slots__dayhead">{formatIn(slots[0]!.start_utc, viewerZone, 'EEE d MMM')}</h4>
+          {showDayHeading && <h4 className="cal-slots__dayhead">{formatIn(slots[0]!.start_utc, viewerZone, 'EEE d MMM')}</h4>}
           <div className="cal-slots__times">
             {slots.map((s) => {
               const isSelected = selected === s.start_utc;
