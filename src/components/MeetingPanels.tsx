@@ -66,12 +66,17 @@ export interface MeetingSummaryProps {
   /** Product slots: icons per row, a status pill class, extra content under the rows. */
   icons?: Partial<Record<'date' | 'time' | 'where' | 'link', ReactNode>>;
   statusClassName?: string;
+  /**
+   * The link row's "join from this page" hint. Off where joining happens elsewhere (the quick
+   * view, whose own button says where to go), or the hint points at the wrong screen.
+   */
+  linkHint?: boolean;
   children?: ReactNode;
   className?: string;
 }
 
 /** Status, date, time, where, the meeting link's state, what it is about, why it was cancelled. */
-export function MeetingSummary({ meeting: m, timezone, now, icons = {}, statusClassName, children, className }: MeetingSummaryProps) {
+export function MeetingSummary({ meeting: m, timezone, now, icons = {}, statusClassName, linkHint = true, children, className }: MeetingSummaryProps) {
   const { labels, classNames } = useCalendarUi();
   const link = meetingLinkState(m, now, timezone, labels);
 
@@ -82,7 +87,7 @@ export function MeetingSummary({ meeting: m, timezone, now, icons = {}, statusCl
         <Row label={labels.meetingDate} value={formatZonedDate(m.start_utc, timezone, 'long')} icon={icons.date} />
         <Row label={labels.meetingTime} value={formatZonedTimeRange(m.start_utc, m.end_utc, timezone)} icon={icons.time} />
         <Row label={labels.meetingWhere} value={m.where} icon={icons.where} />
-        <Row label={labels.meetingLink} value={link.value} hint={link.hint} icon={icons.link} />
+        <Row label={labels.meetingLink} value={link.value} hint={linkHint ? link.hint : undefined} icon={icons.link} />
       </div>
       {m.about && (
         <div className="cal-meeting__about">

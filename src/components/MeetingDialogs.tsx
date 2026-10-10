@@ -92,7 +92,7 @@ export function MeetingQuickView({ meeting, timezone, now, roomOpen, onJoin, onO
         </button>
       }
     >
-      <MeetingSummary meeting={meeting} timezone={timezone} now={now} icons={icons} statusClassName={statusClassName} />
+      <MeetingSummary meeting={meeting} timezone={timezone} now={now} icons={icons} statusClassName={statusClassName} linkHint={false} />
       {meeting.people.length > 0 && <MeetingPeople meeting={meeting} />}
     </ModalShell>
   );

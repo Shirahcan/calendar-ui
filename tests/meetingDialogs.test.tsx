@@ -27,6 +27,8 @@ describe('MeetingQuickView', () => {
     );
 
     expect(screen.getByText('Maria Garcia')).toBeTruthy();
+    // Joining happens from the meeting page, so the page's "join from this page" hint is not said here.
+    expect(screen.queryByText(/Join from this page/)).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Open meeting page' }));
     expect(onOpenPage).toHaveBeenCalled();
     expect(screen.queryByRole('button', { name: 'Cancel meeting' })).toBeNull();
