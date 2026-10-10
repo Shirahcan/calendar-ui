@@ -31,7 +31,6 @@ export interface CallToolsAdapter {
   /** Start connecting Zoom (a popup or a redirect, the product's choice). Resolves once started. */
   connectZoom: () => Promise<void>;
   disconnectZoom: (id: number) => Promise<void>;
-  setApproval: (on: boolean) => Promise<void>;
 }
 
 export interface CallToolPickerProps {

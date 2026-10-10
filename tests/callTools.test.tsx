@@ -13,7 +13,6 @@ function adapter(initial: CallToolsState): CallToolsAdapter & { current: CallToo
     choose: vi.fn(async (tool) => { a.current = { ...a.current, choice: tool }; }),
     connectZoom: vi.fn(async () => undefined),
     disconnectZoom: vi.fn(async () => { a.current = { ...a.current, zoom: [], choice: null }; }),
-    setApproval: vi.fn(async () => undefined),
   } as CallToolsAdapter & { current: CallToolsState };
   return a;
 }
