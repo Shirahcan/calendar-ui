@@ -106,28 +106,45 @@ export function MeetingSummary({ meeting: m, timezone, now, icons = {}, statusCl
   );
 }
 
-/** Who the meeting is for. */
-export function MeetingPeople({ meeting, avatar, className }: { meeting: MeetingView; avatar?: ReactNode; className?: string }) {
+/**
+ * Who the meeting is for. `collapsible` folds the list behind its title (closed unless
+ * `defaultOpen`), with the names still said on the title row, for a compact surface such as the
+ * quick view.
+ */
+export function MeetingPeople({ meeting, avatar, collapsible = false, defaultOpen = false, className }: { meeting: MeetingView; avatar?: ReactNode; collapsible?: boolean; defaultOpen?: boolean; className?: string }) {
   const { labels, classNames } = useCalendarUi();
+  const list = meeting.people.map((p) => (
+    <div key={`${p.role}-${p.name}`} className="cal-meeting-side__person">
+      {avatar}
+      <div className="cal-meeting-side__who">
+        <p className="cal-meeting__label">{p.role}</p>
+        <p className="cal-meeting-side__name">{p.name}</p>
+        {p.email && <p className="cal-meeting-side__email">{p.email}</p>}
+        {(() => {
+          const state = p.attendance ? labels.meetingAttendance(p.attendance) : p.response ? labels.meetingResponse(p.response) : null;
+          const key = p.attendance ?? p.response;
+          return state ? <p className="cal-meeting-side__state" data-state={key ?? undefined}>{state}</p> : null;
+        })()}
+      </div>
+    </div>
+  ));
+
+  if (collapsible) {
+    return (
+      <details className={cx('cal-meeting-side', 'cal-meeting-side--fold', classNames.meeting, className)} open={defaultOpen || undefined}>
+        <summary className="cal-meeting-side__summary">
+          <span className="cal-meeting-side__title">{labels.meetingPeople}</span>
+          <span className="cal-meeting-side__names">{meeting.people.map((p) => p.name).join(', ')}</span>
+        </summary>
+        {list}
+      </details>
+    );
+  }
 
   return (
     <section className={cx('cal-meeting-side', classNames.meeting, className)} aria-label={labels.meetingPeople}>
       <p className="cal-meeting-side__title">{labels.meetingPeople}</p>
-      {meeting.people.map((p) => (
-        <div key={`${p.role}-${p.name}`} className="cal-meeting-side__person">
-          {avatar}
-          <div className="cal-meeting-side__who">
-            <p className="cal-meeting__label">{p.role}</p>
-            <p className="cal-meeting-side__name">{p.name}</p>
-            {p.email && <p className="cal-meeting-side__email">{p.email}</p>}
-            {(() => {
-              const state = p.attendance ? labels.meetingAttendance(p.attendance) : p.response ? labels.meetingResponse(p.response) : null;
-              const key = p.attendance ?? p.response;
-              return state ? <p className="cal-meeting-side__state" data-state={key ?? undefined}>{state}</p> : null;
-            })()}
-          </div>
-        </div>
-      ))}
+      {list}
     </section>
   );
 }

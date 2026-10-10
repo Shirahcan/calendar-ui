@@ -26,7 +26,9 @@ describe('MeetingQuickView', () => {
         actions={[{ key: 'cancel', label: 'Cancel meeting', danger: true, onSelect: cancel }, { key: 'move', label: 'Reschedule', onSelect: () => undefined }]} />,
     );
 
-    expect(screen.getByText('Maria Garcia')).toBeTruthy();
+    // People is folded by default; the title row still names them.
+    const people = screen.getByText('Maria Garcia', { selector: '.cal-meeting-side__names' }).closest('details')!;
+    expect(people.open).toBe(false);
     // Joining happens from the meeting page, so the page's "join from this page" hint is not said here.
     expect(screen.queryByText(/Join from this page/)).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Open meeting page' }));

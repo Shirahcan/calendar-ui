@@ -467,3 +467,13 @@
 .cal-modal__day p { margin: 0; font-size: 14px; font-weight: 600; }
 .cal-modal__daynav { border: 1px solid var(--cal-border); background: var(--cal-surface); color: var(--cal-ink); border-radius: var(--cal-radius-pill); width: 32px; height: 32px; cursor: pointer; outline: none; }
 .cal-modal__daynav:disabled { opacity: 0.4; cursor: default; }
+
+/* People folded behind its title (the quick view): the names stay on the title row. */
+.cal-meeting-side__summary { display: flex; align-items: baseline; gap: 10px; cursor: pointer; list-style: none; outline: none; }
+.cal-meeting-side__summary::-webkit-details-marker { display: none; }
+.cal-meeting-side__summary::after { content: ''; margin-left: auto; align-self: center; width: 8px; height: 8px; border-right: 2px solid var(--cal-ink-muted); border-bottom: 2px solid var(--cal-ink-muted); transform: rotate(45deg); transition: transform 0.15s; flex: none; }
+.cal-meeting-side--fold[open] > .cal-meeting-side__summary::after { transform: rotate(-135deg); }
+.cal-meeting-side--fold[open] > .cal-meeting-side__summary { margin-bottom: 12px; }
+.cal-meeting-side__names { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; color: var(--cal-ink-muted); }
+.cal-meeting-side__summary:focus-visible { outline: 2px solid var(--cal-accent); outline-offset: 4px; border-radius: 6px; }
+@media (prefers-reduced-motion: reduce) { .cal-meeting-side__summary::after { transition: none; } }
