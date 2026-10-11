@@ -190,6 +190,8 @@ export interface CalendarLabels {
   rescheduleConfirm: (time: string) => string;
   reschedulePick: string;
   rescheduleFailed: string;
+  rescheduleChooseDay: string;
+  rescheduleOtherDay: string;
   meetingLinkNone: string;
   meetingLinkNoneHint: string;
   meetingLinkClosed: string;
@@ -593,6 +595,8 @@ export const DEFAULT_LABELS: CalendarLabels = {
   rescheduleConfirm: (time) => `Move to ${time}`,
   reschedulePick: 'Pick a new time',
   rescheduleFailed: 'The meeting could not be moved.',
+  rescheduleChooseDay: 'Choose a day',
+  rescheduleOtherDay: 'Choose another day',
   meetingLinkNone: 'No video link',
   meetingLinkNoneHint: 'This meeting is not a video call.',
   meetingLinkClosed: 'Closed',

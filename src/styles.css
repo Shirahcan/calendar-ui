@@ -467,6 +467,7 @@
 .cal-modal__day p { margin: 0; font-size: 14px; font-weight: 600; }
 .cal-modal__daynav { border: 1px solid var(--cal-border); background: var(--cal-surface); color: var(--cal-ink); border-radius: var(--cal-radius-pill); width: 32px; height: 32px; cursor: pointer; outline: none; }
 .cal-modal__daynav:disabled { opacity: 0.4; cursor: default; }
+.cal-modal__daynav--text { width: auto; padding: 0 10px; font-size: 13px; }
 
 /* People folded behind its title (the quick view): the names stay on the title row. */
 .cal-meeting-side__summary { display: flex; align-items: baseline; gap: 10px; cursor: pointer; list-style: none; outline: none; }

@@ -88,6 +88,29 @@ describe('RescheduleDialog', () => {
     expect(onReschedule).toHaveBeenCalledWith(slots[2], '');
   });
 
+  it('with month counts, moves a meeting the way one is booked: a month of days, then that day\'s times', async () => {
+    const fetcher = vi.fn().mockResolvedValue({ slots });
+    const monthCounts = vi.fn().mockResolvedValue({ counts: { '2026-10-12': 3, '2026-10-14': 2 }, lastBookable: '2026-10-31' });
+    const onReschedule = vi.fn().mockResolvedValue(undefined);
+    render(<RescheduleDialog title="Study permit review" currentStart="2026-10-12T14:00:00Z" viewerZone="Africa/Lagos" fetcher={fetcher} bookingType="consultation" now={now} onReschedule={onReschedule} onClose={() => undefined} monthCounts={monthCounts} />);
+
+    expect(screen.getByText('Choose a day')).toBeTruthy();
+    expect(monthCounts).toHaveBeenCalledWith('2026-10');
+    await waitFor(() => expect((screen.getByRole('gridcell', { name: /Wednesday 14 October: 2 open times/ }) as HTMLButtonElement).disabled).toBe(false));
+    expect((screen.getByRole('gridcell', { name: /Tuesday 13 October: no open times/ }) as HTMLButtonElement).disabled).toBe(true);
+
+    fireEvent.click(screen.getByRole('gridcell', { name: /Monday 12 October/ }));
+    await waitFor(() => expect(screen.getByRole('button', { name: /Monday 12 October, 4:00 PM WAT/ })).toBeTruthy());
+    fireEvent.click(screen.getByRole('button', { name: /Choose another day/ }));
+    expect(screen.getByText('Choose a day')).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('gridcell', { name: /Monday 12 October/ }));
+    await waitFor(() => expect(screen.getByRole('button', { name: /Monday 12 October, 4:00 PM WAT/ })).toBeTruthy());
+    fireEvent.click(screen.getByRole('button', { name: /Monday 12 October, 4:00 PM WAT/ }));
+    await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Move to 4:00 PM WAT' })));
+    expect(onReschedule).toHaveBeenCalledWith(slots[2], '');
+  });
+
   it('cannot go back before today, and says so when a day has nothing open', async () => {
     const fetcher = vi.fn().mockResolvedValue({ slots: [] });
     render(<RescheduleDialog title="Call" currentStart="2026-10-01T14:00:00Z" viewerZone="UTC" fetcher={fetcher} bookingType="x" now={now} onReschedule={vi.fn()} onClose={() => undefined} />);

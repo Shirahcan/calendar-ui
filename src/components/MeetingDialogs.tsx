@@ -7,6 +7,7 @@ import { formatZonedDateTime, formatZonedTime, wallTimeToInstant } from '../zone
 import { MeetingPeople, MeetingSummary, type MeetingAction, type MeetingView } from './MeetingPanels';
 import { RowMenu } from './RowMenu';
 import { SlotPicker } from './SlotPicker';
+import { AvailabilityMonth } from './AvailabilityMonth';
 
 /**
  * One modal shell for the meeting dialogs: a native modal bounded to the viewport, header and
@@ -174,6 +175,69 @@ export interface RescheduleDialogProps {
   onReschedule: (slot: Slot, reason: string) => Promise<void>;
   onClose: () => void;
   describeError?: (error: unknown) => string;
+  /**
+   * The open-time counts for a month (`yyyy-MM`), keyed `yyyy-MM-dd` on the viewer's clock, and the
+   * last day that may be picked. Given, the dialog moves a meeting the way one is booked: a month
+   * of days shaded by how many times are open (AvailabilityMonth), then that day's times. Without
+   * it, the dialog steps a day at a time (kept for products that have no month counts yet).
+   */
+  monthCounts?: (month: string) => Promise<{ counts: Record<string, number>; lastBookable?: string | null }>;
+}
+
+/** The month of days the reschedule dialog opens on, read through the product's `monthCounts`. */
+type MonthRead = { month: string; counts: Record<string, number>; lastBookable: string | null };
+
+function RescheduleMonth({ monthCounts, cache, today, initial, selected, onSelect, describeError }: {
+  monthCounts: NonNullable<RescheduleDialogProps['monthCounts']>;
+  /** Months already read in this dialog: going back to the days is instant, not a second fetch. */
+  cache: Map<string, MonthRead>;
+  today: string;
+  initial: string;
+  selected: string | null;
+  onSelect: (day: string) => void;
+  describeError?: (error: unknown) => string;
+}) {
+  const [month, setMonth] = useState(initial.slice(0, 7));
+  const [read, setRead] = useState<MonthRead | null>(() => cache.get(initial.slice(0, 7)) ?? null);
+  const [failed, setFailed] = useState<{ month: string; message: string } | null>(null);
+  const [attempt, setAttempt] = useState(0);
+
+  useEffect(() => {
+    let live = true;
+    const held = cache.get(month);
+    if (held) {
+      setRead(held);
+      return () => { live = false; };
+    }
+    monthCounts(month)
+      .then((r) => {
+        const got = { month, counts: r.counts, lastBookable: r.lastBookable ?? null };
+        cache.set(month, got);
+        if (live) setRead(got);
+      })
+      .catch((err: unknown) => {
+        if (live) setFailed({ month, message: describeError ? describeError(err) : err instanceof Error ? err.message : String(err) });
+      });
+    return () => { live = false; };
+  }, [month, monthCounts, describeError, attempt, cache]);
+
+  const shown = read?.month === month ? read : null;
+  const error = failed?.month === month && !shown ? failed.message : null;
+
+  return (
+    <AvailabilityMonth
+      month={month}
+      counts={shown?.counts ?? {}}
+      today={today}
+      lastBookable={shown?.lastBookable ?? read?.lastBookable ?? null}
+      selected={selected}
+      onSelect={onSelect}
+      onMonthChange={setMonth}
+      loading={!shown && !error}
+      error={error}
+      onRetry={() => { setFailed(null); setAttempt((n) => n + 1); }}
+    />
+  );
 }
 
 /**
@@ -181,13 +245,16 @@ export interface RescheduleDialogProps {
  * host's real availability, sent as a UTC instant. Never a free date and time box: that sent a
  * wall time with no zone and offered times nobody was free.
  */
-export function RescheduleDialog({ title, currentStart, viewerZone, hostZone, fetcher, bookingType, now, onReschedule, onClose, describeError }: RescheduleDialogProps) {
+export function RescheduleDialog({ title, currentStart, viewerZone, hostZone, fetcher, bookingType, now, onReschedule, onClose, describeError, monthCounts }: RescheduleDialogProps) {
   const { labels, classNames } = useCalendarUi();
   const today = dayKey(now, viewerZone);
   const [day, setDay] = useState(() => {
     const current = dayKey(currentStart, viewerZone);
     return current > today ? current : today;
   });
+  // With month counts the dialog opens on the month of days, as booking does.
+  const [step, setStep] = useState<'days' | 'times'>(monthCounts ? 'days' : 'times');
+  const [months] = useState(() => new Map<string, MonthRead>());
   const [picked, setPicked] = useState<Slot | null>(null);
   const [reason, setReason] = useState('');
   const [busy, setBusy] = useState(false);
@@ -232,12 +299,32 @@ export function RescheduleDialog({ title, currentStart, viewerZone, hostZone, fe
       }
     >
       <p className="cal-modal__text"><strong>{title}</strong>. {labels.rescheduleNow(formatZonedDateTime(currentStart, viewerZone))}</p>
-      <div className="cal-modal__day">
-        <button type="button" className="cal-modal__daynav" aria-label={labels.reschedulePrevDay} onClick={() => move(-1)} disabled={day <= today || busy}>‹</button>
-        <p>{formatIn(from, viewerZone, 'EEEE d MMMM')}</p>
-        <button type="button" className="cal-modal__daynav" aria-label={labels.rescheduleNextDay} onClick={() => move(1)} disabled={busy}>›</button>
-      </div>
-      {slots.loading ? (
+      {monthCounts && step === 'days' ? (
+        <>
+          <p className="cal-modal__hint">{labels.rescheduleChooseDay}</p>
+          <RescheduleMonth
+            monthCounts={monthCounts}
+            cache={months}
+            today={today}
+            initial={day}
+            selected={null}
+            onSelect={(d) => { setDay(d); setPicked(null); setStep('times'); }}
+            describeError={describeError}
+          />
+        </>
+      ) : monthCounts ? (
+        <div className="cal-modal__day">
+          <button type="button" className="cal-modal__daynav cal-modal__daynav--text" onClick={() => { setStep('days'); setPicked(null); }} disabled={busy}>‹ {labels.rescheduleOtherDay}</button>
+          <p>{formatIn(from, viewerZone, 'EEEE d MMMM')}</p>
+        </div>
+      ) : (
+        <div className="cal-modal__day">
+          <button type="button" className="cal-modal__daynav" aria-label={labels.reschedulePrevDay} onClick={() => move(-1)} disabled={day <= today || busy}>‹</button>
+          <p>{formatIn(from, viewerZone, 'EEEE d MMMM')}</p>
+          <button type="button" className="cal-modal__daynav" aria-label={labels.rescheduleNextDay} onClick={() => move(1)} disabled={busy}>›</button>
+        </div>
+      )}
+      {monthCounts && step === 'days' ? null : slots.loading ? (
         <p className="cal-modal__hint" aria-live="polite">{labels.rescheduleLoading}</p>
       ) : (
         <SlotPicker
