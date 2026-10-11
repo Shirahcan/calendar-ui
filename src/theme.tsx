@@ -281,6 +281,9 @@ export interface CalendarLabels {
   policySeedWeek: string;
   policySeedWeekHint: string;
   policyObserveHolidays: string;
+  policyRecords: string;
+  policyEraseAfter: string;
+  policyEraseAfterHint: string;
   policySave: string;
   policySaved: string;
   policyUseDefault: string;
@@ -678,6 +681,9 @@ export const DEFAULT_LABELS: CalendarLabels = {
   policySeedWeek: 'The week a new person starts with',
   policySeedWeekHint: 'Also the hours a day gets when someone turns it on.',
   policyObserveHolidays: "Close on a person's public holidays unless they choose otherwise",
+  policyRecords: 'Meeting records',
+  policyEraseAfter: 'Erase ended meetings after (days)',
+  policyEraseAfterHint: 'Their notes, pads and attendee details are erased for good. Leave empty to keep them; a regulated practice may have to keep records for years. 30 to 3650.',
   policySave: 'Save rules',
   policySaved: 'Saved',
   policyUseDefault: 'Use the standard rules',

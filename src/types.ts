@@ -90,6 +90,8 @@ export interface SchedulingPolicy {
   /** The week a new person starts with; its rows also give the hours a day gets when turned on. */
   seed_weekly: WeeklyRule[];
   observe_holidays_by_default: boolean;
+  /** Erase an ended booking (its notes, pads and people) this many days after it ended; null keeps it. */
+  erase_ended_bookings_after_days?: number | null;
 }
 
 /** A place with public holidays (calendar-service GET /v1/holidays/regions). */

@@ -30,7 +30,7 @@ const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b)
 /**
  * How a product's bookings are scheduled, for its admins: buffer floor, ceiling, usual value and
  * choices, notice, how far ahead, how long a picked time is held, the week a new person starts
- * with, and whether holidays are observed by default. The values live in calendar-service; an
+ * with, whether holidays are observed by default, and how long ended meetings are kept. The values live in calendar-service; an
  * admin changes them here without a developer or a deploy.
  */
 export function SchedulingPolicyEditor({ adapter, describeError, className }: SchedulingPolicyEditorProps) {
@@ -161,6 +161,26 @@ export function SchedulingPolicyEditor({ adapter, describeError, className }: Sc
               disabled={busy}
               edit={(action) => set('seed_weekly', reduceSpec(seedSpec, action).weekly ?? [])}
             />
+          </fieldset>
+
+          <fieldset className="cal-policy__group">
+            <legend>{labels.policyRecords}</legend>
+            <div className="cal-policy__field">
+              <label htmlFor={`${ids}-erase`}>{labels.policyEraseAfter}</label>
+              <input
+                id={`${ids}-erase`}
+                className="cal-input"
+                type="number"
+                min={30}
+                max={3650}
+                inputMode="numeric"
+                aria-describedby={`${ids}-erase-hint`}
+                value={draft.erase_ended_bookings_after_days == null ? '' : String(draft.erase_ended_bookings_after_days)}
+                disabled={busy}
+                onChange={(e) => set('erase_ended_bookings_after_days', e.target.value === '' ? null : Math.max(0, Math.round(Number(e.target.value) || 0)))}
+              />
+              <span className="cal-policy__hint" id={`${ids}-erase-hint`}>{labels.policyEraseAfterHint}</span>
+            </div>
           </fieldset>
 
           <label className="cal-policy__check">

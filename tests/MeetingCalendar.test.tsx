@@ -32,7 +32,7 @@ describe('MeetingCalendar', () => {
     render(<MeetingCalendar meetings={meetings} zone="UTC" view="month" initialDate={new Date('2026-10-11T12:00:00Z')} onMeetingClick={onMeetingClick} showBusy busyStale />);
 
     fireEvent.click(screen.getByText(/Review/));
-    expect(onMeetingClick.mock.calls[0][0].id).toBe('m-2');
+    expect(onMeetingClick.mock.calls[0]?.[0].id).toBe('m-2');
     expect(screen.getByText(/some busy time may be missing/)).toBeTruthy();
   });
 });
