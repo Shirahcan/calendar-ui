@@ -62,6 +62,19 @@ export function themeStyle(theme: Partial<CalendarTheme> | undefined): CSSProper
 /** Every sentence the components show. Functions take what the sentence needs. */
 export interface CalendarLabels {
   timesIn: (zone: string) => string;
+  /* The meetings calendar (MeetingCalendar). */
+  today: string;
+  previousPeriod: (view: 'month' | 'week' | 'day') => string;
+  nextPeriod: (view: 'month' | 'week' | 'day') => string;
+  weekRange: (from: string, to: string) => string;
+  calendarView: string;
+  viewName: (view: 'month' | 'week' | 'day') => string;
+  loadingCalendar: string;
+  busyElsewhere: string;
+  busyElsewhereLegend: string;
+  busyStale: string;
+  statusLegend: string;
+  meetingStatus: (status: string) => string;
   /* The booking month (AvailabilityMonth). */
   previousMonth: string;
   nextMonth: string;
@@ -457,6 +470,18 @@ export function reminderLeadLabel(minutes: number): string {
 
 export const DEFAULT_LABELS: CalendarLabels = {
   timesIn: (zone) => `Times in ${zone}`,
+  today: 'Today',
+  previousPeriod: (v) => `Previous ${v}`,
+  nextPeriod: (v) => `Next ${v}`,
+  weekRange: (from, to) => `Week of ${from} to ${to}`,
+  calendarView: 'Calendar view',
+  viewName: (v) => ({ month: 'Month', week: 'Week', day: 'Day' })[v],
+  loadingCalendar: 'Loading the calendar…',
+  busyElsewhere: 'Busy elsewhere',
+  busyElsewhereLegend: 'Busy elsewhere: your other products and your connected calendar',
+  busyStale: 'Your connected calendar has not been read recently, so some busy time may be missing.',
+  statusLegend: 'Status',
+  meetingStatus: (s) => ({ pending_approval: 'Awaiting approval', scheduled: 'Scheduled', confirmed: 'Confirmed', in_progress: 'In progress', completed: 'Completed', cancelled: 'Cancelled', no_show: 'No-show', rescheduled: 'Rescheduled' } as Record<string, string>)[s] ?? s,
   previousMonth: 'Previous month',
   nextMonth: 'Next month',
   previousYear: 'Previous year',

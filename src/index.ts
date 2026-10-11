@@ -84,3 +84,5 @@ export type { CalendarConnection, CalendarConnectionsAdapter, CalendarConnection
 export type { SchedulingPolicyAdapter, SchedulingPolicyEditorProps, SchedulingPolicyState } from './components/SchedulingPolicyEditor';
 export { AvailabilityMonth, availabilityLevel } from './components/AvailabilityMonth';
 export type { AvailabilityLevel, AvailabilityMonthProps } from './components/AvailabilityMonth';
+export { MeetingCalendar, MEETING_STATUS_COLORS } from './components/MeetingCalendar';
+export type { MeetingCalendarMeeting, MeetingCalendarProps, MeetingCalendarStatus, MeetingCalendarView } from './components/MeetingCalendar';

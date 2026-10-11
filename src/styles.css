@@ -12,7 +12,7 @@
  */
 .cal-root { display: contents; }
 
-:where(.cal-root, :is(.cal-week, .cal-month, .cal-amonth, .cal-slots, .cal-flow, .cal-avail, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad, .cal-dock, .cal-holidays, .cal-reminders, .cal-policy, .cal-rules, .cal-conns, .cal-links, .cal-notes, .cal-pads, .cal-paddlg, .cal-confirm, .cal-modal, .cal-tools, .cal-meeting, .cal-meeting-side):not(.cal-root *)) {
+:where(.cal-root, :is(.cal-week, .cal-month, .cal-amonth, .cal-mcal, .cal-slots, .cal-flow, .cal-avail, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad, .cal-dock, .cal-holidays, .cal-reminders, .cal-policy, .cal-rules, .cal-conns, .cal-links, .cal-notes, .cal-pads, .cal-paddlg, .cal-confirm, .cal-modal, .cal-tools, .cal-meeting, .cal-meeting-side):not(.cal-root *)) {
   --cal-accent: #4361ee;
   --cal-accent-ink: #ffffff;
   --cal-surface: #ffffff;
@@ -28,14 +28,14 @@
   --cal-hour-height: 48px;
 }
 
-:where(.cal-week, .cal-month, .cal-amonth, .cal-slots, .cal-flow, .cal-avail, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad, .cal-dock, .cal-holidays, .cal-reminders, .cal-policy, .cal-rules, .cal-conns, .cal-links, .cal-notes, .cal-pads, .cal-paddlg, .cal-confirm, .cal-modal, .cal-tools) {
+:where(.cal-week, .cal-month, .cal-amonth, .cal-mcal, .cal-slots, .cal-flow, .cal-avail, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad, .cal-dock, .cal-holidays, .cal-reminders, .cal-policy, .cal-rules, .cal-conns, .cal-links, .cal-notes, .cal-pads, .cal-paddlg, .cal-confirm, .cal-modal, .cal-tools) {
   font-family: var(--cal-font);
   color: var(--cal-ink);
 }
 
 /* Dark: the OS decides for a component used alone; a provider decides for everything inside it. */
 @media (prefers-color-scheme: dark) {
-  :where(:is(.cal-week, .cal-month, .cal-amonth, .cal-slots, .cal-flow, .cal-avail, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad, .cal-dock, .cal-holidays, .cal-reminders, .cal-policy, .cal-rules, .cal-conns, .cal-links, .cal-notes, .cal-pads, .cal-paddlg, .cal-confirm, .cal-modal, .cal-tools):not(.cal-root *)) {
+  :where(:is(.cal-week, .cal-month, .cal-amonth, .cal-mcal, .cal-slots, .cal-flow, .cal-avail, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad, .cal-dock, .cal-holidays, .cal-reminders, .cal-policy, .cal-rules, .cal-conns, .cal-links, .cal-notes, .cal-pads, .cal-paddlg, .cal-confirm, .cal-modal, .cal-tools):not(.cal-root *)) {
     --cal-surface: #0f172a;
     --cal-surface-muted: #1e293b;
     --cal-border: #334155;
@@ -541,3 +541,23 @@
 .cal-amonth__error p { margin: 0; }
 .cal-amonth__retry { font: inherit; padding: 8px 16px; border-radius: var(--cal-radius-pill); border: 1px solid var(--cal-border); background: var(--cal-surface); color: var(--cal-ink); cursor: pointer; white-space: nowrap; outline: none; }
 @media (max-width: 480px) { .cal-amonth__day { min-height: 52px; padding: 6px; } .cal-amonth__count { font-size: 10px; } }
+/* Meetings calendar (MeetingCalendar): the bar, the grid, the legends. */
+.cal-mcal { display: flex; flex-direction: column; gap: 14px; }
+.cal-mcal__bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.cal-mcal__nav, .cal-mcal__tools { display: flex; align-items: center; gap: 8px; }
+.cal-mcal__title { margin: 0 0 0 4px; font-size: 18px; font-weight: 600; color: var(--cal-ink); }
+.cal-mcal__step, .cal-mcal__today { font: inherit; border: 1px solid var(--cal-border); background: var(--cal-surface); color: var(--cal-ink); border-radius: var(--cal-radius-pill); cursor: pointer; white-space: nowrap; outline: none; }
+.cal-mcal__step { width: 36px; height: 36px; font-size: 18px; line-height: 1; }
+.cal-mcal__today { padding: 7px 16px; font-size: 13px; font-weight: 600; }
+.cal-mcal__step:hover, .cal-mcal__today:hover { background: var(--cal-surface-muted); }
+.cal-mcal__views { display: inline-flex; gap: 2px; padding: 4px; border-radius: var(--cal-radius-pill); background: var(--cal-surface-muted); }
+.cal-mcal__view { font: inherit; font-size: 12px; font-weight: 700; padding: 6px 16px; border: 0; border-radius: var(--cal-radius-pill); background: none; color: var(--cal-ink-muted); cursor: pointer; outline: none; }
+.cal-mcal__view.is-active { background: var(--cal-surface); color: var(--cal-accent); box-shadow: 0 1px 2px rgb(0 0 0 / 0.06); }
+.cal-mcal :is(button):focus-visible { box-shadow: 0 0 0 3px color-mix(in srgb, var(--cal-accent) 35%, transparent); }
+.cal-mcal__placeholder { min-height: 320px; display: grid; place-items: center; color: var(--cal-ink-muted); border: 1px dashed var(--cal-border); border-radius: var(--cal-radius); }
+.cal-mcal__busy { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 12px; color: var(--cal-ink-muted); }
+.cal-mcal__busy-swatch { width: 20px; height: 12px; border-radius: 4px; background: var(--cal-busy); }
+.cal-mcal__stale { color: #b45309; }
+.cal-mcal__legend { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--cal-ink-muted); }
+.cal-mcal__legend li { display: inline-flex; align-items: center; gap: 6px; }
+.cal-mcal__dot { width: 8px; height: 8px; border-radius: 999px; }
