@@ -62,6 +62,19 @@ export function themeStyle(theme: Partial<CalendarTheme> | undefined): CSSProper
 /** Every sentence the components show. Functions take what the sentence needs. */
 export interface CalendarLabels {
   timesIn: (zone: string) => string;
+  /* The booking month (AvailabilityMonth). */
+  previousMonth: string;
+  nextMonth: string;
+  previousYear: string;
+  nextYear: string;
+  chooseMonth: string;
+  openTimes: (count: number) => string;
+  openTimesShort: (count: number) => string;
+  availabilityLegend: string;
+  availabilityLevel: (level: 'none' | 'low' | 'medium' | 'high') => string;
+  loadingMonth: string;
+  noOpenDays: string;
+  tryAgain: string;
   noTimes: string;
   findingTimes: string;
   holdingFor: (minutes: number, seconds: string) => string;
@@ -444,6 +457,18 @@ export function reminderLeadLabel(minutes: number): string {
 
 export const DEFAULT_LABELS: CalendarLabels = {
   timesIn: (zone) => `Times in ${zone}`,
+  previousMonth: 'Previous month',
+  nextMonth: 'Next month',
+  previousYear: 'Previous year',
+  nextYear: 'Next year',
+  chooseMonth: 'Choose a month',
+  openTimes: (n) => (n === 0 ? 'no open times' : n === 1 ? '1 open time' : `${n} open times`),
+  openTimesShort: (n) => (n === 1 ? '1 time' : `${n} times`),
+  availabilityLegend: 'How many times are open',
+  availabilityLevel: (level) => ({ high: 'Many', medium: 'Some', low: 'A few', none: 'None' })[level],
+  loadingMonth: 'Finding open days…',
+  noOpenDays: 'No open times this month. Try the next one.',
+  tryAgain: 'Try again',
   noTimes: 'No times are open in this range.',
   findingTimes: 'Finding open times…',
   holdingFor: (m, s) => `We are holding this time for ${m}:${s}.`,

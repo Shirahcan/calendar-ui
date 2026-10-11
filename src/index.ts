@@ -82,3 +82,5 @@ export { BookingLinkEditor } from './components/BookingLinkEditor';
 export type { BookingLink, BookingLinkEditorProps, BookingLinkFields, BookingLinkLimits } from './components/BookingLinkEditor';
 export type { CalendarConnection, CalendarConnectionsAdapter, CalendarConnectionsPanelProps, CalendarProvider } from './components/CalendarConnectionsPanel';
 export type { SchedulingPolicyAdapter, SchedulingPolicyEditorProps, SchedulingPolicyState } from './components/SchedulingPolicyEditor';
+export { AvailabilityMonth, availabilityLevel } from './components/AvailabilityMonth';
+export type { AvailabilityLevel, AvailabilityMonthProps } from './components/AvailabilityMonth';

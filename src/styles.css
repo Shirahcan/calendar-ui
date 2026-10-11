@@ -12,7 +12,7 @@
  */
 .cal-root { display: contents; }
 
-:where(.cal-root, :is(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-avail, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad, .cal-dock, .cal-holidays, .cal-reminders, .cal-policy, .cal-rules, .cal-conns, .cal-links, .cal-notes, .cal-pads, .cal-paddlg, .cal-confirm, .cal-modal, .cal-tools, .cal-meeting, .cal-meeting-side):not(.cal-root *)) {
+:where(.cal-root, :is(.cal-week, .cal-month, .cal-amonth, .cal-slots, .cal-flow, .cal-avail, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad, .cal-dock, .cal-holidays, .cal-reminders, .cal-policy, .cal-rules, .cal-conns, .cal-links, .cal-notes, .cal-pads, .cal-paddlg, .cal-confirm, .cal-modal, .cal-tools, .cal-meeting, .cal-meeting-side):not(.cal-root *)) {
   --cal-accent: #4361ee;
   --cal-accent-ink: #ffffff;
   --cal-surface: #ffffff;
@@ -28,14 +28,14 @@
   --cal-hour-height: 48px;
 }
 
-:where(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-avail, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad, .cal-dock, .cal-holidays, .cal-reminders, .cal-policy, .cal-rules, .cal-conns, .cal-links, .cal-notes, .cal-pads, .cal-paddlg, .cal-confirm, .cal-modal, .cal-tools) {
+:where(.cal-week, .cal-month, .cal-amonth, .cal-slots, .cal-flow, .cal-avail, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad, .cal-dock, .cal-holidays, .cal-reminders, .cal-policy, .cal-rules, .cal-conns, .cal-links, .cal-notes, .cal-pads, .cal-paddlg, .cal-confirm, .cal-modal, .cal-tools) {
   font-family: var(--cal-font);
   color: var(--cal-ink);
 }
 
 /* Dark: the OS decides for a component used alone; a provider decides for everything inside it. */
 @media (prefers-color-scheme: dark) {
-  :where(:is(.cal-week, .cal-month, .cal-slots, .cal-flow, .cal-avail, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad, .cal-dock, .cal-holidays, .cal-reminders, .cal-policy, .cal-rules, .cal-conns, .cal-links, .cal-notes, .cal-pads, .cal-paddlg, .cal-confirm, .cal-modal, .cal-tools):not(.cal-root *)) {
+  :where(:is(.cal-week, .cal-month, .cal-amonth, .cal-slots, .cal-flow, .cal-avail, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad, .cal-dock, .cal-holidays, .cal-reminders, .cal-policy, .cal-rules, .cal-conns, .cal-links, .cal-notes, .cal-pads, .cal-paddlg, .cal-confirm, .cal-modal, .cal-tools):not(.cal-root *)) {
     --cal-surface: #0f172a;
     --cal-surface-muted: #1e293b;
     --cal-border: #334155;
@@ -501,3 +501,43 @@
 .cal-switch:disabled { opacity: 0.6; cursor: default; }
 @media (max-width: 540px) { .cal-tools__item, .cal-approval__row { flex-direction: column; align-items: flex-start; } }
 @media (prefers-reduced-motion: reduce) { .cal-switch__knob { transition: none; } }
+
+/* Booking month (AvailabilityMonth): one hue, three strengths, so a shade says "how many". */
+.cal-amonth { display: flex; flex-direction: column; gap: 12px; }
+.cal-amonth__nav { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.cal-amonth__title { font: inherit; font-size: 17px; font-weight: 600; color: var(--cal-ink); background: none; border: 0; padding: 6px 12px; border-radius: var(--cal-radius-pill); cursor: pointer; white-space: nowrap; outline: none; }
+.cal-amonth__step { font: inherit; font-size: 18px; line-height: 1; width: 36px; height: 36px; border-radius: var(--cal-radius-pill); border: 1px solid var(--cal-border); background: var(--cal-surface); color: var(--cal-ink); cursor: pointer; outline: none; }
+.cal-amonth__title:hover, .cal-amonth__step:hover:not(:disabled) { background: var(--cal-surface-muted); }
+.cal-amonth__step:disabled { opacity: 0.4; cursor: default; }
+.cal-amonth :is(button):focus-visible { box-shadow: 0 0 0 3px color-mix(in srgb, var(--cal-accent) 35%, transparent); }
+.cal-amonth__picker { border: 1px solid var(--cal-border); border-radius: var(--cal-radius); background: var(--cal-surface); padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.cal-amonth__years { display: flex; align-items: center; justify-content: space-between; font-weight: 600; }
+.cal-amonth__months { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.cal-amonth__month { font: inherit; padding: 8px 6px; border-radius: var(--cal-radius-pill); border: 1px solid transparent; background: none; color: var(--cal-ink); cursor: pointer; outline: none; }
+.cal-amonth__month:hover:not(:disabled) { border-color: var(--cal-border); }
+.cal-amonth__month.is-current { background: var(--cal-accent); color: var(--cal-accent-ink); }
+.cal-amonth__month:disabled { opacity: 0.35; cursor: default; }
+.cal-amonth__grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+.cal-amonth__weekday { text-align: center; font-size: 12px; font-weight: 600; color: var(--cal-ink-muted); padding: 4px 0; }
+.cal-amonth__day { font: inherit; min-height: 64px; display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between; gap: 4px; padding: 8px; border-radius: var(--cal-radius); border: 1px solid var(--cal-border); background: var(--cal-surface); color: var(--cal-ink); cursor: pointer; text-align: left; outline: none; }
+.cal-amonth__day.is-low { background: color-mix(in srgb, var(--cal-accent) 10%, var(--cal-surface)); }
+.cal-amonth__day.is-medium { background: color-mix(in srgb, var(--cal-accent) 24%, var(--cal-surface)); }
+.cal-amonth__day.is-high { background: color-mix(in srgb, var(--cal-accent) 42%, var(--cal-surface)); }
+.cal-amonth__day:hover:not(:disabled) { border-color: var(--cal-accent); }
+.cal-amonth__day.is-selected { border-color: var(--cal-accent); box-shadow: inset 0 0 0 2px var(--cal-accent); }
+.cal-amonth__day.is-today .cal-amonth__num { color: var(--cal-accent); font-weight: 700; }
+.cal-amonth__day:disabled { cursor: default; background: var(--cal-surface-muted); color: var(--cal-ink-muted); }
+.cal-amonth__day.is-outside { visibility: hidden; }
+.cal-amonth__num { font-variant-numeric: tabular-nums; font-weight: 600; font-size: 14px; }
+.cal-amonth__count { font-size: 11px; color: var(--cal-ink-muted); white-space: nowrap; }
+.cal-amonth__legend { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 14px; font-size: 12px; color: var(--cal-ink-muted); }
+.cal-amonth__legend li { display: inline-flex; align-items: center; gap: 6px; }
+.cal-amonth__swatch { width: 14px; height: 14px; border-radius: 4px; border: 1px solid var(--cal-border); background: var(--cal-surface-muted); }
+.cal-amonth__swatch.is-low { background: color-mix(in srgb, var(--cal-accent) 10%, var(--cal-surface)); }
+.cal-amonth__swatch.is-medium { background: color-mix(in srgb, var(--cal-accent) 24%, var(--cal-surface)); }
+.cal-amonth__swatch.is-high { background: color-mix(in srgb, var(--cal-accent) 42%, var(--cal-surface)); }
+.cal-amonth__note { margin: 0; font-size: 13px; color: var(--cal-ink-muted); }
+.cal-amonth__error { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; color: var(--cal-danger); }
+.cal-amonth__error p { margin: 0; }
+.cal-amonth__retry { font: inherit; padding: 8px 16px; border-radius: var(--cal-radius-pill); border: 1px solid var(--cal-border); background: var(--cal-surface); color: var(--cal-ink); cursor: pointer; white-space: nowrap; outline: none; }
+@media (max-width: 480px) { .cal-amonth__day { min-height: 52px; padding: 6px; } .cal-amonth__count { font-size: 10px; } }
