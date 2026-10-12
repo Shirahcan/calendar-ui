@@ -1,4 +1,5 @@
 import { createContext, useContext, useMemo, useSyncExternalStore, type CSSProperties, type ReactNode } from 'react';
+import type { DayPeriod } from './periods';
 
 /**
  * Customisation for every product (owner 2026-10-05: "the UI package should be built to be
@@ -89,6 +90,8 @@ export interface CalendarLabels {
   noOpenDays: string;
   tryAgain: string;
   noTimes: string;
+  /** The heading over a part of the day's open times (SlotPicker). */
+  dayPeriod: (period: DayPeriod) => string;
   findingTimes: string;
   holdingFor: (minutes: number, seconds: string) => string;
   pickAnother: string;
@@ -500,6 +503,7 @@ export const DEFAULT_LABELS: CalendarLabels = {
   noOpenDays: 'No open times this month. Try the next one.',
   tryAgain: 'Try again',
   noTimes: 'No times are open in this range.',
+  dayPeriod: (p) => ({ early_morning: 'Early morning', morning: 'Morning', afternoon: 'Afternoon', evening: 'Evening', night: 'Night' })[p],
   findingTimes: 'Finding open times…',
   holdingFor: (m, s) => `We are holding this time for ${m}:${s}.`,
   pickAnother: 'Pick another time',

@@ -4,6 +4,8 @@ export { CalendarUiProvider, DEFAULT_LABELS, cx, reminderLeadLabel, themeStyle, 
 export type { CalendarClassNames, CalendarLabels, CalendarTheme, CalendarUiConfig, CalendarUiProviderProps, ColorScheme, ResolvedCalendarUi } from './theme';
 export { dayKey, eventsToItems, formatIn, gridDays, inZone, itemsOn, minutesIntoDay, shiftAnchor, slotsByDay } from './time';
 export type { GridDay, WeekStart } from './time';
+export { DAY_PERIODS, dayPeriodOf, groupByDayPeriod } from './periods';
+export type { DayPeriod } from './periods';
 
 export { useCalendarRange } from './hooks/useCalendarRange';
 export type { CalendarRange } from './hooks/useCalendarRange';

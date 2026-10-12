@@ -37,6 +37,23 @@ describe('SlotPicker', () => {
     expect(onPick).toHaveBeenCalledWith(slots[0]);
   });
 
+  it('groups a day into its parts on the viewer clock, in day order, leaving out empty parts', () => {
+    // Toronto (EDT, UTC-4): 6:30 AM, 9:00 AM, 1:00 PM, 6:00 PM, 10:00 PM. No slot falls on another day.
+    const day: Slot[] = ['10:30', '13:00', '17:00', '22:00'].map((t) => ({ start_utc: `2026-10-12T${t}:00Z`, end_utc: `2026-10-12T${t}:00Z`, host_ids: [] }))
+      .concat([{ start_utc: '2026-10-13T02:00:00Z', end_utc: '2026-10-13T03:00:00Z', host_ids: [] }]);
+    const { container } = render(<SlotPicker byDay={slotsByDay(day, 'America/Toronto')} viewerZone="America/Toronto" onPick={() => undefined} />);
+
+    const heads = [...container.querySelectorAll('.cal-slots__periodhead')].map((h) => h.textContent);
+    expect(heads).toEqual(['Early morning', 'Morning', 'Afternoon', 'Evening', 'Night']);
+    expect(screen.getByRole('group', { name: 'Night' }).textContent).toMatch(/22:00|10:00/);
+  });
+
+  it('can show a flat list instead of parts of the day', () => {
+    const { container } = render(<SlotPicker byDay={slotsByDay(slots, 'UTC')} viewerZone="UTC" groupByPeriod={false} onPick={() => undefined} />);
+    expect(container.querySelector('.cal-slots__periodhead')).toBeNull();
+    expect(screen.getAllByRole('button')).toHaveLength(2);
+  });
+
   it('says so when nothing is open', () => {
     render(<SlotPicker byDay={new Map()} viewerZone="UTC" onPick={() => undefined} emptyLabel="Nothing this week." />);
     expect(screen.getByText('Nothing this week.')).toBeTruthy();

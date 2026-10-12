@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { formatIn } from '../time';
+import { groupByDayPeriod } from '../periods';
 import type { Slot } from '../types';
 import { cx, useCalendarUi } from '../theme';
 import { zoneCity, zoneLabel as namedZone, zoneLongName } from '../zoned';
@@ -24,10 +25,15 @@ export interface SlotPickerProps {
    */
   showZone?: boolean;
   showDayHeading?: boolean;
+  /**
+   * Group each day's times under Early morning, Morning, Afternoon, Evening and Night, read on the
+   * viewer's clock (the estate default). A long day as one flat run of buttons is hard to scan.
+   */
+  groupByPeriod?: boolean;
   className?: string;
 }
 
-export function SlotPicker({ byDay, viewerZone, hostZone, onPick, selected, disabled, emptyLabel, renderSlot, showZone = true, showDayHeading = true, className }: SlotPickerProps) {
+export function SlotPicker({ byDay, viewerZone, hostZone, onPick, selected, disabled, emptyLabel, renderSlot, showZone = true, showDayHeading = true, groupByPeriod = true, className }: SlotPickerProps) {
   const { labels, classNames, timePattern } = useCalendarUi();
 
   if (byDay.size === 0) {
@@ -41,33 +47,38 @@ export function SlotPicker({ byDay, viewerZone, hostZone, onPick, selected, disa
   // said once, above them, and in every button's accessible name.
   const firstStart = [...byDay.values()][0]?.[0]?.start_utc ?? Date.now();
 
+  const renderOne = (s: Slot) => {
+    const isSelected = selected === s.start_utc;
+    const time = formatIn(s.start_utc, viewerZone, timePattern);
+    const hostTime = hostTz ? `${formatIn(s.start_utc, hostTz, timePattern)} ${namedZone(s.start_utc, hostTz)}` : null;
+    const label = `${formatIn(s.start_utc, viewerZone, 'EEEE d MMMM, h:mm a')} ${namedZone(s.start_utc, viewerZone)}`
+      + (hostTz ? `, ${formatIn(s.start_utc, hostTz, 'h:mm a')} in ${zoneCity(hostTz)}` : '');
+
+    return (
+      <button type="button" key={s.start_utc} disabled={disabled} aria-label={label} aria-pressed={isSelected}
+        className={cx('cal-slot', isSelected && 'is-selected', classNames.slot, isSelected && classNames.slotSelected)} onClick={() => onPick(s)}>
+        {renderSlot ? renderSlot(s, { selected: isSelected, time, hostTime }) : (
+          <>
+            <span className="cal-slot__time">{time}</span>
+            {hostTime && <span className="cal-slot__host">{hostTime}</span>}
+          </>
+        )}
+      </button>
+    );
+  };
+
   return (
     <div className={cx('cal-slots', classNames.slots, className)}>
       {showZone && <p className="cal-slots__zone">{labels.timesIn(zoneLongName(firstStart, viewerZone))}</p>}
       {[...byDay.entries()].map(([key, slots]) => (
         <section key={key} className="cal-slots__day" aria-label={formatIn(slots[0]!.start_utc, viewerZone, 'EEEE d MMMM yyyy')}>
           {showDayHeading && <h4 className="cal-slots__dayhead">{formatIn(slots[0]!.start_utc, viewerZone, 'EEE d MMM')}</h4>}
-          <div className="cal-slots__times">
-            {slots.map((s) => {
-              const isSelected = selected === s.start_utc;
-              const time = formatIn(s.start_utc, viewerZone, timePattern);
-              const hostTime = hostTz ? `${formatIn(s.start_utc, hostTz, timePattern)} ${namedZone(s.start_utc, hostTz)}` : null;
-              const label = `${formatIn(s.start_utc, viewerZone, 'EEEE d MMMM, h:mm a')} ${namedZone(s.start_utc, viewerZone)}`
-                + (hostTz ? `, ${formatIn(s.start_utc, hostTz, 'h:mm a')} in ${zoneCity(hostTz)}` : '');
-
-              return (
-                <button type="button" key={s.start_utc} disabled={disabled} aria-label={label} aria-pressed={isSelected}
-                  className={cx('cal-slot', isSelected && 'is-selected', classNames.slot, isSelected && classNames.slotSelected)} onClick={() => onPick(s)}>
-                  {renderSlot ? renderSlot(s, { selected: isSelected, time, hostTime }) : (
-                    <>
-                      <span className="cal-slot__time">{time}</span>
-                      {hostTime && <span className="cal-slot__host">{hostTime}</span>}
-                    </>
-                  )}
-                </button>
-              );
-            })}
-          </div>
+          {groupByPeriod ? groupByDayPeriod(slots, viewerZone, (s) => s.start_utc).map(({ period, items }) => (
+            <div key={period} className="cal-slots__period" role="group" aria-label={labels.dayPeriod(period)}>
+              <h5 className="cal-slots__periodhead">{labels.dayPeriod(period)}</h5>
+              <div className="cal-slots__times">{items.map(renderOne)}</div>
+            </div>
+          )) : <div className="cal-slots__times">{slots.map(renderOne)}</div>}
         </section>
       ))}
     </div>

@@ -91,6 +91,9 @@
 .cal-slots { display: flex; flex-direction: column; gap: 16px; }
 .cal-slots__dayhead { margin: 0 0 8px; font-size: 14px; font-weight: 600; }
 .cal-slots__times { display: flex; flex-wrap: wrap; gap: 8px; }
+.cal-slots__day { display: flex; flex-direction: column; gap: 12px; }
+.cal-slots__period { display: flex; flex-direction: column; gap: 6px; }
+.cal-slots__periodhead { margin: 0; font-size: 12px; font-weight: 600; color: var(--cal-ink-muted); }
 .cal-slot { display: inline-flex; flex-direction: column; align-items: center; padding: 8px 14px; border: 1px solid var(--cal-border); border-radius: var(--cal-radius-pill); background: var(--cal-surface); color: var(--cal-ink); font: inherit; cursor: pointer; white-space: nowrap; outline: none; }
 .cal-slot:hover:not(:disabled), .cal-slot.is-selected { border-color: var(--cal-accent); color: var(--cal-accent); }
 .cal-slot:focus-visible { box-shadow: 0 0 0 3px color-mix(in srgb, var(--cal-accent) 35%, transparent); }
