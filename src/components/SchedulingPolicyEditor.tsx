@@ -24,6 +24,8 @@ export interface SchedulingPolicyAdapter {
 export interface SchedulingPolicyEditorProps {
   adapter: SchedulingPolicyAdapter;
   describeError?: (error: unknown) => string;
+  /** Offer the backup call setting (default on). A product that ships it dark passes false. */
+  showBackupCall?: boolean;
   className?: string;
 }
 
@@ -38,7 +40,7 @@ const CALL_TOOLS = ['zoom', 'google_meet'] as const;
  * people may use and the backup when a call's own room cannot be rescued. The values live in calendar-service; an
  * admin changes them here without a developer or a deploy.
  */
-export function SchedulingPolicyEditor({ adapter, describeError, className }: SchedulingPolicyEditorProps) {
+export function SchedulingPolicyEditor({ adapter, describeError, showBackupCall = true, className }: SchedulingPolicyEditorProps) {
   const { labels, classNames } = useCalendarUi();
   const ids = useId();
   const [saved, setSaved] = useState<SchedulingPolicyState | null>(null);
@@ -185,7 +187,7 @@ export function SchedulingPolicyEditor({ adapter, describeError, className }: Sc
               ))}
               <span className="cal-policy__hint" id={`${ids}-tools-hint`}>{labels.policyCallToolsHint}</span>
             </div>
-            <div className="cal-policy__field">
+            {showBackupCall ? <div className="cal-policy__field">
               <label htmlFor={`${ids}-backup`}>{labels.policyBackupCall}</label>
               <select
                 id={`${ids}-backup`}
@@ -204,7 +206,7 @@ export function SchedulingPolicyEditor({ adapter, describeError, className }: Sc
                   <> {saved.offered.backup_call.ready ? labels.policyBackupReady : labels.policyBackupNotReady(saved.offered.backup_call.reason ?? '')}</>
                 ) : null}
               </span>
-            </div>
+            </div> : null}
           </fieldset>
 
           <fieldset className="cal-policy__group">

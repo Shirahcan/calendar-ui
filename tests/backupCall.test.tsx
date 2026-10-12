@@ -37,6 +37,12 @@ describe('SchedulingPolicyEditor calls', () => {
   });
 });
 
+it('hides the backup setting for a product that ships it dark', async () => {
+  render(<SchedulingPolicyEditor adapter={{ load: async () => ({ policy: POLICY, is_default: false }), save: async () => ({ policy: POLICY, is_default: false }) }} showBackupCall={false} />);
+  expect(await screen.findByLabelText('Google Meet')).toBeTruthy();
+  expect(screen.queryByLabelText('Backup when a call cannot be rescued')).toBeNull();
+});
+
 describe('BackupCallAccountPanel', () => {
   const account: BackupCallAccount = { id: 3, provider: 'google', account_email: 'calls@shirah.co', status: 'active', last_error: null };
 
