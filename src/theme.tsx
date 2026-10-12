@@ -318,6 +318,30 @@ export interface CalendarLabels {
   policyUseDefault: string;
   policyIsDefault: string;
   policyFailed: string;
+  /** Which call tools people may connect, and the backup when a call's own room fails. */
+  policyCalls: string;
+  policyCallToolsOffered: string;
+  policyCallToolsHint: string;
+  policyCallTool: (tool: 'zoom' | 'google_meet') => string;
+  policyBackupCall: string;
+  policyBackupCallOff: string;
+  policyBackupCallHint: string;
+  policyBackupNotReady: (reason: string) => string;
+  policyBackupReady: string;
+  /** BackupCallAccountPanel: the product's own Google account that makes backup Meets. */
+  backupTitle: string;
+  backupIntro: string;
+  backupLoading: string;
+  backupNone: string;
+  backupActive: string;
+  backupNeedsReauth: string;
+  backupConnect: string;
+  backupReconnect: string;
+  backupDisconnect: string;
+  backupActionsFor: (email: string) => string;
+  backupConfirmDisconnect: (email: string | null) => string;
+  backupOpenAccess: string;
+  backupFailed: string;
   // Holiday places and rules (HolidayRulesEditor)
   rulesTitle: string;
   rulesIntro: string;
@@ -742,6 +766,28 @@ export const DEFAULT_LABELS: CalendarLabels = {
   policyUseDefault: 'Use the standard rules',
   policyIsDefault: 'Using the standard rules',
   policyFailed: 'Those scheduling rules did not save. Please try again.',
+  policyCalls: 'Calls',
+  policyCallToolsOffered: 'Call tools people may use instead of the built-in room',
+  policyCallToolsHint: 'Each person connects their own account. Google Meet runs on their connected Google calendar.',
+  policyCallTool: (tool) => (tool === 'zoom' ? 'Zoom' : 'Google Meet'),
+  policyBackupCall: 'Backup when a call cannot be rescued',
+  policyBackupCallOff: 'No backup',
+  policyBackupCallHint: 'When the call room cannot be fixed, the people in the call can switch to a matching meeting made on the backup account below.',
+  policyBackupNotReady: (reason) => `Not available yet: ${reason}`,
+  policyBackupReady: 'Ready: the backup account is connected.',
+  backupTitle: 'Backup call account',
+  backupIntro: 'A Google account the platform owns. When a call room cannot be fixed, the backup Google Meet is made on this account, with everyone in the call invited.',
+  backupLoading: 'Loading the backup account...',
+  backupNone: 'No backup account connected yet.',
+  backupActive: 'Connected',
+  backupNeedsReauth: 'Needs reconnecting: backup calls cannot be made until it is.',
+  backupConnect: 'Connect a Google account',
+  backupReconnect: 'Reconnect',
+  backupDisconnect: 'Disconnect',
+  backupActionsFor: (email) => `Actions for ${email}`,
+  backupConfirmDisconnect: (email) => `Disconnect ${email ?? 'the backup account'}? Backup calls stop until another account is connected.`,
+  backupOpenAccess: 'Use a Google Workspace account whose Meet access is set to "Open" in the Workspace admin console. Otherwise nobody is in the meeting to let the guests in, and they wait at "Asking to join".',
+  backupFailed: 'That did not work. Please try again.',
   rulesTitle: 'Public holidays by place',
   rulesIntro: 'The places people can observe holidays for, and the rule that gives each holiday its date. Every product uses these.',
   rulesLoading: 'Loading the places...',
@@ -940,6 +986,7 @@ export interface CalendarClassNames {
   policyEditor: string;
   holidayRulesEditor: string;
   connectionsPanel: string;
+  backupAccountPanel: string;
   linksManager: string;
   linkEditor: string;
   input: string;

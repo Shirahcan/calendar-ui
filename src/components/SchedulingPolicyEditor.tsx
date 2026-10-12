@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useId, useState } from 'react';
 import { cx, useCalendarUi } from '../theme';
 import { errorText } from '../errorText';
-import type { AvailabilitySpec, SchedulingPolicy } from '../types';
+import type { AvailabilitySpec, SchedulingOffered, SchedulingPolicy } from '../types';
 import { reduceSpec } from '../hooks/useAvailabilityEditor';
 import { WeeklyHours } from './availability/WeeklyHours';
 
@@ -10,6 +10,8 @@ export interface SchedulingPolicyState {
   policy: SchedulingPolicy;
   is_default: boolean;
   defaults?: SchedulingPolicy;
+  /** What the server can offer right now (includes whether a backup call is ready, and why not). */
+  offered?: SchedulingOffered;
 }
 
 /** The product's own backend, which calls calendar-service (the package never calls the service). */
@@ -27,10 +29,13 @@ export interface SchedulingPolicyEditorProps {
 
 const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
 
+const CALL_TOOLS = ['zoom', 'google_meet'] as const;
+
 /**
  * How a product's bookings are scheduled, for its admins: buffer floor, ceiling, usual value and
  * choices, notice, how far ahead, how long a picked time is held, the week a new person starts
- * with, whether holidays are observed by default, and how long ended meetings are kept. The values live in calendar-service; an
+ * with, whether holidays are observed by default, how long ended meetings are kept, which call tools
+ * people may use and the backup when a call's own room cannot be rescued. The values live in calendar-service; an
  * admin changes them here without a developer or a deploy.
  */
 export function SchedulingPolicyEditor({ adapter, describeError, className }: SchedulingPolicyEditorProps) {
@@ -161,6 +166,45 @@ export function SchedulingPolicyEditor({ adapter, describeError, className }: Sc
               disabled={busy}
               edit={(action) => set('seed_weekly', reduceSpec(seedSpec, action).weekly ?? [])}
             />
+          </fieldset>
+
+          <fieldset className="cal-policy__group">
+            <legend>{labels.policyCalls}</legend>
+            <div className="cal-policy__field" role="group" aria-labelledby={`${ids}-tools`} aria-describedby={`${ids}-tools-hint`}>
+              <span id={`${ids}-tools`}>{labels.policyCallToolsOffered}</span>
+              {CALL_TOOLS.map((tool) => (
+                <label key={tool} className="cal-policy__check">
+                  <input
+                    type="checkbox"
+                    checked={(draft.call_tools_offered ?? []).includes(tool)}
+                    disabled={busy}
+                    onChange={(e) => set('call_tools_offered', CALL_TOOLS.filter((t) => (t === tool ? e.target.checked : (draft.call_tools_offered ?? []).includes(t))))}
+                  />
+                  {labels.policyCallTool(tool)}
+                </label>
+              ))}
+              <span className="cal-policy__hint" id={`${ids}-tools-hint`}>{labels.policyCallToolsHint}</span>
+            </div>
+            <div className="cal-policy__field">
+              <label htmlFor={`${ids}-backup`}>{labels.policyBackupCall}</label>
+              <select
+                id={`${ids}-backup`}
+                className="cal-input"
+                aria-describedby={`${ids}-backup-hint`}
+                value={draft.backup_call_tool ?? ''}
+                disabled={busy}
+                onChange={(e) => set('backup_call_tool', e.target.value === 'google_meet' ? 'google_meet' : null)}
+              >
+                <option value="">{labels.policyBackupCallOff}</option>
+                <option value="google_meet">{labels.policyCallTool('google_meet')}</option>
+              </select>
+              <span className="cal-policy__hint" id={`${ids}-backup-hint`}>
+                {labels.policyBackupCallHint}
+                {!dirty && saved.offered?.backup_call?.tool ? (
+                  <> {saved.offered.backup_call.ready ? labels.policyBackupReady : labels.policyBackupNotReady(saved.offered.backup_call.reason ?? '')}</>
+                ) : null}
+              </span>
+            </div>
           </fieldset>
 
           <fieldset className="cal-policy__group">

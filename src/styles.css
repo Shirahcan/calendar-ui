@@ -323,6 +323,7 @@
 .cal-policy, .cal-rules, .cal-conns { display: grid; gap: 14px; padding: 20px; border: 1px solid var(--cal-border); border-radius: var(--cal-radius); background: var(--cal-surface); min-width: 0; }
 .cal-policy__title, .cal-rules__title, .cal-conns__title { margin: 0; font-size: 16px; font-weight: 600; }
 .cal-policy__intro, .cal-policy__note, .cal-policy__hint, .cal-rules__intro, .cal-rules__note, .cal-conns__intro, .cal-conns__note { margin: 0; font-size: 13px; color: var(--cal-ink-muted); }
+.cal-conns__notice { margin: 0; padding: 8px 12px; border-radius: 10px; font-size: 13px; color: var(--cal-ink); background: var(--cal-warn-bg, rgba(245, 158, 11, 0.12)); border: 1px solid var(--cal-warn-border, rgba(245, 158, 11, 0.35)); }
 .cal-policy__error, .cal-rules__error, .cal-conns__error { margin: 0; font-size: 13px; color: var(--cal-danger, #b91c1c); }
 .cal-policy__group, .cal-rules__form { display: grid; gap: 10px; margin: 0; padding: 14px 16px; border: 1px solid var(--cal-border); border-radius: calc(var(--cal-radius) * 0.6); min-width: 0; }
 .cal-policy__group legend, .cal-rules__form legend { padding: 0 6px; font-size: 13px; font-weight: 600; color: var(--cal-ink); }

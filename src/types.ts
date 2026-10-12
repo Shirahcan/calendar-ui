@@ -92,6 +92,17 @@ export interface SchedulingPolicy {
   observe_holidays_by_default: boolean;
   /** Erase an ended booking (its notes, pads and people) this many days after it ended; null keeps it. */
   erase_ended_bookings_after_days?: number | null;
+  /** The call tools people may connect instead of the product's own room. */
+  call_tools_offered?: Array<'zoom' | 'google_meet'>;
+  /** The tool a backup call is made on when a call's own room cannot be rescued; null = none. */
+  backup_call_tool?: 'google_meet' | null;
+}
+
+/** What the server can actually offer right now (the policy less what is not configured). */
+export interface SchedulingOffered {
+  call_tools: Array<'zoom' | 'google_meet'>;
+  calendar_providers: Array<'google' | 'microsoft'>;
+  backup_call?: { tool: 'google_meet' | null; ready: boolean; reason: string | null };
 }
 
 /** A place with public holidays (calendar-service GET /v1/holidays/regions). */
