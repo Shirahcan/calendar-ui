@@ -40,6 +40,16 @@ describe('meeting page panels', () => {
     expect(screen.getByText('West Africa Standard Time')).toBeTruthy();
   });
 
+  it('says when it was booked and, when the product gives it, the clock it was booked on', () => {
+    const { rerender } = render(<MeetingDetails meeting={meeting()} timezone="Africa/Lagos" />);
+    expect(screen.getByText('Booked on')).toBeTruthy();
+    expect(screen.queryByText('Timezone booked in')).toBeNull();
+
+    rerender(<MeetingDetails meeting={meeting({ booked_zone: 'America/Edmonton' })} timezone="Africa/Lagos" />);
+    expect(screen.getByText('Timezone booked in')).toBeTruthy();
+    expect(screen.getByText('Mountain Daylight Time (America/Edmonton)')).toBeTruthy();
+  });
+
   it('says who has answered before the call, and who came after it', () => {
     const before = meeting({ people: [
       { role: 'Client', name: 'Maria Garcia', response: 'pending' },

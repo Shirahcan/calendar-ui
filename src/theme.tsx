@@ -172,6 +172,7 @@ export interface CalendarLabels {
   meetingMinutes: (minutes: number) => string;
   meetingTimesShownIn: string;
   meetingBooked: string;
+  meetingBookedZone: string;
   /* The quick look at one meeting, and moving or cancelling it (plan M2) */
   quickViewClose: string;
   quickViewJoin: string;
@@ -580,7 +581,8 @@ export const DEFAULT_LABELS: CalendarLabels = {
   meetingLength: 'Length',
   meetingMinutes: (minutes) => `${minutes} minutes`,
   meetingTimesShownIn: 'Times shown in',
-  meetingBooked: 'Booked',
+  meetingBooked: 'Booked on',
+  meetingBookedZone: 'Timezone booked in',
   quickViewClose: 'Close',
   quickViewJoin: 'Join meeting',
   quickViewOpenPage: 'Open meeting page',

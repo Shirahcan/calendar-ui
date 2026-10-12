@@ -27,6 +27,11 @@ export interface MeetingView {
   cancellation_reason?: string | null;
   booked_at?: string | null;
   /**
+   * The zone the booker's screen was on when they booked (IANA). For diagnostics: a product passes
+   * it only to the people who should see it (Portify: admins).
+   */
+  booked_zone?: string | null;
+  /**
    * Who is on the call. `attendance` (after the call) or else `response` (before it) shows as a
    * small status beside the name: who came, or who has answered.
    */
@@ -160,6 +165,7 @@ export function MeetingDetails({ meeting: m, timezone, className }: { meeting: M
       <Row label={labels.meetingLength} value={labels.meetingMinutes(minutes)} />
       <Row label={labels.meetingTimesShownIn} value={zoneLongName(m.start_utc, timezone)} />
       {m.booked_at && <Row label={labels.meetingBooked} value={formatZonedDateTime(m.booked_at, timezone)} />}
+      {m.booked_zone && <Row label={labels.meetingBookedZone} value={`${zoneLongName(m.booked_at ?? m.start_utc, m.booked_zone)} (${m.booked_zone})`} />}
     </section>
   );
 }
