@@ -20,7 +20,9 @@ describe('SlotPicker', () => {
 
     const first = screen.getByRole('button', { name: /Monday 12 October, 2:00 PM WAT, 9:00 AM in Toronto/ });
     // The zone is named once above the compact buttons.
-    expect(screen.getByText('Times in West Africa Standard Time')).toBeTruthy();
+    expect(screen.getByText('Times in West Africa Standard Time, with Eastern Daylight Time under each')).toBeTruthy();
+    // Two clocks: the big time names its own zone, so it never reads as the small one's.
+    expect(first.querySelector('.cal-slot__time')?.textContent).toMatch(/WAT$/);
     fireEvent.click(first);
     expect(onPick).toHaveBeenCalledWith(slots[0]);
   });

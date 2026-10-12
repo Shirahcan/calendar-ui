@@ -63,6 +63,8 @@ export function themeStyle(theme: Partial<CalendarTheme> | undefined): CSSProper
 /** Every sentence the components show. Functions take what the sentence needs. */
 export interface CalendarLabels {
   timesIn: (zone: string) => string;
+  /** The line above times that show two clocks: the big time's zone, and the small one under it. */
+  timesInWith: (zone: string, other: string) => string;
   /* The meetings calendar (MeetingCalendar). */
   today: string;
   previousPeriod: (view: 'month' | 'week' | 'day') => string;
@@ -478,6 +480,7 @@ export function reminderLeadLabel(minutes: number): string {
 
 export const DEFAULT_LABELS: CalendarLabels = {
   timesIn: (zone) => `Times in ${zone}`,
+  timesInWith: (zone, other) => `Times in ${zone}, with ${other} under each`,
   today: 'Today',
   previousPeriod: (v) => `Previous ${v}`,
   nextPeriod: (v) => `Next ${v}`,

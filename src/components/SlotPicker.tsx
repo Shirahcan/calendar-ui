@@ -49,7 +49,9 @@ export function SlotPicker({ byDay, viewerZone, hostZone, onPick, selected, disa
 
   const renderOne = (s: Slot) => {
     const isSelected = selected === s.start_utc;
-    const time = formatIn(s.start_utc, viewerZone, timePattern);
+    // With a second clock under it, the big time names its own zone too: otherwise the only zone
+    // printed on the button is the small one, and the big time reads as that zone.
+    const time = formatIn(s.start_utc, viewerZone, timePattern) + (hostTz ? ` ${namedZone(s.start_utc, viewerZone)}` : '');
     const hostTime = hostTz ? `${formatIn(s.start_utc, hostTz, timePattern)} ${namedZone(s.start_utc, hostTz)}` : null;
     const label = `${formatIn(s.start_utc, viewerZone, 'EEEE d MMMM, h:mm a')} ${namedZone(s.start_utc, viewerZone)}`
       + (hostTz ? `, ${formatIn(s.start_utc, hostTz, 'h:mm a')} in ${zoneCity(hostTz)}` : '');
@@ -69,7 +71,11 @@ export function SlotPicker({ byDay, viewerZone, hostZone, onPick, selected, disa
 
   return (
     <div className={cx('cal-slots', classNames.slots, className)}>
-      {showZone && <p className="cal-slots__zone">{labels.timesIn(zoneLongName(firstStart, viewerZone))}</p>}
+      {showZone && (
+        <p className="cal-slots__zone">
+          {hostTz ? labels.timesInWith(zoneLongName(firstStart, viewerZone), zoneLongName(firstStart, hostTz)) : labels.timesIn(zoneLongName(firstStart, viewerZone))}
+        </p>
+      )}
       {[...byDay.entries()].map(([key, slots]) => (
         <section key={key} className="cal-slots__day" aria-label={formatIn(slots[0]!.start_utc, viewerZone, 'EEEE d MMMM yyyy')}>
           {showDayHeading && <h4 className="cal-slots__dayhead">{formatIn(slots[0]!.start_utc, viewerZone, 'EEE d MMM')}</h4>}
