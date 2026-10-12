@@ -40,6 +40,15 @@ describe('meeting page panels', () => {
     expect(screen.getByText('West Africa Standard Time')).toBeTruthy();
   });
 
+  it('says the meeting on another person clock only when given their zone', () => {
+    render(<MeetingPeople meeting={meeting({ people: [
+      { role: 'Client', name: 'Maria Garcia', zone: 'America/Edmonton' },
+      { role: 'Consultant', name: 'Elena Rodriguez' },
+    ] })} />);
+    expect(screen.getByText('Their time: Sun, Oct 11, 2026, 8:00 AM - 8:30 AM MDT')).toBeTruthy();
+    expect(screen.getAllByText(/Their time/)).toHaveLength(1);
+  });
+
   it('says when it was booked and, when the product gives it, the clock it was booked on', () => {
     const { rerender } = render(<MeetingDetails meeting={meeting()} timezone="Africa/Lagos" />);
     expect(screen.getByText('Booked on')).toBeTruthy();

@@ -35,7 +35,11 @@ export interface MeetingView {
    * Who is on the call. `attendance` (after the call) or else `response` (before it) shows as a
    * small status beside the name: who came, or who has answered.
    */
-  people: Array<{ role: string; name: string; email?: string | null; response?: string | null; attendance?: string | null }>;
+  people: Array<{
+    role: string; name: string; email?: string | null; response?: string | null; attendance?: string | null;
+    /** Their own zone (IANA), when the viewer may see it: the meeting's time on THEIR clock shows under them. */
+    zone?: string | null;
+  }>;
 }
 
 /** What the meeting link means right now: open, when it opens, or why there is none. */
@@ -116,6 +120,22 @@ export function MeetingSummary({ meeting: m, timezone, now, icons = {}, statusCl
  * `defaultOpen`), with the names still said on the title row, for a compact surface such as the
  * quick view.
  */
+/**
+ * The meeting's time on someone else's clock, under their name ("Their time: Tue, Oct 13, 9:00 AM -
+ * 9:30 AM EDT"). The page itself stays on the viewer's clock; this is the one place every product
+ * says what time it is for the other person. Renders nothing without a zone.
+ */
+export function PersonLocalTime({ start, end, zone, className }: { start: string; end: string; zone?: string | null; className?: string }) {
+  const { labels } = useCalendarUi();
+  if (!zone) return null;
+
+  return (
+    <p className={cx('cal-meeting-side__local', className)} title={zoneLongName(start, zone)}>
+      {labels.meetingTheirTime(`${formatZonedDate(start, zone, 'medium')}, ${formatZonedTimeRange(start, end, zone)}`)}
+    </p>
+  );
+}
+
 export function MeetingPeople({ meeting, avatar, collapsible = false, defaultOpen = false, className }: { meeting: MeetingView; avatar?: ReactNode; collapsible?: boolean; defaultOpen?: boolean; className?: string }) {
   const { labels, classNames } = useCalendarUi();
   const list = meeting.people.map((p) => (
@@ -125,6 +145,7 @@ export function MeetingPeople({ meeting, avatar, collapsible = false, defaultOpe
         <p className="cal-meeting__label">{p.role}</p>
         <p className="cal-meeting-side__name">{p.name}</p>
         {p.email && <p className="cal-meeting-side__email">{p.email}</p>}
+        <PersonLocalTime start={meeting.start_utc} end={meeting.end_utc} zone={p.zone} />
         {(() => {
           const state = p.attendance ? labels.meetingAttendance(p.attendance) : p.response ? labels.meetingResponse(p.response) : null;
           const key = p.attendance ?? p.response;

@@ -444,6 +444,10 @@
 .cal-meeting-side__state[data-state='no_show'], .cal-meeting-side__state[data-state='declined'] { background: #ffe4e6; color: #be123c; }
 .cal-meeting-side__state[data-state='pending'] { background: #fef3c7; color: #b45309; }
 .cal-meeting-side__name { margin: 0; font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cal-people__formtitle { margin: 0; font-size: 13px; font-weight: 600; color: var(--cal-ink); }
+.cal-people__fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; }
+.cal-people__field { width: 100%; padding: 8px 12px; font: inherit; font-size: 14px; border: 1px solid var(--cal-border); border-radius: calc(var(--cal-radius) * 0.5); background: var(--cal-surface); color: var(--cal-ink); outline: none; box-sizing: border-box; }
+.cal-meeting-side__local { margin: 2px 0 0; font-size: 12px; color: var(--cal-ink-muted); }
 .cal-meeting-side__email { margin: 0; font-size: 12px; color: var(--cal-ink-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cal-meeting-side__action { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; }
 .cal-meeting-side__action--danger { color: var(--cal-danger); }

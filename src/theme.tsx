@@ -173,6 +173,8 @@ export interface CalendarLabels {
   meetingTimesShownIn: string;
   meetingBooked: string;
   meetingBookedZone: string;
+  /** Under a person: the meeting on their clock (PersonLocalTime). */
+  meetingTheirTime: (when: string) => string;
   /* The quick look at one meeting, and moving or cancelling it (plan M2) */
   quickViewClose: string;
   quickViewJoin: string;
@@ -224,6 +226,25 @@ export interface CalendarLabels {
   notesDeleteAsk: string;
   notesPrivateBadge: string;
   notesSomeone: string;
+  /* The participants panel (MeetingParticipantsPanel). */
+  participantsTitle: string;
+  participantsLoading: string;
+  participantsEmpty: string;
+  participantKind: (kind: 'organizer' | 'host' | 'booker' | 'attendee' | 'guest') => string;
+  participantsMenu: (name: string) => string;
+  participantsCopyEmail: string;
+  participantsCopied: string;
+  participantsRemove: string;
+  participantsRemoveAsk: (name: string) => string;
+  participantsInvite: string;
+  participantsEmail: string;
+  participantsName: string;
+  participantsOptional: string;
+  participantsOptionalHint: string;
+  participantsAdd: string;
+  participantsAdding: string;
+  participantsBadEmail: string;
+  participantsFailed: string;
   notesFailed: string;
   holidayTitle: string;
   holidayRegion: string;
@@ -583,6 +604,7 @@ export const DEFAULT_LABELS: CalendarLabels = {
   meetingTimesShownIn: 'Times shown in',
   meetingBooked: 'Booked on',
   meetingBookedZone: 'Timezone booked in',
+  meetingTheirTime: (when) => `Their time: ${when}`,
   quickViewClose: 'Close',
   quickViewJoin: 'Join meeting',
   quickViewOpenPage: 'Open meeting page',
@@ -631,6 +653,24 @@ export const DEFAULT_LABELS: CalendarLabels = {
   notesDeleteAsk: 'Delete this note? This cannot be undone.',
   notesPrivateBadge: 'Private',
   notesSomeone: 'Someone',
+  participantsTitle: 'Participants',
+  participantsLoading: 'Loading who is on this meeting…',
+  participantsEmpty: 'Nobody else is on this meeting yet. Invite someone below.',
+  participantKind: (k) => ({ organizer: 'Host', host: 'Co-host', booker: 'Client', attendee: 'Invited', guest: 'Optional' })[k],
+  participantsMenu: (name) => `Actions for ${name}`,
+  participantsCopyEmail: 'Copy email',
+  participantsCopied: 'Email copied.',
+  participantsRemove: 'Remove from meeting',
+  participantsRemoveAsk: (name) => `Remove ${name} from this meeting? They will no longer get its details or the link.`,
+  participantsInvite: 'Invite someone',
+  participantsEmail: 'Email address',
+  participantsName: 'Name (optional)',
+  participantsOptional: 'Optional',
+  participantsOptionalHint: 'Invited people are expected to attend; optional people may join.',
+  participantsAdd: 'Invite',
+  participantsAdding: 'Inviting…',
+  participantsBadEmail: 'Enter a valid email address.',
+  participantsFailed: 'That did not work. Please try again.',
   notesFailed: 'That did not work. Please try again.',
   holidayTitle: 'Public holidays',
   holidayRegion: 'Country or province',
