@@ -108,6 +108,8 @@ export interface CalendarLabels {
   bookingFailed: string;
   staleCalendars: string;
   moreItems: (count: number) => string;
+  /** Collapses a day that "+N more" opened back to its first few items. */
+  fewerItems: string;
   allDay: string;
   weekOf: (date: string) => string;
   zonePromptAria: string;
@@ -182,6 +184,8 @@ export interface CalendarLabels {
   quickViewClose: string;
   quickViewJoin: string;
   quickViewOpenPage: string;
+  /** The quick look while the meeting is still being fetched. */
+  quickViewLoading: string;
   quickViewMore: string;
   cancelTitle: string;
   /** Who hears about it, in the reader's words ("Maria Garcia", "your consultant"). */
@@ -573,6 +577,7 @@ export const DEFAULT_LABELS: CalendarLabels = {
   bookingFailed: 'Something went wrong while booking. Please try again.',
   staleCalendars: 'Some calendars have not synced recently, so a time shown here may already be taken. We check again when you book.',
   moreItems: (n) => `+${n} more`,
+  fewerItems: 'Show fewer',
   allDay: 'all day',
   weekOf: (date) => `Week of ${date}`,
   zonePromptAria: 'Timezone for your emails',
@@ -641,6 +646,7 @@ export const DEFAULT_LABELS: CalendarLabels = {
   quickViewClose: 'Close',
   quickViewJoin: 'Join meeting',
   quickViewOpenPage: 'Open meeting page',
+  quickViewLoading: 'Loading the meeting…',
   quickViewMore: 'More actions',
   cancelTitle: 'Cancel this meeting?',
   cancelWhoIsTold: (who) => `${who} will be told it is cancelled, with your reason. This cannot be undone.`,

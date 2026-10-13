@@ -1,6 +1,6 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
-import { CancelMeetingDialog, MeetingQuickView, RescheduleDialog } from '../src/components/MeetingDialogs';
+import { CancelMeetingDialog, MeetingQuickView, MeetingQuickViewLoading, RescheduleDialog } from '../src/components/MeetingDialogs';
 import type { MeetingView } from '../src/components/MeetingPanels';
 import type { Slot } from '../src/types';
 
@@ -123,5 +123,18 @@ describe('RescheduleDialog', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Next day' }));
     expect(fetcher).toHaveBeenLastCalledWith('x', '2026-10-11T00:00:00.000Z', '2026-10-12T00:00:00.000Z');
     await waitFor(() => expect(screen.getByText('No open times on this day. Try another day.')).toBeTruthy());
+  });
+});
+
+describe('MeetingQuickViewLoading', () => {
+  it('opens at once, names the meeting, says it is loading, and can be closed', () => {
+    const onClose = vi.fn();
+    render(<MeetingQuickViewLoading title="Consultation with Maria" onClose={onClose} />);
+
+    expect(screen.getByRole('dialog', { hidden: true }).getAttribute('aria-label')).toBe('Consultation with Maria');
+    expect(screen.getByRole('status', { hidden: true }).getAttribute('aria-busy')).toBe('true');
+    expect((screen.getAllByText('Loading the meeting…', { selector: 'button' })[0] as HTMLButtonElement).disabled).toBe(true);
+    fireEvent.click(screen.getByRole('button', { name: 'Close', hidden: true }));
+    expect(onClose).toHaveBeenCalledOnce();
   });
 });

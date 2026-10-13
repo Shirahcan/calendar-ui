@@ -99,6 +99,43 @@ export function MeetingQuickView({ meeting, timezone, now, roomOpen, onJoin, onO
   );
 }
 
+export interface MeetingQuickViewLoadingProps {
+  /** What the calendar already knows (the item's title), so the dialog names the meeting at once. */
+  title?: string;
+  onClose: () => void;
+  className?: string;
+}
+
+/**
+ * The quick look the moment a meeting is clicked, while the product fetches the whole meeting.
+ * Without it the click looked like it did nothing until the fetch landed. Swap it for
+ * MeetingQuickView when the meeting arrives; closing it is the product's cue to drop the fetch.
+ */
+export function MeetingQuickViewLoading({ title, onClose, className }: MeetingQuickViewLoadingProps) {
+  const { labels, classNames } = useCalendarUi();
+
+  return (
+    <ModalShell
+      title={title || labels.quickViewLoading}
+      onClose={onClose}
+      className={cx('cal-modal--loading', className)}
+      footer={
+        <button type="button" disabled className={cx('cal-btn', 'cal-btn--primary', 'cal-modal__primary', classNames.button, classNames.buttonPrimary)}>
+          {labels.quickViewLoading}
+        </button>
+      }
+    >
+      <div className="cal-quick-skel" role="status" aria-busy="true" aria-live="polite">
+        <span className="cal-sr-only">{labels.quickViewLoading}</span>
+        <span className="cal-quick-skel__line" style={{ width: '60%' }} />
+        <span className="cal-quick-skel__line" style={{ width: '45%' }} />
+        <span className="cal-quick-skel__line" style={{ width: '70%' }} />
+        <span className="cal-quick-skel__line" style={{ width: '35%' }} />
+      </div>
+    </ModalShell>
+  );
+}
+
 export interface CancelMeetingDialogProps {
   title: string;
   /** Who hears about it, in the reader's words ("Maria Garcia", "your consultant"). */

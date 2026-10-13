@@ -76,7 +76,7 @@ describe('WeekView', () => {
 });
 
 describe('MonthView', () => {
-  it('collapses a busy day into "+N more"', () => {
+  it('collapses a busy day into "+N more", which reveals the rest in place and folds back', () => {
     const days = gridDays('month', new Date('2026-10-12T15:00:00Z'), 'UTC');
     const items: CalendarItem[] = Array.from({ length: 5 }, (_, i) => ({
       id: `i${i}`, start: new Date(`2026-10-12T1${i}:00:00Z`), end: new Date(`2026-10-12T1${i}:30:00Z`), title: `Item ${i}`, layer: 'busy',
@@ -84,8 +84,15 @@ describe('MonthView', () => {
     const onSelectDay = vi.fn();
     render(<MonthView days={days} items={items} zone="UTC" maxPerDay={3} onSelectDay={onSelectDay} />);
 
+    expect(screen.queryByText('Item 4')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: '+2 more' }));
-    expect(onSelectDay.mock.calls[0]![0].key).toBe('2026-10-12');
+    expect(screen.getByText('Item 3')).toBeTruthy();
+    expect(screen.getByText('Item 4')).toBeTruthy();
+    expect(onSelectDay).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Show fewer' }));
+    expect(screen.queryByText('Item 4')).toBeNull();
+    expect(screen.getByRole('button', { name: '+2 more' }).getAttribute('aria-expanded')).toBe('false');
   });
 });
 
