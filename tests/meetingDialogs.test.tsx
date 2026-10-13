@@ -1,6 +1,6 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
-import { CancelMeetingDialog, LinkMeetingDialog, MeetingQuickView, MeetingQuickViewLoading, RescheduleDialog } from '../src/components/MeetingDialogs';
+import { CancelMeetingDialog, LinkMeetingDialog, MeetingQuickView, MeetingQuickViewLoading, RebookDialog, RescheduleDialog } from '../src/components/MeetingDialogs';
 import type { MeetingView } from '../src/components/MeetingPanels';
 import type { Slot } from '../src/types';
 
@@ -155,5 +155,21 @@ describe('LinkMeetingDialog', () => {
     fireEvent.click(radios[1]!);
     fireEvent.click(screen.getByRole('button', { name: 'Link to case', hidden: true }));
     await waitFor(() => expect(screen.getByRole('alert', { hidden: true }).textContent).toBe('Not this client'));
+  });
+});
+
+describe('RebookDialog', () => {
+  it('says the call was missed and books a new time', async () => {
+    const slots: Slot[] = [{ start_utc: '2026-10-12T15:00:00Z', end_utc: '2026-10-12T15:30:00Z', host_ids: [] }];
+    const onRebook = vi.fn().mockResolvedValue(undefined);
+    render(<RebookDialog title="First call" currentStart="2026-10-10T14:00:00Z" viewerZone="Africa/Lagos" fetcher={vi.fn().mockResolvedValue({ slots })}
+      bookingType="consultation" now={now} onRebook={onRebook} onClose={() => undefined} />);
+
+    expect(screen.getByRole('dialog', { hidden: true }).getAttribute('aria-label')).toBe('Book a new time');
+    expect(screen.getByText(/Missed: /, { exact: false })).toBeTruthy();
+    await waitFor(() => screen.getByRole('button', { name: /Monday 12 October, 4:00 PM WAT/, hidden: true }));
+    fireEvent.click(screen.getByRole('button', { name: /Monday 12 October, 4:00 PM WAT/, hidden: true }));
+    await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Book 4:00 PM WAT', hidden: true })));
+    expect(onRebook).toHaveBeenCalledWith(slots[0], '');
   });
 });

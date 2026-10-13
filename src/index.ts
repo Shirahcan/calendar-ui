@@ -73,8 +73,8 @@ export type { ReminderPolicy, ReminderPolicyAdapter, ReminderPolicyEditorProps }
 export { SchedulingPolicyEditor } from './components/SchedulingPolicyEditor';
 export { HolidayRulesEditor } from './components/HolidayRulesEditor';
 export { RowMenu } from './components/RowMenu';
-export { CancelMeetingDialog, LinkMeetingDialog, MeetingQuickView, MeetingQuickViewLoading, RescheduleDialog } from './components/MeetingDialogs';
-export type { CancelMeetingDialogProps, LinkMeetingDialogProps, LinkMeetingOption, MeetingQuickViewLoadingProps, MeetingQuickViewProps, RescheduleDialogProps } from './components/MeetingDialogs';
+export { CancelMeetingDialog, LinkMeetingDialog, MeetingQuickView, MeetingQuickViewLoading, RebookDialog, RescheduleDialog } from './components/MeetingDialogs';
+export type { CancelMeetingDialogProps, LinkMeetingDialogProps, LinkMeetingOption, MeetingQuickViewLoadingProps, MeetingQuickViewProps, RebookDialogProps, RescheduleDialogProps } from './components/MeetingDialogs';
 export type { RowMenuItem } from './components/RowMenu';
 export type { HolidayRule, HolidayRuleInput, HolidayRuleKind, HolidayRulesAdapter, HolidayRulesEditorProps } from './components/HolidayRulesEditor';
 export { CalendarConnectionsPanel } from './components/CalendarConnectionsPanel';

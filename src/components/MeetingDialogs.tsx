@@ -304,6 +304,8 @@ export interface RescheduleDialogProps {
    * it, the dialog steps a day at a time (kept for products that have no month counts yet).
    */
   monthCounts?: (month: string) => Promise<{ counts: Record<string, number>; lastBookable?: string | null }>;
+  /** `rebook`: the meeting did not happen and a NEW one is booked (RebookDialog); default `move`. */
+  intent?: 'move' | 'rebook';
 }
 
 /** The month of days the reschedule dialog opens on, read through the product's `monthCounts`. */
@@ -367,7 +369,7 @@ function RescheduleMonth({ monthCounts, cache, today, initial, selected, onSelec
  * host's real availability, sent as a UTC instant. Never a free date and time box: that sent a
  * wall time with no zone and offered times nobody was free.
  */
-export function RescheduleDialog({ title, currentStart, viewerZone, hostZone, fetcher, bookingType, now, onReschedule, onClose, describeError, monthCounts }: RescheduleDialogProps) {
+export function RescheduleDialog({ title, currentStart, viewerZone, hostZone, fetcher, bookingType, now, onReschedule, onClose, describeError, monthCounts, intent = 'move' }: RescheduleDialogProps) {
   const { labels, classNames } = useCalendarUi();
   const today = dayKey(now, viewerZone);
   const [day, setDay] = useState(() => {
@@ -409,18 +411,18 @@ export function RescheduleDialog({ title, currentStart, viewerZone, hostZone, fe
 
   return (
     <ModalShell
-      title={labels.rescheduleTitle}
+      title={intent === 'rebook' ? labels.rebookTitle : labels.rescheduleTitle}
       onClose={onClose}
       footer={
         <>
           <button type="button" className={cx('cal-btn', classNames.button)} onClick={onClose} disabled={busy}>{labels.cancelKeep}</button>
           <button type="button" className={cx('cal-btn', 'cal-btn--primary', classNames.button, classNames.buttonPrimary)} onClick={() => void submit()} disabled={!picked || busy}>
-            {picked ? labels.rescheduleConfirm(formatZonedTime(picked.start_utc, viewerZone)) : labels.reschedulePick}
+            {picked ? (intent === 'rebook' ? labels.rebookConfirm : labels.rescheduleConfirm)(formatZonedTime(picked.start_utc, viewerZone)) : labels.reschedulePick}
           </button>
         </>
       }
     >
-      <p className="cal-modal__text"><strong>{title}</strong>. {labels.rescheduleNow(formatZonedDateTime(currentStart, viewerZone))}</p>
+      <p className="cal-modal__text"><strong>{title}</strong>. {(intent === 'rebook' ? labels.rebookMissed : labels.rescheduleNow)(formatZonedDateTime(currentStart, viewerZone))}</p>
       {monthCounts && step === 'days' ? (
         <>
           <p className="cal-modal__hint">{labels.rescheduleChooseDay}</p>
@@ -468,4 +470,17 @@ export function RescheduleDialog({ title, currentStart, viewerZone, hostZone, fe
       {error && <p className="cal-modal__error" role="alert">{error}</p>}
     </ModalShell>
   );
+}
+
+export type RebookDialogProps = Omit<RescheduleDialogProps, 'intent' | 'onReschedule'> & {
+  /** The product books the new meeting at this slot. A rejection keeps the dialog open. */
+  onRebook: (slot: Slot, note: string) => Promise<void>;
+};
+
+/**
+ * Book a call that did not happen (a no-show) again: the same day-then-times picker as moving a
+ * meeting, said as a new booking. The missed time is shown at the top.
+ */
+export function RebookDialog({ onRebook, ...rest }: RebookDialogProps) {
+  return <RescheduleDialog {...rest} intent="rebook" onReschedule={onRebook} />;
 }

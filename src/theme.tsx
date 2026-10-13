@@ -207,6 +207,11 @@ export interface CalendarLabels {
   cancelConfirm: string;
   cancelFailed: string;
   rescheduleTitle: string;
+  /* Booking a missed call again (RebookDialog) */
+  rebookTitle: string;
+  rebookMissed: (when: string) => string;
+  rebookConfirm: (time: string) => string;
+  rebookAction: string;
   rescheduleNow: (when: string) => string;
   reschedulePrevDay: string;
   rescheduleNextDay: string;
@@ -677,6 +682,10 @@ export const DEFAULT_LABELS: CalendarLabels = {
   cancelConfirm: 'Cancel meeting',
   cancelFailed: 'The meeting could not be cancelled.',
   rescheduleTitle: 'Move this meeting',
+  rebookTitle: 'Book a new time',
+  rebookMissed: (when) => `Missed: ${when}`,
+  rebookConfirm: (time) => `Book ${time}`,
+  rebookAction: 'Book a new time',
   rescheduleNow: (when) => `Now: ${when}`,
   reschedulePrevDay: 'Previous day',
   rescheduleNextDay: 'Next day',
