@@ -187,6 +187,17 @@ export interface CalendarLabels {
   /** The quick look while the meeting is still being fetched. */
   quickViewLoading: string;
   quickViewMore: string;
+  /* Linking a meeting to the record it serves */
+  linkTitle: (noun: string) => string;
+  linkWhy: (noun: string) => string;
+  linkNone: (noun: string) => string;
+  linkConfirm: (noun: string) => string;
+  linkBusy: string;
+  linkKeep: string;
+  linkCurrent: string;
+  linkSuggested: string;
+  linkMeetingFailed: string;
+  linkAction: (noun: string) => string;
   cancelTitle: string;
   /** Who hears about it, in the reader's words ("Maria Garcia", "your consultant"). */
   cancelWhoIsTold: (who: string) => string;
@@ -648,6 +659,16 @@ export const DEFAULT_LABELS: CalendarLabels = {
   quickViewOpenPage: 'Open meeting page',
   quickViewLoading: 'Loading the meeting…',
   quickViewMore: 'More actions',
+  linkTitle: (noun) => `Link to a ${noun}`,
+  linkWhy: (noun) => `What this call decides is filed on the ${noun}, and the ${noun}'s next step can move on once the call has happened.`,
+  linkNone: (noun) => `This person has no ${noun} with you to link it to.`,
+  linkConfirm: (noun) => `Link to ${noun}`,
+  linkBusy: 'Linking…',
+  linkKeep: 'Not now',
+  linkCurrent: 'linked now',
+  linkSuggested: 'waiting on this call',
+  linkMeetingFailed: 'The meeting could not be linked. Please try again.',
+  linkAction: (noun) => `Link to ${noun}`,
   cancelTitle: 'Cancel this meeting?',
   cancelWhoIsTold: (who) => `${who} will be told it is cancelled, with your reason. This cannot be undone.`,
   cancelReason: 'Reason',

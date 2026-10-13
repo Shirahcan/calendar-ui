@@ -190,6 +190,91 @@ export function CancelMeetingDialog({ title, otherParty, onCancel, onClose, desc
   );
 }
 
+export interface LinkMeetingOption {
+  id: string;
+  label: string;
+  /** A second line: a reference number, a status. */
+  detail?: string;
+  /** The one this meeting most likely belongs to (shown first, chosen to start). */
+  suggested?: boolean;
+}
+
+export interface LinkMeetingDialogProps {
+  title: string;
+  /** What the product links a meeting to, in its words ("case"). */
+  noun: string;
+  options: LinkMeetingOption[];
+  /** The one it is linked to now, if any. */
+  currentId?: string | null;
+  /** The product's call. A rejection keeps the dialog open and shows why. */
+  onLink: (id: string) => Promise<void>;
+  onClose: () => void;
+  describeError?: (error: unknown) => string;
+}
+
+/**
+ * Link a meeting to the record it serves (a case, an application): so what the call decides lands
+ * on that record. The product supplies the choices and does the linking.
+ */
+export function LinkMeetingDialog({ title, noun, options, currentId, onLink, onClose, describeError }: LinkMeetingDialogProps) {
+  const { labels, classNames } = useCalendarUi();
+  const ordered = [...options].sort((a, b) => Number(Boolean(b.suggested)) - Number(Boolean(a.suggested)));
+  const [picked, setPicked] = useState<string | null>(currentId ?? ordered.find((o) => o.suggested)?.id ?? null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const submit = async () => {
+    if (picked === null) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await onLink(picked);
+    } catch (err) {
+      setError(describeError ? describeError(err) : err instanceof Error && err.message ? err.message : labels.linkMeetingFailed);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <ModalShell
+      title={labels.linkTitle(noun)}
+      onClose={onClose}
+      footer={
+        <>
+          <button type="button" className={cx('cal-btn', classNames.button)} onClick={onClose} disabled={busy}>{labels.linkKeep}</button>
+          <button type="button" className={cx('cal-btn', 'cal-btn--primary', classNames.button, classNames.buttonPrimary)} onClick={() => void submit()}
+            disabled={picked === null || picked === currentId || busy}>
+            {busy ? labels.linkBusy : labels.linkConfirm(noun)}
+          </button>
+        </>
+      }
+    >
+      <p className="cal-modal__text"><strong>{title}</strong>. {labels.linkWhy(noun)}</p>
+      {ordered.length === 0 ? (
+        <p className="cal-modal__text">{labels.linkNone(noun)}</p>
+      ) : (
+        <div className="cal-link-list" role="radiogroup" aria-label={labels.linkTitle(noun)}>
+          {ordered.map((o) => (
+            <label key={o.id} className={cx('cal-link-option', picked === o.id && 'is-picked')}>
+              <input type="radio" name="cal-link" value={o.id} checked={picked === o.id} onChange={() => setPicked(o.id)} disabled={busy} />
+              <span className="cal-link-option__text">
+                <span className="cal-link-option__label">{o.label}</span>
+                {(o.detail || o.suggested || o.id === currentId) && (
+                  <span className="cal-link-option__detail">
+                    {[o.detail, o.id === currentId ? labels.linkCurrent : null, o.suggested ? labels.linkSuggested : null].filter(Boolean).join(', ')}
+                  </span>
+                )}
+              </span>
+            </label>
+          ))}
+        </div>
+      )}
+      {error && <p className="cal-modal__error" role="alert">{error}</p>}
+    </ModalShell>
+  );
+}
+
 /** "2026-10-12" plus n days, as a calendar date (no clock, so no DST drift). */
 function addDays(key: string, n: number): string {
   const [y, m, d] = key.split('-').map(Number) as [number, number, number];

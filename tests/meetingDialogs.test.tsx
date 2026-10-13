@@ -1,6 +1,6 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
-import { CancelMeetingDialog, MeetingQuickView, MeetingQuickViewLoading, RescheduleDialog } from '../src/components/MeetingDialogs';
+import { CancelMeetingDialog, LinkMeetingDialog, MeetingQuickView, MeetingQuickViewLoading, RescheduleDialog } from '../src/components/MeetingDialogs';
 import type { MeetingView } from '../src/components/MeetingPanels';
 import type { Slot } from '../src/types';
 
@@ -136,5 +136,24 @@ describe('MeetingQuickViewLoading', () => {
     expect((screen.getAllByText('Loading the meeting…', { selector: 'button' })[0] as HTMLButtonElement).disabled).toBe(true);
     fireEvent.click(screen.getByRole('button', { name: 'Close', hidden: true }));
     expect(onClose).toHaveBeenCalledOnce();
+  });
+});
+
+describe('LinkMeetingDialog', () => {
+  it('starts on the suggested record, links the one picked, and keeps a refusal on screen', async () => {
+    const onLink = vi.fn(async (id: string) => { if (id === 'c2') throw new Error('Not this client'); });
+    render(<LinkMeetingDialog title="First call" noun="case" onClose={() => undefined} onLink={onLink}
+      options={[{ id: 'c2', label: 'Study permit' }, { id: 'c1', label: 'Work permit', detail: 'CASE-1', suggested: true }]} />);
+
+    const radios = screen.getAllByRole('radio', { hidden: true }) as HTMLInputElement[];
+    expect(radios[0]!.value).toBe('c1');   // the suggested one first, and picked
+    expect(radios[0]!.checked).toBe(true);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Link to case', hidden: true }));
+    await waitFor(() => expect(onLink).toHaveBeenCalledWith('c1'));
+
+    fireEvent.click(radios[1]!);
+    fireEvent.click(screen.getByRole('button', { name: 'Link to case', hidden: true }));
+    await waitFor(() => expect(screen.getByRole('alert', { hidden: true }).textContent).toBe('Not this client'));
   });
 });
