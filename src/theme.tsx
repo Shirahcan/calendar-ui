@@ -78,6 +78,9 @@ export interface CalendarLabels {
   busyStale: string;
   statusLegend: string;
   meetingStatus: (status: string) => string;
+  /** MeetingStatusFilter: its (screen-reader) label and the "every status" choice. */
+  statusFilterLabel: string;
+  statusFilterAll: string;
   /* The booking month (AvailabilityMonth). */
   previousMonth: string;
   nextMonth: string;
@@ -405,6 +408,10 @@ export interface CalendarLabels {
   callToolInUse: string;
   callToolUse: string;
   callToolConnect: string;
+  /** Not connected yet: connect the account, then switch calls to it in one step. */
+  callToolConnectAndUse: string;
+  /** Google Meet before the Google calendar is connected. */
+  callToolMeetConnectHint: string;
   callToolActionsFor: (tool: string) => string;
   callToolCopyEmail: string;
   callToolDisconnect: string;
@@ -539,6 +546,8 @@ export const DEFAULT_LABELS: CalendarLabels = {
   busyStale: 'Your connected calendar has not been read recently, so some busy time may be missing.',
   statusLegend: 'Status',
   meetingStatus: (s) => ({ pending_approval: 'Awaiting approval', scheduled: 'Scheduled', confirmed: 'Confirmed', in_progress: 'In progress', completed: 'Completed', cancelled: 'Cancelled', no_show: 'No-show', rescheduled: 'Rescheduled' } as Record<string, string>)[s] ?? s,
+  statusFilterLabel: 'Status',
+  statusFilterAll: 'All statuses',
   previousMonth: 'Previous month',
   nextMonth: 'Next month',
   previousYear: 'Previous year',
@@ -855,10 +864,13 @@ export const DEFAULT_LABELS: CalendarLabels = {
   callToolZoomConnectedAs: (email) => `Connected as ${email ?? 'your Zoom account'}`,
   callToolMeet: 'Google Meet',
   callToolMeetHint: 'Calls run on your own Google account, added to the booking in your Google calendar.',
+  /** @deprecated replaced by callToolMeetConnectHint and the "Connect and use" button. */
   callToolMeetNeedsCalendar: 'Connect your Google calendar first: Google Meet runs on it.',
   callToolInUse: 'In use',
   callToolUse: 'Use this',
   callToolConnect: 'Connect',
+  callToolConnectAndUse: 'Connect and use',
+  callToolMeetConnectHint: 'Calls run on your own Google account. Connecting also adds your Google calendar, so busy time there keeps you from being double-booked.',
   callToolActionsFor: (tool) => `Actions for ${tool}`,
   callToolCopyEmail: 'Copy email',
   callToolDisconnect: 'Disconnect',
@@ -987,6 +999,7 @@ export interface CalendarClassNames {
   holidayRulesEditor: string;
   connectionsPanel: string;
   backupAccountPanel: string;
+  statusFilter: string;
   linksManager: string;
   linkEditor: string;
   input: string;

@@ -28,8 +28,16 @@ export interface CallToolsState {
 export interface CallToolsAdapter {
   load: () => Promise<CallToolsState>;
   choose: (tool: CallToolKind | null) => Promise<void>;
-  /** Start connecting Zoom (a popup or a redirect, the product's choice). Resolves once started. */
-  connectZoom: () => Promise<void>;
+  /**
+   * Start connecting Zoom (a popup or a redirect, the product's choice). Resolves once started.
+   * `thenUse`: once the connect lands, calls switch to Zoom (calendar-service does it).
+   */
+  connectZoom: (thenUse?: boolean) => Promise<void>;
+  /**
+   * Start connecting the person's Google calendar, which Google Meet runs on. `thenUse`: once it
+   * lands, calls switch to Google Meet. Absent = Meet cannot be connected from here.
+   */
+  connectGoogle?: (thenUse?: boolean) => Promise<void>;
   disconnectZoom: (id: number) => Promise<void>;
 }
 
@@ -37,7 +45,7 @@ export interface CallToolPickerProps {
   adapter: CallToolsAdapter;
   /** Bump to reload (a product's Zoom popup came back). */
   refreshKey?: number;
-  /** Where to connect a Google calendar, shown when Meet needs one (a product link). */
+  /** @deprecated ignored: Meet offers "Connect and use" through `adapter.connectGoogle`. */
   meetCalendarLink?: ReactNode;
   /** Ask before disconnecting (a product's own dialog); defaults to window.confirm. */
   confirmDisconnect?: (account: CallToolAccount, question: string) => Promise<boolean>;
@@ -52,7 +60,7 @@ export interface CallToolPickerProps {
  * accounts, the choice and the offered list are the person's on calendar-service, so the same in
  * every product. A tool shows when the policy offers it, or while it is in use (so it can be left).
  */
-export function CallToolPicker({ adapter, refreshKey = 0, meetCalendarLink, confirmDisconnect, onNotice, describeError, className }: CallToolPickerProps) {
+export function CallToolPicker({ adapter, refreshKey = 0, confirmDisconnect, onNotice, describeError, className }: CallToolPickerProps) {
   const { labels, classNames } = useCalendarUi();
   const ids = useId();
   const [state, setState] = useState<CallToolsState | null>(null);
@@ -84,7 +92,6 @@ export function CallToolPicker({ adapter, refreshKey = 0, meetCalendarLink, conf
   };
 
   const primary = cx('cal-btn cal-btn--primary', classNames.button, classNames.buttonPrimary);
-  const plain = cx('cal-btn', classNames.button);
   const choice = state?.choice ?? null;
   const zoom = state?.zoom.find((z) => z.status === 'active') ?? null;
   const offers = (tool: CallToolKind) => !!state && (state.offered.includes(tool) || state.choice === tool);
@@ -147,12 +154,16 @@ export function CallToolPicker({ adapter, refreshKey = 0, meetCalendarLink, conf
                 />
               </>
             ) : (
-              <button type="button" className={plain} disabled={busy} onClick={() => void act(() => adapter.connectZoom())}>{labels.callToolConnect}</button>
+              <button type="button" className={primary} disabled={busy} onClick={() => void act(() => adapter.connectZoom(true))}>{labels.callToolConnectAndUse}</button>
             ))}
 
           {offers('google_meet') && row('meet', choice === 'google_meet', labels.callToolMeet,
-            state.google_calendar_connected ? labels.callToolMeetHint : <>{labels.callToolMeetNeedsCalendar} {meetCalendarLink}</>,
-            state.google_calendar_connected ? (choice === 'google_meet' ? inUse : use('google_meet')) : null)}
+            state.google_calendar_connected ? labels.callToolMeetHint : labels.callToolMeetConnectHint,
+            state.google_calendar_connected
+              ? (choice === 'google_meet' ? inUse : use('google_meet'))
+              : adapter.connectGoogle
+                ? <button type="button" className={primary} disabled={busy} onClick={() => void act(() => adapter.connectGoogle!(true))}>{labels.callToolConnectAndUse}</button>
+                : null)}
         </ul>
       ) : null}
     </section>

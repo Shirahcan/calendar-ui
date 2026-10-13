@@ -79,6 +79,8 @@ export type { RowMenuItem } from './components/RowMenu';
 export type { HolidayRule, HolidayRuleInput, HolidayRuleKind, HolidayRulesAdapter, HolidayRulesEditorProps } from './components/HolidayRulesEditor';
 export { CalendarConnectionsPanel } from './components/CalendarConnectionsPanel';
 export { BackupCallAccountPanel } from './components/BackupCallAccountPanel';
+export { MeetingStatusFilter, MEETING_STATUSES } from './components/MeetingStatusFilter';
+export type { MeetingStatusFilterProps } from './components/MeetingStatusFilter';
 export type { BackupCallAccount, BackupCallAccountAdapter, BackupCallAccountPanelProps } from './components/BackupCallAccountPanel';
 export { BookingApprovalToggle, CallToolPicker } from './components/CallToolPicker';
 export type { BookingApprovalAdapter, CallToolAccount, CallToolKind, CallToolPickerProps, CallToolsAdapter, CallToolsState } from './components/CallToolPicker';

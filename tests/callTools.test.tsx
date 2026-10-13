@@ -34,9 +34,9 @@ describe('CallToolPicker', () => {
   it('connects Zoom when there is no account, and disconnects only after a yes', async () => {
     const a = adapter(state());
     const { unmount } = render(<CallToolPicker adapter={a} />);
-    const connect = await screen.findByRole('button', { name: 'Connect' });
+    const connect = await screen.findByRole('button', { name: 'Connect and use' });
     await act(async () => fireEvent.click(connect));
-    expect(a.connectZoom).toHaveBeenCalled();
+    expect(a.connectZoom).toHaveBeenCalledWith(true);
     unmount();
 
     const b = adapter(state({ choice: 'zoom', zoom: [{ id: 7, account_email: null, status: 'active' }] }));
@@ -53,11 +53,18 @@ describe('CallToolPicker', () => {
     expect(b.disconnectZoom).toHaveBeenCalledWith(7);
   });
 
-  it('asks for a Google calendar before Meet can be chosen', async () => {
-    render(<CallToolPicker adapter={adapter(state({ offered: ['google_meet'] }))} meetCalendarLink={<a href="/connections">Connections</a>} />);
-    await screen.findByText(/Connect your Google calendar first/);
-    expect(screen.getByRole('link', { name: 'Connections' })).toBeTruthy();
-    expect(screen.queryAllByRole('button', { name: 'Use this' })).toHaveLength(0);
+  it('connects Google and uses Meet in one step, and offers Use once the calendar is connected', async () => {
+    const connectGoogle = vi.fn(async () => undefined);
+    const { unmount } = render(<CallToolPicker adapter={{ ...adapter(state({ offered: ['google_meet'] })), connectGoogle }} />);
+    await screen.findByText(/Connecting also adds your Google calendar/);
+    expect(screen.queryByRole('link')).toBeNull();
+    await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Connect and use' })));
+    expect(connectGoogle).toHaveBeenCalledWith(true);
+    unmount();
+
+    render(<CallToolPicker adapter={adapter(state({ offered: ['google_meet'], google_calendar_connected: true }))} />);
+    await screen.findByText(/added to the booking in your Google calendar/);
+    expect(screen.getAllByRole('button', { name: 'Use this' })).toHaveLength(1);
   });
 });
 
