@@ -138,7 +138,7 @@ export function PersonLocalTime({ start, end, zone, className }: { start: string
 
 export function MeetingPeople({ meeting, avatar, collapsible = false, defaultOpen = false, className }: { meeting: MeetingView; avatar?: ReactNode; collapsible?: boolean; defaultOpen?: boolean; className?: string }) {
   const { labels, classNames } = useCalendarUi();
-  const list = meeting.people.map((p) => (
+  const people = meeting.people.map((p) => (
     <div key={`${p.role}-${p.name}`} className="cal-meeting-side__person">
       {avatar}
       <div className="cal-meeting-side__who">
@@ -154,6 +154,8 @@ export function MeetingPeople({ meeting, avatar, collapsible = false, defaultOpe
       </div>
     </div>
   ));
+  // One spaced list in both shapes: inside <details> the card's own grid gap does not reach it.
+  const list = <div className="cal-meeting-side__list">{people}</div>;
 
   if (collapsible) {
     return (

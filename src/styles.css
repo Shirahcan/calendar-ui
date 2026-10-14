@@ -433,6 +433,11 @@
 .cal-confirm__question { margin: 0 0 16px; font-size: 14px; line-height: 1.5; }
 .cal-confirm__actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
 
+/* Every kit dialog is a native modal <dialog>, centred by the browser's own `margin: auto`. A
+   product whose CSS reset zeroes every margin (Tailwind 4's preflight: `* { margin: 0 }`) pins it
+   to the top-left corner instead, so the kit says it itself. */
+.cal-linkdlg, .cal-paddlg, .cal-confirm, .cal-modal { margin: auto; }
+
 /* The meeting page's panels (plan MP1). */
 .cal-meeting, .cal-meeting-side { display: grid; gap: 14px; padding: 20px; border: 1px solid var(--cal-border); border-radius: var(--cal-radius); background: var(--cal-surface); color: var(--cal-ink); min-width: 0; }
 .cal-meeting__status { justify-self: start; padding: 3px 12px; border-radius: 999px; border: 1px solid var(--cal-border); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.02em; }
@@ -448,6 +453,7 @@
 .cal-meeting__text { margin: 0; font-size: 14px; white-space: pre-wrap; overflow-wrap: anywhere; color: var(--cal-ink); }
 .cal-meeting-side__title { margin: 0; font-size: 16px; font-weight: 600; }
 .cal-meeting-side__person { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.cal-meeting-side__list { display: grid; gap: 16px; min-width: 0; }
 .cal-meeting-side__who { min-width: 0; }
 .cal-meeting-side__state { display: inline-block; margin: 4px 0 0; padding: 1px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; background: var(--cal-surface-muted, #f1f5f9); color: var(--cal-ink-muted); }
 .cal-meeting-side__state[data-state='attended'], .cal-meeting-side__state[data-state='accepted'] { background: #d1fae5; color: #047857; }
@@ -491,7 +497,10 @@
 .cal-meeting-side__summary::-webkit-details-marker { display: none; }
 .cal-meeting-side__summary::after { content: ''; margin-left: auto; align-self: center; width: 8px; height: 8px; border-right: 2px solid var(--cal-ink-muted); border-bottom: 2px solid var(--cal-ink-muted); transform: rotate(45deg); transition: transform 0.15s; flex: none; }
 .cal-meeting-side--fold[open] > .cal-meeting-side__summary::after { transform: rotate(-135deg); }
-.cal-meeting-side--fold[open] > .cal-meeting-side__summary { margin-bottom: 12px; }
+/* <details> lays its content out as a block whatever its own display says, so the folded list
+   is a block with its own grid, and the closed fold has no gap under its title. */
+.cal-meeting-side--fold { display: block; }
+.cal-meeting-side--fold[open] > .cal-meeting-side__summary { margin-bottom: 16px; }
 .cal-meeting-side__names { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; color: var(--cal-ink-muted); }
 .cal-meeting-side__summary:focus-visible { outline: 2px solid var(--cal-accent); outline-offset: 4px; border-radius: 6px; }
 @media (prefers-reduced-motion: reduce) { .cal-meeting-side__summary::after { transition: none; } }
