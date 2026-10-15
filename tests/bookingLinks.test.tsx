@@ -74,6 +74,26 @@ describe('BookingLinksManager', () => {
     await waitFor(() => expect(notice).toHaveBeenCalledWith('Link saved'));
   });
 
+  it('ends a link on its last day or after a total, and says so on the row', async () => {
+    const a = adapterWith([link({ max_bookings: 10, bookings_used: 10, closed_reason: 'full', expires_at: '2030-03-01T04:59:59Z' })]);
+    render(<BookingLinksManager adapter={a} limits={LIMITS} />);
+
+    expect(await screen.findByText('Fully booked')).toBeTruthy();
+    expect(screen.getByText('10 of 10 booked')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Actions for Initial Consultation' }));
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Edit' }));
+    const dlg = await screen.findByRole('dialog');
+    fireEvent.change(within(dlg).getByLabelText('Total bookings allowed'), { target: { value: '20' } });
+    fireEvent.change(within(dlg).getByLabelText('Last day to book'), { target: { value: '2030-06-30' } });
+    fireEvent.click(within(dlg).getByRole('button', { name: 'Save changes' }));
+
+    await waitFor(() => expect(a.update).toHaveBeenCalledTimes(1));
+    const sent = vi.mocked(a.update).mock.calls[0]![1];
+    expect(sent.max_bookings).toBe(20);
+    // Inclusive: the end of that day in the viewer's zone.
+    expect(sent.expires_at).toBe(new Date('2030-06-30T23:59:59').toISOString());
+  });
+
   it('shows every reason a save was refused, inside the dialog', async () => {
     const a = adapterWith([]);
     vi.mocked(a.create).mockRejectedValueOnce(Object.assign(new Error('The link cannot be saved.'), { errors: ['Choose a length of 15, 30, 60 minutes.'] }));

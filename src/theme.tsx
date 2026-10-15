@@ -466,6 +466,15 @@ export interface CalendarLabels {
   linkOffBadge: string;
   linkDaysAheadShort: (days: number) => string;
   linkDailyCapShort: (n: number) => string;
+  /** A capped link's count, e.g. "3 of 10 booked". */
+  linkUsedShort: (used: number, max: number) => string;
+  /** An expiring link's last day, already formatted for the viewer. */
+  linkUntilShort: (date: string) => string;
+  linkExpiredBadge: string;
+  linkFullBadge: string;
+  linkExpires: string;
+  linkMaxBookings: string;
+  linkEndHelp: string;
   linkCreateTitle: string;
   linkEditTitle: string;
   linkClose: string;
@@ -943,6 +952,13 @@ export const DEFAULT_LABELS: CalendarLabels = {
   linkOffBadge: 'Off',
   linkDaysAheadShort: (days) => `up to ${days} days ahead`,
   linkDailyCapShort: (n) => `at most ${n} a day`,
+  linkUsedShort: (used, max) => `${used} of ${max} booked`,
+  linkUntilShort: (date) => `until ${date}`,
+  linkExpiredBadge: 'Expired',
+  linkFullBadge: 'Fully booked',
+  linkExpires: 'Last day to book',
+  linkMaxBookings: 'Total bookings allowed',
+  linkEndHelp: 'Leave both empty to keep the link open. When the last day passes or the total is reached, the link stops offering times.',
   linkCreateTitle: 'Create booking link',
   linkEditTitle: 'Edit booking link',
   linkClose: 'Close',

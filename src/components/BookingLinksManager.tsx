@@ -145,6 +145,8 @@ export function BookingLinksManager({ adapter, limits, actions = [], confirmDele
                   {link.name}
                   {link.is_default ? <span className="cal-links__badge">{labels.linkDefaultBadge}</span> : null}
                   {!link.is_active ? <span className="cal-links__badge cal-links__badge--off">{labels.linkOffBadge}</span> : null}
+                  {link.is_active && link.closed_reason === 'expired' ? <span className="cal-links__badge cal-links__badge--off">{labels.linkExpiredBadge}</span> : null}
+                  {link.is_active && link.closed_reason === 'full' ? <span className="cal-links__badge cal-links__badge--off">{labels.linkFullBadge}</span> : null}
                   {link.external_url ? <span className="cal-links__badge cal-links__badge--off">{labels.linkExternalBadge}</span> : null}
                 </span>
                 <span className="cal-links__meta">
@@ -152,6 +154,8 @@ export function BookingLinksManager({ adapter, limits, actions = [], confirmDele
                   <span className="cal-links__slug">{link.slug}</span>
                   {link.days_ahead ? <span>{labels.linkDaysAheadShort(link.days_ahead)}</span> : null}
                   {link.daily_cap ? <span>{labels.linkDailyCapShort(link.daily_cap)}</span> : null}
+                  {link.max_bookings ? <span>{labels.linkUsedShort(link.bookings_used ?? 0, link.max_bookings)}</span> : null}
+                  {link.expires_at ? <span>{labels.linkUntilShort(new Date(link.expires_at).toLocaleDateString(undefined, { dateStyle: 'medium' }))}</span> : null}
                 </span>
               </span>
               <RowMenu label={labels.linkActionsFor(link.name)} disabled={busy} items={items(link)} />

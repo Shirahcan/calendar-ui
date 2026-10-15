@@ -23,6 +23,14 @@ export interface BookingLink {
   daily_cap: number | null;
   /** null = the product's usual horizon applies. */
   days_ahead: number | null;
+  /** When the link stops taking bookings (ISO 8601); null = never. */
+  expires_at?: string | null;
+  /** How many bookings it takes in all; null = no limit. */
+  max_bookings?: number | null;
+  /** How many it has given out (a capped link only). */
+  bookings_used?: number | null;
+  /** Why it takes no bookings, or null when it does. */
+  closed_reason?: 'inactive' | 'expired' | 'full' | null;
 }
 
 /** What a create or an edit sends (only the keys given change on an edit). */
@@ -38,6 +46,8 @@ export interface BookingLinkFields {
   buffer_after: number | null;
   daily_cap: number | null;
   days_ahead: number | null;
+  expires_at: string | null;
+  max_bookings: number | null;
   /** Only when the product allows external links. */
   external_url?: string | null;
   external_call_url?: string | null;
@@ -66,6 +76,22 @@ export interface BookingLinkEditorProps {
 
 const intOrNull = (v: string): number | null => (v.trim() === '' ? null : Math.max(0, Math.trunc(Number(v))));
 
+/** A YYYY-MM-DD in the viewer's own zone, from an instant. */
+const localDate = (iso: string | null | undefined): string => {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  const p = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+};
+
+/** The last day to book is inclusive: the link closes at the end of that day in the viewer's zone. */
+const endOfLocalDay = (date: string): string | null => {
+  if (date.trim() === '') return null;
+  const d = new Date(`${date}T23:59:59`);
+  return Number.isNaN(d.getTime()) ? null : d.toISOString();
+};
+
 /**
  * Create or edit one booking link, the same in every product. A native modal dialog that stays
  * inside the viewport: its header and footer stay put and the fields scroll between them, so the
@@ -78,6 +104,7 @@ export function BookingLinkEditor({ open, link, limits, onSave, onClose, describ
   const dialog = useRef<HTMLDialogElement>(null);
   const [form, setForm] = useState(() => toForm(link, limits));
   const [busy, setBusy] = useState(false);
+  const [today] = useState(() => localDate(new Date().toISOString()));
   const [error, setError] = useState<unknown>(null);
   const describe = describeError ?? ((e: unknown) => errorText(e, labels.linkSaveFailed));
 
@@ -110,6 +137,8 @@ export function BookingLinkEditor({ open, link, limits, onSave, onClose, describ
         buffer_after: intOrNull(form.buffer_after),
         daily_cap: intOrNull(form.daily_cap),
         days_ahead: intOrNull(form.days_ahead),
+        expires_at: endOfLocalDay(form.expires_at),
+        max_bookings: intOrNull(form.max_bookings),
         ...(allowExternal ? { external_url: form.external_url.trim() || null, external_call_url: form.external_call_url.trim() || null } : {}),
       });
     } catch (err) {
@@ -170,6 +199,15 @@ export function BookingLinkEditor({ open, link, limits, onSave, onClose, describ
                 <input className={field} type="number" min={1} max={limits.maxDailyCap ?? 50} value={form.daily_cap} placeholder={labels.linkUnlimited} onChange={(e) => set({ daily_cap: e.target.value })} />
               </label>
             </div>
+            <div className="cal-links__row">
+              <label className="cal-links__field">{labels.linkExpires}
+                <input className={field} type="date" min={today} value={form.expires_at} onChange={(e) => set({ expires_at: e.target.value })} />
+              </label>
+              <label className="cal-links__field">{labels.linkMaxBookings}
+                <input className={field} type="number" min={1} max={10000} value={form.max_bookings} placeholder={labels.linkUnlimited} onChange={(e) => set({ max_bookings: e.target.value })} />
+              </label>
+            </div>
+            <span className="cal-links__hint">{labels.linkEndHelp}</span>
             {allowExternal ? (
               <fieldset className="cal-links__external">
                 <legend>{labels.linkExternal}</legend>
@@ -212,6 +250,8 @@ function toForm(link: BookingLink | null, limits: BookingLinkLimits) {
     buffer_after: s(link?.buffer_after),
     days_ahead: s(link?.days_ahead),
     daily_cap: s(link?.daily_cap),
+    expires_at: localDate(link?.expires_at),
+    max_bookings: s(link?.max_bookings),
     is_active: link?.is_active ?? true,
     is_default: link?.is_default ?? false,
     external_url: link?.external_url ?? '',
