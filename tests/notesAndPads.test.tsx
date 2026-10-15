@@ -133,16 +133,16 @@ describe('PendingPadsBanner', () => {
       />,
     );
 
-    expect(await screen.findByText('You have call notes that are not saved anywhere yet')).toBeTruthy();
+    expect(await screen.findByText('Your scratchpad from a call is not saved to the meeting notes yet')).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'Review' }));
     expect(await screen.findByDisplayValue('follow up on funds')).toBeTruthy();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Discard notes' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Discard scratchpad' }));
     // The confirm is native and stacked on the review dialog (a portal dialog would be inert).
-    const confirm = await screen.findByRole('dialog', { name: 'Discard these call notes for good? This cannot be undone.' });
-    fireEvent.click(within(confirm).getByRole('button', { name: 'Discard notes' }));
+    const confirm = await screen.findByRole('dialog', { name: 'Discard this scratchpad for good? This cannot be undone.' });
+    fireEvent.click(within(confirm).getByRole('button', { name: 'Discard scratchpad' }));
     await waitFor(() => expect(discard).toHaveBeenCalled());
-    await waitFor(() => expect(screen.queryByText('You have call notes that are not saved anywhere yet')).toBeNull());
+    await waitFor(() => expect(screen.queryByText('Your scratchpad from a call is not saved to the meeting notes yet')).toBeNull());
   });
 
   it('shows nothing when there is nothing to settle', async () => {

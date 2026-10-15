@@ -71,8 +71,8 @@ export interface PendingPadsBannerProps {
 }
 
 /**
- *   ⓘ You have call notes that are not saved anywhere yet
- *     Review them and save them where they belong, or discard them.
+ *   ⓘ Your scratchpad from a call is not saved to the meeting notes yet
+ *     Only you can see a scratchpad. Review it, then save it to the meeting notes or discard it.
  *     Study permit review · Oct 11, 3:00 PM            [Review]
  */
 export function PendingPadsBanner({ adapter, filter, timezone, onOpenMeeting, confirmDiscard, describeError, className }: PendingPadsBannerProps) {
