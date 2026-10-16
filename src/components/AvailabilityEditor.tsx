@@ -20,6 +20,11 @@ export interface AvailabilityEditorProps {
   extra?: ReactNode;
   describeError?: (error: unknown) => string;
   className?: string;
+  /**
+   * Let each weekly window set the meeting length it offers (MployNow: 60-minute interview mornings
+   * beside 30-minute afternoons). The product's booking type must read window lengths.
+   */
+  windowLengths?: boolean;
 }
 
 /** The product's choices, plus the schedule's own value when an admin has since removed it. */
@@ -39,7 +44,7 @@ function zones(): string[] {
  * only passes it through). Saving replaces the whole spec, so the screen and the service never
  * disagree about what was saved.
  */
-export function AvailabilityEditor({ adapter, sections = ['weekly', 'dates', 'timeoff', 'holidays'], showZone = false, extra, describeError, className }: AvailabilityEditorProps) {
+export function AvailabilityEditor({ adapter, sections = ['weekly', 'dates', 'timeoff', 'holidays'], showZone = false, extra, describeError, className, windowLengths = false }: AvailabilityEditorProps) {
   const { labels, classNames } = useCalendarUi();
   const ids = useId();
   const s = useAvailabilitySchedule(adapter);
@@ -115,7 +120,7 @@ export function AvailabilityEditor({ adapter, sections = ['weekly', 'dates', 'ti
           ) : null}
 
           <div role="tabpanel" id={`${ids}-${tab}-panel`} aria-labelledby={`${ids}-${tab}`} className="cal-avail__panel">
-            {tab === 'weekly' && s.policy ? <WeeklyHours spec={s.spec} policy={s.policy} edit={s.edit} disabled={busy} /> : null}
+            {tab === 'weekly' && s.policy ? <WeeklyHours spec={s.spec} policy={s.policy} edit={s.edit} disabled={busy} windowLengths={windowLengths} /> : null}
             {tab === 'dates' ? <DateChanges spec={s.spec} edit={s.edit} disabled={busy} /> : null}
             {tab === 'timeoff' ? <TimeOff spec={s.spec} edit={s.edit} disabled={busy} /> : null}
             {tab === 'holidays' ? <PublicHolidays spec={s.spec} edit={s.edit} regions={s.regions} holidays={adapter.holidays} disabled={busy} /> : null}

@@ -3,6 +3,9 @@ import type { AvailabilitySpec, DayName, WeeklyRule } from '../types';
 
 type Window = [string, string];
 
+/** One weekday window: start, end, and the meeting length it offers when it sets its own. */
+export type DayWindow = [string, string, number?];
+
 export type EditorAction =
   | { type: 'reset'; spec: AvailabilitySpec }
   | { type: 'setZone'; zone: string; followHostProfile?: boolean }
@@ -19,7 +22,7 @@ export type EditorAction =
   | { type: 'removeBlock'; index: number }
   | { type: 'setHolidays'; region: string | null }
   /** Replace one weekday's hours (rules with their own validity dates are left alone). */
-  | { type: 'setDayWindows'; day: DayName; windows: Window[] }
+  | { type: 'setDayWindows'; day: DayName; windows: DayWindow[] }
   /** The schedule's own buffer (minutes kept free around every meeting); null = none of its own. */
   | { type: 'setBuffer'; minutes: number | null }
   /** One weekday's own buffer, written as that day's `gap`; null = the schedule's buffer. */
@@ -35,11 +38,14 @@ function toMinutes(hhmm: string): number {
   return Number(h) * 60 + Number(m);
 }
 
-/** The open windows of one weekday, from rules that apply every week (no validity dates). */
-export function dayWindows(spec: AvailabilitySpec, day: DayName): Window[] {
+/**
+ * The open windows of one weekday, from rules that apply every week (no validity dates), each with
+ * the meeting length it sets (if it sets one).
+ */
+export function dayWindows(spec: AvailabilitySpec, day: DayName): DayWindow[] {
   return (spec.weekly ?? [])
     .filter((r) => r.days.includes(day) && !r.valid_from && !r.valid_until)
-    .map((r) => [r.start, r.end] as Window)
+    .map((r) => (r.length !== undefined ? [r.start, r.end, r.length] : [r.start, r.end]) as DayWindow)
     .sort((a, b) => a[0].localeCompare(b[0]));
 }
 
@@ -47,7 +53,7 @@ export function dayWindows(spec: AvailabilitySpec, day: DayName): Window[] {
  * Rewrite one weekday as one rule per window. A rule shared with other days keeps its other days;
  * the day's own `gap` (a different buffer on that day) carries over to its new rules.
  */
-function withDayWindows(spec: AvailabilitySpec, day: DayName, windows: Window[]): AvailabilitySpec {
+function withDayWindows(spec: AvailabilitySpec, day: DayName, windows: DayWindow[]): AvailabilitySpec {
   const rules = spec.weekly ?? [];
   const gap = rules.find((r) => r.days.includes(day) && !r.valid_from && !r.valid_until && r.gap !== undefined)?.gap;
   const kept: WeeklyRule[] = [];
@@ -59,7 +65,13 @@ function withDayWindows(spec: AvailabilitySpec, day: DayName, windows: Window[])
     const others = r.days.filter((d) => d !== day);
     if (others.length) kept.push({ ...r, days: others });
   }
-  const added = windows.map(([start, end]) => ({ days: [day], start, end, ...(gap !== undefined ? { gap } : {}) }) as WeeklyRule);
+  const added = windows.map(([start, end, length]) => ({
+    days: [day],
+    start,
+    end,
+    ...(gap !== undefined ? { gap } : {}),
+    ...(length !== undefined ? { length } : {}),
+  }) as WeeklyRule);
 
   return { ...spec, weekly: [...kept, ...added] };
 }

@@ -159,6 +159,34 @@ describe('AvailabilityEditor', () => {
     expect(dayGap(saved, 'mon')).toBe(15);
   });
 
+  it('lets each window set its meeting length when the product asks, and keeps it through day edits', async () => {
+    const withLengths = { ...BASE, weekly: [{ days: ['mon'], start: '09:00', end: '11:00', length: 60 }, { days: ['mon'], start: '14:00', end: '16:00' }] } as AvailabilitySpec;
+    const a = adapter(withLengths);
+    const policy = { ...POLICY, duration_choices: [30, 45, 60] };
+    a.load = vi.fn(async () => ({ spec: withLengths, policy, regions: [] }));
+    render(<AvailabilityEditor adapter={a} windowLengths />);
+    await screen.findByLabelText('Your week at a glance');
+
+    const morning = screen.getByLabelText('Meeting length from 09:00 to 11:00 on Monday') as HTMLSelectElement;
+    expect(morning.value).toBe('60');
+    expect(Array.from(morning.options).map((o) => o.value)).toEqual(['', '30', '45', '60']);
+    const afternoon = screen.getByLabelText('Meeting length from 14:00 to 16:00 on Monday') as HTMLSelectElement;
+    expect(afternoon.value).toBe('');
+    fireEvent.change(afternoon, { target: { value: '45' } });
+    fireEvent.change(screen.getAllByLabelText('Monday From')[0] as HTMLInputElement, { target: { value: '08:30' } });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Save availability' }));
+    await waitFor(() => expect(a.save).toHaveBeenCalled());
+    expect(dayWindows(a.save.mock.calls[0]![0], 'mon')).toEqual([['08:30', '11:00', 60], ['14:00', '16:00', 45]]);
+  });
+
+  it('offers no window length unless the product asks for it', async () => {
+    render(<AvailabilityEditor adapter={adapter(BASE)} />);
+    await screen.findByLabelText('Your week at a glance');
+
+    expect(screen.queryByLabelText('Meeting length from 09:00 to 12:00 on Monday')).toBeNull();
+  });
+
   it('never shows "no holidays" for a list it could not read', async () => {
     const a = { ...adapter(BASE), holidays: vi.fn(async () => { throw new Error('down'); }) };
     render(<AvailabilityEditor adapter={a} />);

@@ -1,5 +1,5 @@
 import type { AvailabilitySpec, DayName, SchedulingPolicy } from '../../types';
-import { dayGap, dayWindows, type EditorAction } from '../../hooks/useAvailabilityEditor';
+import { dayGap, dayWindows, type DayWindow, type EditorAction } from '../../hooks/useAvailabilityEditor';
 import { cx, useCalendarUi } from '../../theme';
 import { WEEK, minutesOf } from './WeekRibbon';
 
@@ -14,7 +14,7 @@ function seedWindow(policy: SchedulingPolicy, day: DayName): [string, string] {
 }
 
 /** The next window after the day's last one: an hour later, as long as the seed window. */
-function nextWindow(windows: [string, string][], seed: [string, string]): [string, string] {
+function nextWindow(windows: DayWindow[], seed: [string, string]): [string, string] {
   if (windows.length === 0) return seed;
   const length = Math.max(minutesOf(seed[1]) - minutesOf(seed[0]), 60);
   const end = minutesOf(windows[windows.length - 1]![1]);
@@ -26,17 +26,20 @@ function nextWindow(windows: [string, string][], seed: [string, string]): [strin
 }
 
 /** One row per weekday: open or not, each window it is open for, and its own buffer if it has one. */
-export function WeeklyHours({ spec, policy, edit, disabled, dayBuffers = true }: {
+export function WeeklyHours({ spec, policy, edit, disabled, dayBuffers = true, windowLengths = false }: {
   spec: AvailabilitySpec;
   policy: SchedulingPolicy;
   edit: (a: EditorAction) => void;
   disabled?: boolean;
   /** Show each day's own break (off where the week is a template, e.g. the policy's seed week). */
   dayBuffers?: boolean;
+  /** Let each window set the meeting length it offers (the policy's lengths). */
+  windowLengths?: boolean;
 }) {
   const { labels, classNames } = useCalendarUi();
   const btn = cx('cal-btn', classNames.button);
   const scheduleBuffer = spec.buffer ?? policy.default_buffer_minutes;
+  const lengths = windowLengths ? policy.duration_choices ?? [] : [];
 
   return (
     <div className="cal-avail__days">
@@ -44,7 +47,7 @@ export function WeeklyHours({ spec, policy, edit, disabled, dayBuffers = true }:
         const windows = dayWindows(spec, day);
         const name = labels.availDayNames[day];
         const gap = dayGap(spec, day);
-        const set = (next: [string, string][]) => edit({ type: 'setDayWindows', day, windows: next });
+        const set = (next: DayWindow[]) => edit({ type: 'setDayWindows', day, windows: next });
         const choices = gap === undefined || policy.buffer_choices.includes(gap) ? policy.buffer_choices : [...policy.buffer_choices, gap].sort((a, b) => a - b);
 
         return (
@@ -62,7 +65,7 @@ export function WeeklyHours({ spec, policy, edit, disabled, dayBuffers = true }:
 
             <div className="cal-avail__windows">
               {windows.length === 0 ? <span className="cal-avail__off">{labels.availDayOff}</span> : null}
-              {windows.map(([s, e], i) => (
+              {windows.map(([s, e, length], i) => (
                 <div key={`${s}-${e}-${i}`} className="cal-avail__window">
                   <input
                     className="cal-input"
@@ -71,7 +74,7 @@ export function WeeklyHours({ spec, policy, edit, disabled, dayBuffers = true }:
                     value={s}
                     disabled={disabled}
                     aria-label={`${name} ${labels.availFrom}`}
-                    onChange={(ev) => set(windows.map((w, j) => (j === i ? [ev.target.value, w[1]] : w)))}
+                    onChange={(ev) => set(windows.map((w, j) => (j === i ? [ev.target.value, w[1], w[2]] : w)))}
                   />
                   <span className="cal-avail__dash" aria-hidden="true">-</span>
                   <input
@@ -81,8 +84,22 @@ export function WeeklyHours({ spec, policy, edit, disabled, dayBuffers = true }:
                     value={e}
                     disabled={disabled}
                     aria-label={`${name} ${labels.availTo}`}
-                    onChange={(ev) => set(windows.map((w, j) => (j === i ? [w[0], ev.target.value] : w)))}
+                    onChange={(ev) => set(windows.map((w, j) => (j === i ? [w[0], ev.target.value, w[2]] : w)))}
                   />
+                  {lengths.length > 0 ? (
+                    <select
+                      className="cal-input cal-avail__length"
+                      value={length === undefined ? '' : String(length)}
+                      disabled={disabled}
+                      aria-label={labels.availLengthFor(name, s, e)}
+                      onChange={(ev) => set(windows.map((w, j) => (j !== i ? w : ev.target.value === '' ? [w[0], w[1]] : [w[0], w[1], Number(ev.target.value)])))}
+                    >
+                      <option value="">{labels.availLengthUsual}</option>
+                      {(length === undefined || lengths.includes(length) ? lengths : [...lengths, length].sort((a, b) => a - b)).map((m) => (
+                        <option key={m} value={String(m)}>{labels.availMinutes(m)}</option>
+                      ))}
+                    </select>
+                  ) : null}
                   <button
                     type="button"
                     className="cal-avail__x"

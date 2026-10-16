@@ -33,7 +33,7 @@ export function WeekRibbon({ spec }: { spec: AvailabilitySpec }) {
           <div key={day} className="cal-avail__ribbon-row">
             <span className="cal-avail__ribbon-day">{labels.availDayNames[day].slice(0, 3)}</span>
             <span className="cal-avail__ribbon-track" aria-hidden="true">
-              {bars(windows).map((b, i) => (
+              {bars(windows.map(([s, e]) => [s, e] as [string, string])).map((b, i) => (
                 <span key={i} className="cal-avail__ribbon-bar" style={{ left: `${b.left}%`, width: `${b.width}%` }} />
               ))}
             </span>

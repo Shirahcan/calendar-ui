@@ -519,6 +519,8 @@ export interface CalendarLabels {
   availBufferHelp: string;
   availDayBuffer: string;
   availDayBufferFor: (day: string) => string;
+  availLengthFor: (day: string, start: string, end: string) => string;
+  availLengthUsual: string;
   availBufferSameAsDefault: (minutes: number) => string;
   availMinutes: (minutes: number) => string;
   availOpenDay: (day: string) => string;
@@ -1002,6 +1004,8 @@ export const DEFAULT_LABELS: CalendarLabels = {
   availBufferHelp: 'A day can keep a different break: set it on that day.',
   availDayBuffer: 'Break',
   availDayBufferFor: (day) => `Break around meetings on ${day}`,
+  availLengthFor: (day, start, end) => `Meeting length from ${start} to ${end} on ${day}`,
+  availLengthUsual: 'Usual length',
   availBufferSameAsDefault: (minutes) => `Usual (${minutes} min)`,
   availMinutes: (minutes) => `${minutes} min`,
   availOpenDay: (day) => `Take meetings on ${day}`,

@@ -61,6 +61,11 @@ export interface WeeklyRule {
   valid_until?: string | null;
   /** Minutes kept free around each meeting on these days, when it differs from the schedule's buffer. */
   gap?: number;
+  /**
+   * The meeting length these hours offer, when it is not the booking type's (a 60-minute interview
+   * morning beside 30-minute afternoons). Read only by a type with `length_from_windows`.
+   */
+  length?: number;
 }
 
 /** The schema-1 availability spec the service stores (04-availability-spec-and-engine.md). */
@@ -71,8 +76,8 @@ export interface AvailabilitySpec {
   buffer?: number;
   weekly?: WeeklyRule[];
   periods?: { from: string; to: string; weekly: WeeklyRule[] }[];
-  dates?: { date: string; windows: [string, string][] }[];
-  overrides?: { date: string; windows: [string, string][]; gap?: number }[];
+  dates?: { date: string; windows: [string, string][]; length?: number }[];
+  overrides?: { date: string; windows: [string, string][]; gap?: number; length?: number }[];
   blocks?: ({ from: string; to: string } | { start: string; end: string })[];
   /** Close on the region's public holidays (the service holds the dates), except the dates in `work`. */
   holidays?: { region: string; observe: boolean; work?: string[] };
@@ -84,6 +89,8 @@ export interface SchedulingPolicy {
   max_buffer_minutes: number;
   default_buffer_minutes: number;
   buffer_choices: number[];
+  /** The meeting lengths offered (a window's own length is one of these). */
+  duration_choices?: number[];
   min_notice_minutes: number;
   horizon_days: number;
   hold_seconds: number;
