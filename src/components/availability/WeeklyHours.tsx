@@ -26,7 +26,7 @@ function nextWindow(windows: DayWindow[], seed: [string, string]): [string, stri
 }
 
 /** One row per weekday: open or not, each window it is open for, and its own buffer if it has one. */
-export function WeeklyHours({ spec, policy, edit, disabled, dayBuffers = true, windowLengths = false }: {
+export function WeeklyHours({ spec, policy, edit, disabled, dayBuffers = true, windowLengths = false, usualLength }: {
   spec: AvailabilitySpec;
   policy: SchedulingPolicy;
   edit: (a: EditorAction) => void;
@@ -35,6 +35,8 @@ export function WeeklyHours({ spec, policy, edit, disabled, dayBuffers = true, w
   dayBuffers?: boolean;
   /** Let each window set the meeting length it offers (the policy's lengths). */
   windowLengths?: boolean;
+  /** What "usual" means, in minutes, when the product says. */
+  usualLength?: number;
 }) {
   const { labels, classNames } = useCalendarUi();
   const btn = cx('cal-btn', classNames.button);
@@ -94,7 +96,7 @@ export function WeeklyHours({ spec, policy, edit, disabled, dayBuffers = true, w
                       aria-label={labels.availLengthFor(name, s, e)}
                       onChange={(ev) => set(windows.map((w, j) => (j !== i ? w : ev.target.value === '' ? [w[0], w[1]] : [w[0], w[1], Number(ev.target.value)])))}
                     >
-                      <option value="">{labels.availLengthUsual}</option>
+                      <option value="">{usualLength ? `${labels.availLengthUsual} (${labels.availMinutes(usualLength)})` : labels.availLengthUsual}</option>
                       {(length === undefined || lengths.includes(length) ? lengths : [...lengths, length].sort((a, b) => a - b)).map((m) => (
                         <option key={m} value={String(m)}>{labels.availMinutes(m)}</option>
                       ))}

@@ -180,6 +180,17 @@ describe('AvailabilityEditor', () => {
     expect(dayWindows(a.save.mock.calls[0]![0], 'mon')).toEqual([['08:30', '11:00', 60], ['14:00', '16:00', 45]]);
   });
 
+  it('says what the usual length is when the product tells it', async () => {
+    const policy = { ...POLICY, duration_choices: [30, 60] };
+    const a = adapter(BASE);
+    a.load = vi.fn(async () => ({ spec: BASE, policy, regions: [] }));
+    render(<AvailabilityEditor adapter={a} windowLengths usualLength={60} />);
+    await screen.findByLabelText('Your week at a glance');
+
+    const select = screen.getByLabelText('Meeting length from 09:00 to 12:00 on Monday') as HTMLSelectElement;
+    expect(select.options[0]!.textContent).toBe(`Usual length (${select.options[2]!.textContent})`);
+  });
+
   it('offers no window length unless the product asks for it', async () => {
     render(<AvailabilityEditor adapter={adapter(BASE)} />);
     await screen.findByLabelText('Your week at a glance');
