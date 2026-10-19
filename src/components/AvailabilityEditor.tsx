@@ -4,6 +4,7 @@ import { cx, useCalendarUi } from '../theme';
 import { errorText } from '../errorText';
 import { DateChanges } from './availability/DateChanges';
 import { PublicHolidays } from './availability/PublicHolidays';
+import { SeasonalHours } from './availability/SeasonalHours';
 import { TimeOff } from './availability/TimeOff';
 import { WeekRibbon } from './availability/WeekRibbon';
 import { WeeklyHours } from './availability/WeeklyHours';
@@ -126,7 +127,12 @@ export function AvailabilityEditor({ adapter, sections = ['weekly', 'dates', 'ti
           ) : null}
 
           <div role="tabpanel" id={`${ids}-${tab}-panel`} aria-labelledby={`${ids}-${tab}`} className="cal-avail__panel">
-            {tab === 'weekly' && s.policy ? <WeeklyHours spec={s.spec} policy={s.policy} edit={s.edit} disabled={busy} windowLengths={windowLengths} usualLength={usualLength} /> : null}
+            {tab === 'weekly' && s.policy ? (
+              <>
+                <WeeklyHours spec={s.spec} policy={s.policy} edit={s.edit} disabled={busy} windowLengths={windowLengths} usualLength={usualLength} />
+                <SeasonalHours spec={s.spec} policy={s.policy} edit={s.edit} disabled={busy} windowLengths={windowLengths} usualLength={usualLength} />
+              </>
+            ) : null}
             {tab === 'dates' ? <DateChanges spec={s.spec} edit={s.edit} disabled={busy} /> : null}
             {tab === 'timeoff' ? <TimeOff spec={s.spec} edit={s.edit} disabled={busy} /> : null}
             {tab === 'holidays' ? <PublicHolidays spec={s.spec} edit={s.edit} regions={s.regions} holidays={adapter.holidays} disabled={busy} /> : null}

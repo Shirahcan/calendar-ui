@@ -213,3 +213,67 @@ describe('AvailabilityEditor', () => {
     expect((await screen.findByRole('alert')).textContent).toBe('The calendar service is unreachable.');
   });
 });
+
+describe('Hours for a set time', () => {
+  const SEASONAL: AvailabilitySpec = {
+    schema: 1,
+    timezone: { zone: 'America/Edmonton' },
+    weekly: [
+      { days: ['wed'], start: '09:00', end: '12:00' },
+      { days: ['mon', 'fri'], start: '09:00', end: '17:00', valid_until: '2099-09-16', length: 30 },
+      { days: ['tue'], start: '10:00', end: '11:00', valid_until: '2000-01-31' },
+    ],
+    periods: [{ from: '2099-12-01', to: '2099-12-20', weekly: [{ days: ['sat'], start: '10:00', end: '14:00' }] }],
+    dates: [{ date: '2099-11-03', windows: [['18:00', '20:00']] }],
+  };
+
+  it('shows every weekly rule with dates and every season, and removes one', async () => {
+    const a = adapter(SEASONAL);
+    render(<AvailabilityEditor adapter={a} />);
+    await screen.findByLabelText('Your week at a glance');
+
+    // The every-week pattern leaves them out, so this list is the only place they are seen.
+    expect(screen.getByText('Monday, Friday: 09:00 to 17:00, 30 min meetings')).toBeTruthy();
+    expect(screen.getByText('Saturday: 10:00 to 14:00')).toBeTruthy();
+    expect(screen.getByText('Tuesday: 10:00 to 11:00 (ended)')).toBeTruthy();
+
+    const row = screen.getByText('Monday, Friday: 09:00 to 17:00, 30 min meetings').closest('li')!;
+    fireEvent.click(within(row).getByRole('button', { name: 'Remove' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Save availability' }));
+    await waitFor(() => expect(a.save).toHaveBeenCalled());
+    const saved = a.save.mock.calls[0]![0] as AvailabilitySpec;
+    expect(saved.weekly).toEqual([SEASONAL.weekly![0], SEASONAL.weekly![2]]);
+    expect(saved.periods).toEqual(SEASONAL.periods);
+  });
+
+  it('adds hours that end on a date, and only once a date is picked', async () => {
+    const a = adapter({ schema: 1, timezone: { zone: 'America/Edmonton' }, weekly: [] });
+    const policy = { ...POLICY, duration_choices: [30, 60] };
+    a.load = vi.fn(async () => ({ spec: { schema: 1 as const, timezone: { zone: 'America/Edmonton' }, weekly: [] }, policy, regions: [] }));
+    render(<AvailabilityEditor adapter={a} windowLengths />);
+    await screen.findByLabelText('Your week at a glance');
+
+    const add = screen.getByRole('button', { name: 'Add these hours' }) as HTMLButtonElement;
+    const season = add.closest('.cal-avail__season') as HTMLElement;
+    fireEvent.click(within(season).getByLabelText('Thursday'));
+    expect(add.disabled).toBe(true);
+    expect(screen.getByText('Pick a start date, an end date or both. Hours with neither belong in the week above.')).toBeTruthy();
+
+    fireEvent.change(within(season).getByLabelText('Ends on'), { target: { value: '2099-03-31' } });
+    fireEvent.change(within(season).getByLabelText('Meeting length', { exact: false }), { target: { value: '60' } });
+    fireEvent.click(add);
+    fireEvent.click(screen.getByRole('button', { name: 'Save availability' }));
+    await waitFor(() => expect(a.save).toHaveBeenCalled());
+    expect((a.save.mock.calls[0]![0] as AvailabilitySpec).weekly).toEqual([
+      { days: ['thu'], start: '08:30', end: '16:30', valid_until: '2099-03-31', length: 60 },
+    ]);
+  });
+
+  it('lists extra hours on a date beside the date changes', async () => {
+    render(<AvailabilityEditor adapter={adapter(SEASONAL)} />);
+    await screen.findByLabelText('Your week at a glance');
+    fireEvent.click(screen.getByRole('tab', { name: 'Date changes' }));
+
+    expect(screen.getByText('Extra hours: 18:00-20:00')).toBeTruthy();
+  });
+});

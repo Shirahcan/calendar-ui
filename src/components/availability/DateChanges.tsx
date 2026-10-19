@@ -19,6 +19,9 @@ export function DateChanges({ spec, edit, disabled }: { spec: AvailabilitySpec; 
   const [closed, setClosed] = useState(false);
   const btn = cx('cal-btn', classNames.button);
   const rows = spec.overrides ?? [];
+  // Extra hours on a date, on top of its usual ones (no screen adds these; they are listed so a
+  // person can see and remove hours that are open for them).
+  const extras = spec.dates ?? [];
 
   const add = () => {
     if (!date) return;
@@ -56,7 +59,7 @@ export function DateChanges({ spec, edit, disabled }: { spec: AvailabilitySpec; 
         </button>
       </div>
 
-      {rows.length === 0 ? (
+      {rows.length === 0 && extras.length === 0 ? (
         <p className="cal-avail__empty">{labels.availNoChanges}</p>
       ) : (
         <ul className="cal-avail__list">
@@ -65,6 +68,15 @@ export function DateChanges({ spec, edit, disabled }: { spec: AvailabilitySpec; 
               <span className="cal-avail__item-date">{dateLabel(r.date)}</span>
               <span className="cal-avail__item-what">{r.windows.length ? r.windows.map(([s, e]) => `${s}-${e}`).join(', ') : labels.availClosedAllDay}</span>
               <button type="button" className={cx(btn, 'cal-btn--ghost')} disabled={disabled} onClick={() => edit({ type: 'removeOverride', date: r.date })}>
+                {labels.availRemove}
+              </button>
+            </li>
+          ))}
+          {extras.map((r) => (
+            <li key={`x${r.date}`} className="cal-avail__item">
+              <span className="cal-avail__item-date">{dateLabel(r.date)}</span>
+              <span className="cal-avail__item-what">{labels.availExtraHours(r.windows.map(([s, e]) => `${s}-${e}`).join(', '))}</span>
+              <button type="button" className={cx(btn, 'cal-btn--ghost')} disabled={disabled} onClick={() => edit({ type: 'removeDate', date: r.date })}>
                 {labels.availRemove}
               </button>
             </li>

@@ -549,6 +549,23 @@ export interface CalendarLabels {
   availLoading: string;
   availFailed: string;
   availNoHours: string;
+  /** Weekly hours that start or stop on a date (SeasonalHours). */
+  availSeasonTitle: string;
+  availSeasonIntro: string;
+  availSeasonNone: string;
+  availSeasonDays: string;
+  availSeasonStarts: string;
+  availSeasonEnds: string;
+  availSeasonLength: string;
+  availSeasonAdd: string;
+  availSeasonEnded: string;
+  availSeasonNeedsDate: string;
+  availSeasonBackwards: string;
+  /** The dates a row applies for, each already formatted; either may be open. */
+  availSeasonWhen: (from: string | null, until: string | null) => string;
+  availSeasonHours: (days: string, start: string, end: string, length: number | null) => string;
+  /** A date with extra hours added to its usual ones (a `dates` row), in Date changes. */
+  availExtraHours: (windows: string) => string;
 }
 
 /** "1 day", "2 hours", "1 hour 30 minutes", "15 minutes". */
@@ -1034,6 +1051,20 @@ export const DEFAULT_LABELS: CalendarLabels = {
   availLoading: 'Loading availability...',
   availFailed: 'Your availability did not save. Please try again.',
   availNoHours: 'No hours yet. Add the hours you can take meetings.',
+  availSeasonTitle: 'Hours for a set time',
+  availSeasonIntro: 'Weekly hours that start or stop on a date, such as a busy season or a temporary schedule. While they last, they add to the hours above.',
+  availSeasonNone: 'No hours for a set time.',
+  availSeasonDays: 'Days',
+  availSeasonStarts: 'Starts on',
+  availSeasonEnds: 'Ends on',
+  availSeasonLength: 'Meeting length',
+  availSeasonAdd: 'Add these hours',
+  availSeasonEnded: 'ended',
+  availSeasonNeedsDate: 'Pick a start date, an end date or both. Hours with neither belong in the week above.',
+  availSeasonBackwards: 'The end date is before the start date.',
+  availSeasonWhen: (from, until) => (from && until ? `${from} to ${until}` : from ? `From ${from}` : `Until ${until}`),
+  availSeasonHours: (days, start, end, length) => `${days}: ${start} to ${end}${length ? `, ${length} min meetings` : ''}`,
+  availExtraHours: (windows) => `Extra hours: ${windows}`,
 };
 
 /** Extra classes per part, appended to the package's own (never replacing them). */

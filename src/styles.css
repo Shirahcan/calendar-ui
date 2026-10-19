@@ -292,6 +292,13 @@
 .cal-avail__item-what { flex: 1; min-width: 8rem; color: var(--cal-ink-muted); }
 .cal-avail__item--working { border-color: color-mix(in srgb, var(--cal-accent) 35%, var(--cal-border)); }
 .cal-avail__item .cal-btn { padding: 6px 12px; font-size: 13px; }
+.cal-avail__item--ended { opacity: 0.65; }
+
+/* Weekly hours with dates: below the every-week pattern, set apart by a rule. */
+.cal-avail__season { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--cal-border); }
+.cal-avail__subtitle { margin: 0; font-size: 14px; font-weight: 700; color: var(--cal-ink); }
+.cal-avail__season-days { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 0; padding: 0; border: 0; min-width: 0; }
+.cal-avail__season-days legend { width: 100%; padding: 0; margin-bottom: 2px; }
 
 .cal-avail__extra { padding-top: 14px; border-top: 1px solid var(--cal-border); }
 .cal-avail__bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding-top: 14px; border-top: 1px solid var(--cal-border); }
