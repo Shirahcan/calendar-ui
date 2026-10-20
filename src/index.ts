@@ -51,6 +51,7 @@ export type { MeetingNotesPanelProps } from './components/MeetingNotesPanel';
 export { PendingPadsBanner, PadReviewDialog, usePendingPads } from './components/PendingPads';
 export { useConfirm } from './components/ConfirmDialog';
 export { MeetingActions, MeetingDetails, MeetingPeople, MeetingSummary, PersonLocalTime, meetingLinkState } from './components/MeetingPanels';
+export { MeetingHistory, type MeetingHistoryEntry } from './components/MeetingHistory';
 export { MeetingParticipantsPanel } from './components/MeetingParticipantsPanel';
 export type { MeetingParticipantView, MeetingParticipantsPanelProps } from './components/MeetingParticipantsPanel';
 export type { MeetingAction, MeetingSummaryProps, MeetingView } from './components/MeetingPanels';

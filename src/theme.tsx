@@ -180,6 +180,14 @@ export interface CalendarLabels {
   meetingBookedZone: string;
   /** Under a person: the meeting on their clock (PersonLocalTime). */
   meetingTheirTime: (when: string) => string;
+  /* What happened to a meeting (MeetingHistory) */
+  meetingHistory: string;
+  /** The service's event in a person's words; null hides it. */
+  meetingHistoryEvent: (event: string) => string | null;
+  /** "Rescheduled on Tue, Oct 20, 2:05 PM by Maria Garcia" (`by` null: nobody named). */
+  meetingHistoryLine: (what: string, when: string, by: string | null) => string;
+  meetingHistoryMoved: (from: string, to: string) => string;
+  meetingHistoryReason: (reason: string) => string;
   /* The quick look at one meeting, and moving or cancelling it (plan M2) */
   quickViewClose: string;
   quickViewJoin: string;
@@ -690,6 +698,14 @@ export const DEFAULT_LABELS: CalendarLabels = {
   meetingBooked: 'Booked on',
   meetingBookedZone: 'Timezone booked in',
   meetingTheirTime: (when) => `Their time: ${when}`,
+  meetingHistory: 'History',
+  meetingHistoryEvent: (e) => ({
+    created: 'Booked', confirmed: 'Booked', approved: 'Approved', declined: 'Declined', rescheduled: 'Rescheduled',
+    proposal_accepted: 'Moved to a new time', cancelled: 'Cancelled', rebooked: 'Booked again',
+  } as Record<string, string>)[e] ?? null,
+  meetingHistoryLine: (what, when, by) => `${what} on ${when}${by ? ` by ${by}` : ''}`,
+  meetingHistoryMoved: (from, to) => `From ${from} to ${to}`,
+  meetingHistoryReason: (reason) => `Reason: ${reason}`,
   quickViewClose: 'Close',
   quickViewJoin: 'Join meeting',
   quickViewOpenPage: 'Open meeting page',

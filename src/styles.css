@@ -461,6 +461,10 @@
 .cal-meeting__cancelled { border-color: var(--cal-danger); }
 .cal-meeting__text { margin: 0; font-size: 14px; white-space: pre-wrap; overflow-wrap: anywhere; color: var(--cal-ink); }
 .cal-meeting-side__title { margin: 0; font-size: 16px; font-weight: 600; }
+.cal-history { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; min-width: 0; }
+.cal-history__item { display: grid; gap: 2px; padding-left: 12px; border-left: 2px solid var(--cal-border); min-width: 0; }
+.cal-history__what { margin: 0; font-size: 14px; color: var(--cal-ink); overflow-wrap: anywhere; }
+.cal-history__detail { margin: 0; font-size: 13px; color: var(--cal-ink-muted); overflow-wrap: anywhere; }
 .cal-meeting-side__person { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .cal-meeting-side__list { display: grid; gap: 16px; min-width: 0; }
 .cal-meeting-side__who { min-width: 0; }
