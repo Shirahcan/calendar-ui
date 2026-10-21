@@ -31,13 +31,18 @@ export interface SchedulingPolicyEditorProps {
    * (`wait_after`). None: the section is not shown. Waits on events not listed are kept as they are.
    */
   waitEvents?: SchedulingWaitEvent[];
+  /**
+   * Named limits on how long a person may set their own wait (`wait_after_limits`), e.g.
+   * `{ key: 'marketplace', label: 'marketplace consultants' }`. None: the fields are not shown.
+   */
+  waitLimits?: SchedulingWaitEvent[];
   className?: string;
 }
 
 /** The service sends an empty map as `[]`; read it as no waits. */
 const normalise = (s: SchedulingPolicyState): SchedulingPolicyState => {
-  const w = s.policy.wait_after;
-  return Array.isArray(w) || w == null ? { ...s, policy: { ...s.policy, wait_after: {} } } : s;
+  const map = (m: Record<string, number> | undefined) => (Array.isArray(m) || m == null ? {} : m);
+  return { ...s, policy: { ...s.policy, wait_after: map(s.policy.wait_after), wait_after_limits: map(s.policy.wait_after_limits) } };
 };
 
 const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
@@ -51,7 +56,7 @@ const CALL_TOOLS = ['zoom', 'google_meet'] as const;
  * people may use and the backup when a call's own room cannot be rescued. The values live in calendar-service; an
  * admin changes them here without a developer or a deploy.
  */
-export function SchedulingPolicyEditor({ adapter, describeError, showBackupCall = true, waitEvents = [], className }: SchedulingPolicyEditorProps) {
+export function SchedulingPolicyEditor({ adapter, describeError, showBackupCall = true, waitEvents = [], waitLimits = [], className }: SchedulingPolicyEditorProps) {
   const { labels, classNames } = useCalendarUi();
   const ids = useId();
   const [saved, setSaved] = useState<SchedulingPolicyState | null>(null);
@@ -190,6 +195,23 @@ export function SchedulingPolicyEditor({ adapter, describeError, showBackupCall 
                       onChange={(e) => set('wait_after', { ...(draft.wait_after ?? {}), [ev.key]: Math.max(0, Math.round(Number(e.target.value) || 0)) * 60 })}
                     />
                     {ev.hint ? <span className="cal-policy__hint" id={`${ids}-wait-${ev.key}-hint`}>{ev.hint}</span> : null}
+                  </div>
+                ))}
+                {waitLimits.map((lim) => (
+                  <div key={lim.key} className="cal-policy__field">
+                    <label htmlFor={`${ids}-limit-${lim.key}`}>{labels.policyWaitLimit(lim.label)}</label>
+                    <input
+                      id={`${ids}-limit-${lim.key}`}
+                      className="cal-input"
+                      type="number"
+                      min={0}
+                      inputMode="numeric"
+                      aria-describedby={`${ids}-limit-${lim.key}-hint`}
+                      value={String(Math.round((draft.wait_after_limits?.[lim.key] ?? 0) / 60))}
+                      disabled={busy}
+                      onChange={(e) => set('wait_after_limits', { ...(draft.wait_after_limits ?? {}), [lim.key]: Math.max(0, Math.round(Number(e.target.value) || 0)) * 60 })}
+                    />
+                    <span className="cal-policy__hint" id={`${ids}-limit-${lim.key}-hint`}>{lim.hint ?? labels.policyWaitLimitHint}</span>
                   </div>
                 ))}
               </div>

@@ -73,6 +73,21 @@ describe('SchedulingPolicyEditor', () => {
     expect(save.mock.calls[1]![0]!.wait_after).toEqual({ other: 60 });
   });
 
+  it('sets a named limit on how long people may choose their own wait', async () => {
+    const save = vi.fn(async (p: SchedulingPolicy | null) => ({ policy: p ?? DEFAULTS, is_default: false }));
+    render(
+      <SchedulingPolicyEditor
+        adapter={{ load: async () => ({ policy: { ...DEFAULTS, wait_after: { case_accepted: 1440 }, wait_after_limits: [] as unknown as Record<string, number> }, is_default: false }), save }}
+        waitEvents={[{ key: 'case_accepted', label: 'After a consultant accepts a case' }]}
+        waitLimits={[{ key: 'marketplace', label: 'marketplace consultants' }]}
+      />,
+    );
+    fireEvent.change(await screen.findByLabelText('Most marketplace consultants may choose (hours)'), { target: { value: '72' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save rules' }));
+    await waitFor(() => expect(save).toHaveBeenCalledTimes(1));
+    expect(save.mock.calls[0]![0]!.wait_after_limits).toEqual({ marketplace: 4320 });
+  });
+
   it('shows the service refusal', async () => {
     render(<SchedulingPolicyEditor adapter={{ load: async () => ({ policy: DEFAULTS, is_default: true }), save: async () => { throw new Error('The default buffer must sit between the minimum and the maximum.'); } }} />);
     fireEvent.change(await screen.findByLabelText('Usual (minutes)'), { target: { value: '999' } });

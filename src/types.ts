@@ -108,6 +108,8 @@ export interface SchedulingPolicy {
    * minutes per event name (`{ case_accepted: 1440 }`). Empty or 0 = no wait.
    */
   wait_after?: Record<string, number>;
+  /** Named limits on a person's own wait, minutes: `{ marketplace: 4320 }`. */
+  wait_after_limits?: Record<string, number>;
 }
 
 /** An event a product reports when people book (`since`), offered as a wait on the policy editor. */

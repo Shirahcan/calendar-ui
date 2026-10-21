@@ -84,6 +84,8 @@ export { MeetingStatusFilter, MEETING_STATUSES } from './components/MeetingStatu
 export type { MeetingStatusFilterProps } from './components/MeetingStatusFilter';
 export type { BackupCallAccount, BackupCallAccountAdapter, BackupCallAccountPanelProps } from './components/BackupCallAccountPanel';
 export { BookingApprovalToggle, CallToolPicker } from './components/CallToolPicker';
+export { BookingWaitPicker } from './components/BookingWaitPicker';
+export type { BookingWaitAdapter, BookingWaitPickerProps, BookingWaitState } from './components/BookingWaitPicker';
 export type { BookingApprovalAdapter, CallToolAccount, CallToolKind, CallToolPickerProps, CallToolsAdapter, CallToolsState } from './components/CallToolPicker';
 export { BookingLinksManager } from './components/BookingLinksManager';
 export type { BookingLinkAction, BookingLinksAdapter, BookingLinksManagerProps } from './components/BookingLinksManager';

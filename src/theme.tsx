@@ -452,6 +452,16 @@ export interface CalendarLabels {
   approvalHint: string;
   approvalOn: string;
   approvalOff: string;
+  waitLoading: string;
+  waitStandard: (hours: number) => string;
+  waitOwn: string;
+  waitHours: string;
+  waitRange: (maxHours: number) => string;
+  waitSave: string;
+  waitSaved: string;
+  waitFailed: string;
+  policyWaitLimit: (who: string) => string;
+  policyWaitLimitHint: string;
   // Booking links (BookingLinksManager, BookingLinkEditor)
   linksTitle: string;
   linksIntro: string;
@@ -969,6 +979,16 @@ export const DEFAULT_LABELS: CalendarLabels = {
   approvalHint: 'When on, a new booking waits for you to approve it before it is confirmed, and the person is told it is pending.',
   approvalOn: 'On',
   approvalOff: 'Off',
+  waitLoading: 'Loading your wait...',
+  waitStandard: (hours) => (hours === 0 ? 'Use the standard wait (none)' : `Use the standard wait (${hours} ${hours === 1 ? 'hour' : 'hours'})`),
+  waitOwn: 'Set my own',
+  waitHours: 'Hours',
+  waitRange: (maxHours) => `0 (none) to ${maxHours % 24 === 0 ? `${maxHours / 24} ${maxHours === 24 ? 'day' : 'days'}` : `${maxHours} hours`}.`,
+  waitSave: 'Save wait',
+  waitSaved: 'Saved',
+  waitFailed: 'That wait did not save. Please try again.',
+  policyWaitLimit: (who) => `Most ${who} may choose (hours)`,
+  policyWaitLimitHint: 'People may set their own wait up to this. Others choose any wait up to 90 days.',
   linksTitle: 'Booking links',
   linksIntro: 'Each link is a way to book time with you, with its own length and rules.',
   linksLoading: 'Loading your links...',
