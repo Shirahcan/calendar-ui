@@ -91,15 +91,17 @@ export function BookingWaitPicker({ adapter, title, hint, describeError, classNa
       {state === null && !error ? <p className="cal-tools__intro">{labels.waitLoading}</p> : null}
 
       {state !== null ? (
-        <div className="cal-wait__body" role="radiogroup" aria-labelledby={`${ids}-t`}>
-          <label className="cal-policy__check">
-            <input type="radio" name={`${ids}-mode`} checked={!own} disabled={busy} onChange={() => { setOwn(false); setSaved(false); }} />
-            {labels.waitStandard(hoursOf(state.standard))}
-          </label>
-          <label className="cal-policy__check">
-            <input type="radio" name={`${ids}-mode`} checked={own} disabled={busy} onChange={() => { setOwn(true); setSaved(false); }} />
-            {labels.waitOwn}
-          </label>
+        <div className="cal-wait__body">
+          <div className="cal-wait__choices" role="radiogroup" aria-labelledby={`${ids}-t`}>
+            <label className="cal-policy__check">
+              <input type="radio" name={`${ids}-mode`} checked={!own} disabled={busy} onChange={() => { setOwn(false); setSaved(false); }} />
+              {labels.waitStandard(hoursOf(state.standard))}
+            </label>
+            <label className="cal-policy__check">
+              <input type="radio" name={`${ids}-mode`} checked={own} disabled={busy} onChange={() => { setOwn(true); setSaved(false); }} />
+              {labels.waitOwn}
+            </label>
+          </div>
           {own ? (
             <div className="cal-policy__field">
               <label htmlFor={`${ids}-h`}>{labels.waitHours}</label>

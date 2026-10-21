@@ -533,6 +533,14 @@
 .cal-tools__side .cal-btn { padding: 6px 14px; font-size: 13px; white-space: nowrap; }
 .cal-tools__inuse { font-size: 12px; font-weight: 600; color: var(--cal-accent); white-space: nowrap; }
 .cal-approval__row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+/* A product that already draws its own card around a panel: no second border, padding or surface. */
+.cal-tools--flush { border: 0; padding: 0; background: transparent; }
+/* BookingWaitPicker: the two choices, the hours field and the save row each get their own room. */
+.cal-wait__body { display: grid; gap: 14px; }
+.cal-wait__choices { display: grid; gap: 10px; }
+.cal-wait__body .cal-policy__check { min-height: 24px; }
+.cal-wait__body .cal-policy__field { display: grid; gap: 6px; max-width: 18rem; }
+.cal-wait__body .cal-policy__actions { padding-top: 2px; }
 .cal-switch { display: inline-flex; align-items: center; gap: 8px; flex: none; padding: 3px 10px 3px 3px; border: 1px solid var(--cal-border); border-radius: var(--cal-radius-pill); background: var(--cal-surface-muted); color: var(--cal-ink-muted); font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; outline: none; }
 .cal-switch__knob { width: 20px; height: 20px; border-radius: 50%; background: var(--cal-border); transition: background 0.15s; }
 .cal-switch[aria-checked='true'] { border-color: var(--cal-accent); color: var(--cal-accent); }
