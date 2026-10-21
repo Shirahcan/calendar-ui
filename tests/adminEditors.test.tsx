@@ -44,6 +44,35 @@ describe('SchedulingPolicyEditor', () => {
     await screen.findByText('Saved');
   });
 
+  it('offers a wait in hours for each event the product reports and keeps waits it does not list', async () => {
+    // The service sends an empty map as [].
+    const loaded = { ...DEFAULTS, wait_after: [] as unknown as Record<string, number> };
+    const save = vi.fn(async (p: SchedulingPolicy | null) => ({ policy: p ?? DEFAULTS, is_default: false }));
+    const { unmount } = render(
+      <SchedulingPolicyEditor
+        adapter={{ load: async () => ({ policy: loaded, is_default: true }), save }}
+        waitEvents={[{ key: 'case_accepted', label: 'After a consultant accepts a case', hint: 'Time to read the file.' }]}
+      />,
+    );
+
+    const field = await screen.findByLabelText('After a consultant accepts a case (hours)');
+    expect((field as HTMLInputElement).value).toBe('0');
+    expect(screen.getByRole('button', { name: 'Save rules' })).toHaveProperty('disabled', true);
+    fireEvent.change(field, { target: { value: '24' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save rules' }));
+    await waitFor(() => expect(save).toHaveBeenCalledTimes(1));
+    expect(save.mock.calls[0]![0]!.wait_after).toEqual({ case_accepted: 1440 });
+    unmount();
+
+    // A wait on an event this product does not list is kept, and no section shows without events.
+    render(<SchedulingPolicyEditor adapter={{ load: async () => ({ policy: { ...DEFAULTS, wait_after: { other: 60 } }, is_default: false }), save }} />);
+    fireEvent.change(await screen.findByLabelText('Usual (minutes)'), { target: { value: '5' } });
+    expect(screen.queryByText('Wait before booking')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Save rules' }));
+    await waitFor(() => expect(save).toHaveBeenCalledTimes(2));
+    expect(save.mock.calls[1]![0]!.wait_after).toEqual({ other: 60 });
+  });
+
   it('shows the service refusal', async () => {
     render(<SchedulingPolicyEditor adapter={{ load: async () => ({ policy: DEFAULTS, is_default: true }), save: async () => { throw new Error('The default buffer must sit between the minimum and the maximum.'); } }} />);
     fireEvent.change(await screen.findByLabelText('Usual (minutes)'), { target: { value: '999' } });

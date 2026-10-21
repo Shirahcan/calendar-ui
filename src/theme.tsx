@@ -342,6 +342,9 @@ export interface CalendarLabels {
   policySeedWeekHint: string;
   policyObserveHolidays: string;
   policyRecords: string;
+  policyWait: string;
+  policyWaitHint: string;
+  policyWaitField: (event: string) => string;
   policyEraseAfter: string;
   policyEraseAfterHint: string;
   policySave: string;
@@ -851,6 +854,9 @@ export const DEFAULT_LABELS: CalendarLabels = {
   policySeedWeekHint: 'Also the hours a day gets when someone turns it on.',
   policyObserveHolidays: "Close on a person's public holidays unless they choose otherwise",
   policyRecords: 'Meeting records',
+  policyWait: 'Wait before booking',
+  policyWaitHint: 'Times open only this long after the event, for the person it happened to. 0 means no wait.',
+  policyWaitField: (event) => `${event} (hours)`,
   policyEraseAfter: 'Erase ended meetings after (days)',
   policyEraseAfterHint: 'Their notes, pads and attendee details are erased for good. Leave empty to keep them; a regulated practice may have to keep records for years. 30 to 3650.',
   policySave: 'Save rules',

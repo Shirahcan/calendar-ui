@@ -103,6 +103,21 @@ export interface SchedulingPolicy {
   call_tools_offered?: Array<'zoom' | 'google_meet'>;
   /** The tool a backup call is made on when a call's own room cannot be rescued; null = none. */
   backup_call_tool?: 'google_meet' | null;
+  /**
+   * Times that open only a while after an event the product reports for the person booking:
+   * minutes per event name (`{ case_accepted: 1440 }`). Empty or 0 = no wait.
+   */
+  wait_after?: Record<string, number>;
+}
+
+/** An event a product reports when people book (`since`), offered as a wait on the policy editor. */
+export interface SchedulingWaitEvent {
+  /** The event name the product sends, e.g. `case_accepted`. */
+  key: string;
+  /** What happened, in the product's words: "After a consultant accepts a case". */
+  label: string;
+  /** Why a wait helps, shown under the field. */
+  hint?: string;
 }
 
 /** What the server can actually offer right now (the policy less what is not configured). */

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useId, useState } from 'react';
 import { cx, useCalendarUi } from '../theme';
 import { errorText } from '../errorText';
-import type { AvailabilitySpec, SchedulingOffered, SchedulingPolicy } from '../types';
+import type { AvailabilitySpec, SchedulingOffered, SchedulingPolicy, SchedulingWaitEvent } from '../types';
 import { reduceSpec } from '../hooks/useAvailabilityEditor';
 import { WeeklyHours } from './availability/WeeklyHours';
 
@@ -26,8 +26,19 @@ export interface SchedulingPolicyEditorProps {
   describeError?: (error: unknown) => string;
   /** Offer the backup call setting (default on). A product that ships it dark passes false. */
   showBackupCall?: boolean;
+  /**
+   * The events this product reports when people book (`since`), each offered as a wait in hours
+   * (`wait_after`). None: the section is not shown. Waits on events not listed are kept as they are.
+   */
+  waitEvents?: SchedulingWaitEvent[];
   className?: string;
 }
+
+/** The service sends an empty map as `[]`; read it as no waits. */
+const normalise = (s: SchedulingPolicyState): SchedulingPolicyState => {
+  const w = s.policy.wait_after;
+  return Array.isArray(w) || w == null ? { ...s, policy: { ...s.policy, wait_after: {} } } : s;
+};
 
 const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
 
@@ -40,7 +51,7 @@ const CALL_TOOLS = ['zoom', 'google_meet'] as const;
  * people may use and the backup when a call's own room cannot be rescued. The values live in calendar-service; an
  * admin changes them here without a developer or a deploy.
  */
-export function SchedulingPolicyEditor({ adapter, describeError, showBackupCall = true, className }: SchedulingPolicyEditorProps) {
+export function SchedulingPolicyEditor({ adapter, describeError, showBackupCall = true, waitEvents = [], className }: SchedulingPolicyEditorProps) {
   const { labels, classNames } = useCalendarUi();
   const ids = useId();
   const [saved, setSaved] = useState<SchedulingPolicyState | null>(null);
@@ -51,7 +62,8 @@ export function SchedulingPolicyEditor({ adapter, describeError, showBackupCall 
   const [justSaved, setJustSaved] = useState(false);
   const describe = describeError ?? ((e: unknown) => errorText(e, labels.policyFailed));
 
-  const adopt = useCallback((s: SchedulingPolicyState) => {
+  const adopt = useCallback((state: SchedulingPolicyState) => {
+    const s = normalise(state);
     setSaved(s);
     setDraft(s.policy);
   }, []);
@@ -157,6 +169,32 @@ export function SchedulingPolicyEditor({ adapter, describeError, showBackupCall 
               </label>
             </div>
           </fieldset>
+
+          {waitEvents.length > 0 ? (
+            <fieldset className="cal-policy__group">
+              <legend>{labels.policyWait}</legend>
+              <p className="cal-policy__hint">{labels.policyWaitHint}</p>
+              <div className="cal-policy__row">
+                {waitEvents.map((ev) => (
+                  <div key={ev.key} className="cal-policy__field">
+                    <label htmlFor={`${ids}-wait-${ev.key}`}>{labels.policyWaitField(ev.label)}</label>
+                    <input
+                      id={`${ids}-wait-${ev.key}`}
+                      className="cal-input"
+                      type="number"
+                      min={0}
+                      inputMode="numeric"
+                      aria-describedby={ev.hint ? `${ids}-wait-${ev.key}-hint` : undefined}
+                      value={String(Math.round((draft.wait_after?.[ev.key] ?? 0) / 60))}
+                      disabled={busy}
+                      onChange={(e) => set('wait_after', { ...(draft.wait_after ?? {}), [ev.key]: Math.max(0, Math.round(Number(e.target.value) || 0)) * 60 })}
+                    />
+                    {ev.hint ? <span className="cal-policy__hint" id={`${ids}-wait-${ev.key}-hint`}>{ev.hint}</span> : null}
+                  </div>
+                ))}
+              </div>
+            </fieldset>
+          ) : null}
 
           <fieldset className="cal-policy__group">
             <legend>{labels.policySeedWeek}</legend>
