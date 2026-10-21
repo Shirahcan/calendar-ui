@@ -86,6 +86,8 @@ export type { BackupCallAccount, BackupCallAccountAdapter, BackupCallAccountPane
 export { BookingApprovalToggle, CallToolPicker } from './components/CallToolPicker';
 export { BookingWaitPicker } from './components/BookingWaitPicker';
 export type { BookingWaitAdapter, BookingWaitPickerProps, BookingWaitState } from './components/BookingWaitPicker';
+export { BookingWaitField } from './components/BookingWaitField';
+export type { BookingWaitFieldProps } from './components/BookingWaitField';
 export type { BookingApprovalAdapter, CallToolAccount, CallToolKind, CallToolPickerProps, CallToolsAdapter, CallToolsState } from './components/CallToolPicker';
 export { BookingLinksManager } from './components/BookingLinksManager';
 export type { BookingLinkAction, BookingLinksAdapter, BookingLinksManagerProps } from './components/BookingLinksManager';

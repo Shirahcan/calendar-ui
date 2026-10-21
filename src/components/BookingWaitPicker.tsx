@@ -1,6 +1,7 @@
 import { useEffect, useId, useState } from 'react';
 import { cx, useCalendarUi } from '../theme';
 import { errorText } from '../errorText';
+import { WaitHoursInput, validWaitHours } from './BookingWaitField';
 
 /** A host's wait after one reported event (calendar-service host preference `wait_after`). */
 export interface BookingWaitState {
@@ -63,9 +64,8 @@ export function BookingWaitPicker({ adapter, title, hint, describeError, classNa
   }, [adapter]);
 
   const maxHours = state ? Math.floor(state.max / 60) : 0;
-  const chosen = Number(hours);
-  const valid = !own || (hours !== '' && Number.isInteger(chosen) && chosen >= 0 && chosen <= maxHours);
-  const next = own ? chosen * 60 : null;
+  const valid = !own || validWaitHours(hours, maxHours);
+  const next = own ? Number(hours) * 60 : null;
   const dirty = state !== null && next !== state.own;
 
   const save = async () => {
@@ -103,22 +103,14 @@ export function BookingWaitPicker({ adapter, title, hint, describeError, classNa
             </label>
           </div>
           {own ? (
-            <div className="cal-policy__field">
-              <label htmlFor={`${ids}-h`}>{labels.waitHours}</label>
-              <input
-                id={`${ids}-h`}
-                className="cal-input"
-                type="number"
-                min={0}
-                max={maxHours}
-                inputMode="numeric"
-                aria-describedby={`${ids}-max`}
-                value={hours}
-                disabled={busy}
-                onChange={(e) => { setHours(e.target.value); setSaved(false); }}
-              />
-              <span className="cal-policy__hint" id={`${ids}-max`}>{labels.waitRange(maxHours)}</span>
-            </div>
+            <WaitHoursInput
+              id={`${ids}-h`}
+              label={labels.waitHours}
+              hours={hours}
+              maxHours={maxHours}
+              disabled={busy}
+              onChange={(h) => { setHours(h); setSaved(false); }}
+            />
           ) : null}
           <div className="cal-policy__actions">
             <button type="button" className={primary} disabled={busy || !dirty || !valid} onClick={() => void save()}>{labels.waitSave}</button>

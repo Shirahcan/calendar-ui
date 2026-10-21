@@ -460,6 +460,11 @@ export interface CalendarLabels {
   waitSave: string;
   waitSaved: string;
   waitFailed: string;
+  /** BookingWaitField: the hours label, the usual wait it starts from, and the way back to it. */
+  waitCaseHours: string;
+  waitCaseUsual: (hours: number, own: boolean) => string;
+  waitCaseDiffers: string;
+  waitCaseReset: (hours: number) => string;
   policyWaitLimit: (who: string) => string;
   policyWaitLimitHint: string;
   // Booking links (BookingLinksManager, BookingLinkEditor)
@@ -987,6 +992,10 @@ export const DEFAULT_LABELS: CalendarLabels = {
   waitSave: 'Save wait',
   waitSaved: 'Saved',
   waitFailed: 'That wait did not save. Please try again.',
+  waitCaseHours: 'Hours before their first times open',
+  waitCaseUsual: (hours, own) => `${own ? 'Your usual wait' : 'The standard wait you follow'} is ${hours === 0 ? 'none' : `${hours} ${hours === 1 ? 'hour' : 'hours'}`}. Change it here for this booking only.`,
+  waitCaseDiffers: 'Different from your usual wait, for this booking only.',
+  waitCaseReset: (hours) => `Use my usual (${hours === 0 ? 'none' : `${hours} ${hours === 1 ? 'hour' : 'hours'}`})`,
   policyWaitLimit: (who) => `Most ${who} may choose (hours)`,
   policyWaitLimitHint: 'People may set their own wait up to this. Others choose any wait up to 90 days.',
   linksTitle: 'Booking links',

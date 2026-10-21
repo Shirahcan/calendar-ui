@@ -541,6 +541,8 @@
 .cal-wait__body .cal-policy__check { min-height: 24px; }
 .cal-wait__body .cal-policy__field { display: grid; gap: 6px; max-width: 18rem; }
 .cal-wait__body .cal-policy__actions { padding-top: 2px; }
+.cal-wait-field__reset { border: 0; padding: 0; background: none; color: var(--cal-accent); font: inherit; text-decoration: underline; cursor: pointer; }
+.cal-wait-field__reset:disabled { opacity: .6; cursor: default; }
 .cal-switch { display: inline-flex; align-items: center; gap: 8px; flex: none; padding: 3px 10px 3px 3px; border: 1px solid var(--cal-border); border-radius: var(--cal-radius-pill); background: var(--cal-surface-muted); color: var(--cal-ink-muted); font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; outline: none; }
 .cal-switch__knob { width: 20px; height: 20px; border-radius: 50%; background: var(--cal-border); transition: background 0.15s; }
 .cal-switch[aria-checked='true'] { border-color: var(--cal-accent); color: var(--cal-accent); }
