@@ -4,6 +4,7 @@ import type { EditorAction } from '../../hooks/useAvailabilityEditor';
 import { cx, useCalendarUi } from '../../theme';
 import { dateLabel } from './DateChanges';
 import { WEEK } from './WeekRibbon';
+import { ModalShell } from '../ModalShell';
 
 /** Today as YYYY-MM-DD on this device, the day a person reads "ended" against. */
 function todayYmd(): string {
@@ -41,6 +42,10 @@ function rows(spec: AvailabilitySpec): SeasonRow[] {
  * Weekly hours that start or stop on a date (a busy season, a temporary schedule). The days above
  * are the every-week pattern and leave these alone; without this list a person could neither see
  * hours that were open for them nor take them away.
+ *
+ * The list stays on the page; adding opens a modal (owner, 2026-10-21): the form was six fields
+ * and seven day boxes laid open under every editor, which is most of a screen for something a
+ * person does a few times a year.
  */
 export function SeasonalHours({ spec, policy, edit, disabled, windowLengths = false, usualLength }: {
   spec: AvailabilitySpec;
@@ -60,6 +65,7 @@ export function SeasonalHours({ spec, policy, edit, disabled, windowLengths = fa
   const [until, setUntil] = useState('');
   const [length, setLength] = useState('');
   const [today] = useState(todayYmd);
+  const [open, setOpen] = useState(false);
   const lengths = windowLengths ? policy.duration_choices ?? [] : [];
   const list = rows(spec);
   const backwards = from !== '' && until !== '' && until < from;
@@ -79,10 +85,15 @@ export function SeasonalHours({ spec, policy, edit, disabled, windowLengths = fa
         ...(length ? { length: Number(length) } : {}),
       },
     });
+    close();
+  };
+
+  const close = () => {
     setDays([]);
     setFrom('');
     setUntil('');
     setLength('');
+    setOpen(false);
   };
 
   return (
@@ -120,56 +131,76 @@ export function SeasonalHours({ spec, policy, edit, disabled, windowLengths = fa
         </ul>
       )}
 
-      <fieldset className="cal-avail__season-days" disabled={disabled}>
-        <legend className="cal-avail__field">{labels.availSeasonDays}</legend>
-        {WEEK.map((d) => (
-          <label key={d} className="cal-avail__check">
-            <input
-              type="checkbox"
-              checked={days.includes(d)}
-              onChange={(e) => setDays((was) => (e.target.checked ? [...was, d] : was.filter((x) => x !== d)))}
-            />
-            {labels.availDayNames[d]}
-          </label>
-        ))}
-      </fieldset>
+      <button type="button" className={cx(btn, 'cal-avail__season-open')} disabled={disabled} onClick={() => setOpen(true)}>
+        {labels.availSeasonOpen}
+      </button>
 
-      <div className="cal-avail__form">
-        <label className="cal-avail__field">
-          {labels.availFrom}
-          <input className="cal-input" type="time" step={900} value={start} disabled={disabled} onChange={(e) => setStart(e.target.value)} />
-        </label>
-        <label className="cal-avail__field">
-          {labels.availTo}
-          <input className="cal-input" type="time" step={900} value={end} disabled={disabled} onChange={(e) => setEnd(e.target.value)} />
-        </label>
-        <label className="cal-avail__field">
-          {labels.availSeasonStarts}
-          <input className="cal-input" type="date" value={from} disabled={disabled} onChange={(e) => setFrom(e.target.value)} />
-        </label>
-        <label className="cal-avail__field">
-          {labels.availSeasonEnds}
-          <input className="cal-input" type="date" value={until} min={from || undefined} disabled={disabled} onChange={(e) => setUntil(e.target.value)} />
-        </label>
-        {lengths.length > 0 ? (
-          <label className="cal-avail__field">
-            {labels.availSeasonLength}
-            <select className="cal-input" value={length} disabled={disabled} onChange={(e) => setLength(e.target.value)}>
-              <option value="">{usualLength ? `${labels.availLengthUsual} (${labels.availMinutes(usualLength)})` : labels.availLengthUsual}</option>
-              {lengths.map((m) => (
-                <option key={m} value={String(m)}>{labels.availMinutes(m)}</option>
-              ))}
-            </select>
-          </label>
-        ) : null}
-        <button type="button" className={btn} disabled={disabled || !canAdd} onClick={add}>
-          {labels.availSeasonAdd}
-        </button>
-      </div>
-      {backwards ? (
-        <p className="cal-avail__hint" role="alert">{labels.availSeasonBackwards}</p>
-      ) : days.length > 0 && from === '' && until === '' ? (
-        <p className="cal-avail__hint">{labels.availSeasonNeedsDate}</p>
+      {open ? (
+        <ModalShell
+          title={labels.availSeasonTitle}
+          onClose={close}
+          className="cal-avail__season-modal"
+          footer={
+            <>
+              <button type="button" className={cx(btn, 'cal-btn--ghost')} onClick={close}>
+                {labels.notesCancel}
+              </button>
+              <button type="button" className={btn} disabled={disabled || !canAdd} onClick={add}>
+                {labels.availSeasonAdd}
+              </button>
+            </>
+          }
+        >
+          <p className="cal-modal__text">{labels.availSeasonIntro}</p>
+          <fieldset className="cal-avail__season-days" disabled={disabled}>
+            <legend className="cal-avail__field">{labels.availSeasonDays}</legend>
+            {WEEK.map((d) => (
+              <label key={d} className="cal-avail__check">
+                <input
+                  type="checkbox"
+                  checked={days.includes(d)}
+                  onChange={(e) => setDays((was) => (e.target.checked ? [...was, d] : was.filter((x) => x !== d)))}
+                />
+                {labels.availDayNames[d]}
+              </label>
+            ))}
+          </fieldset>
+
+          <div className="cal-avail__form">
+            <label className="cal-avail__field">
+              {labels.availFrom}
+              <input className="cal-input" type="time" step={900} value={start} disabled={disabled} onChange={(e) => setStart(e.target.value)} />
+            </label>
+            <label className="cal-avail__field">
+              {labels.availTo}
+              <input className="cal-input" type="time" step={900} value={end} disabled={disabled} onChange={(e) => setEnd(e.target.value)} />
+            </label>
+            <label className="cal-avail__field">
+              {labels.availSeasonStarts}
+              <input className="cal-input" type="date" value={from} disabled={disabled} onChange={(e) => setFrom(e.target.value)} />
+            </label>
+            <label className="cal-avail__field">
+              {labels.availSeasonEnds}
+              <input className="cal-input" type="date" value={until} min={from || undefined} disabled={disabled} onChange={(e) => setUntil(e.target.value)} />
+            </label>
+            {lengths.length > 0 ? (
+              <label className="cal-avail__field">
+                {labels.availSeasonLength}
+                <select className="cal-input" value={length} disabled={disabled} onChange={(e) => setLength(e.target.value)}>
+                  <option value="">{usualLength ? `${labels.availLengthUsual} (${labels.availMinutes(usualLength)})` : labels.availLengthUsual}</option>
+                  {lengths.map((m) => (
+                    <option key={m} value={String(m)}>{labels.availMinutes(m)}</option>
+                  ))}
+                </select>
+              </label>
+            ) : null}
+          </div>
+          {backwards ? (
+            <p className="cal-avail__hint" role="alert">{labels.availSeasonBackwards}</p>
+          ) : days.length > 0 && from === '' && until === '' ? (
+            <p className="cal-avail__hint">{labels.availSeasonNeedsDate}</p>
+          ) : null}
+        </ModalShell>
       ) : null}
     </div>
   );

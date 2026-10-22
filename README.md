@@ -68,8 +68,8 @@ import '@shirahcan/calendar-ui/styles.css';
 </CalendarUiProvider>
 ```
 
-1. **Theme tokens** become CSS variables on one `.cal-root` wrapper (`display: contents`, so it
-   adds no box). Tokens: `accent`, `accentInk`, `surface`, `surfaceMuted`, `border`, `ink`,
+1. **Theme tokens** become CSS variables on one `.cal-root` wrapper, a normal block box (it was
+   `display: contents` before 0.39.0, which swallowed any spacing a product gave it). Tokens: `accent`, `accentInk`, `surface`, `surfaceMuted`, `border`, `ink`,
    `inkMuted`, `busy`, `danger`, `radius`, `radiusPill`, `font`, `hourHeight`.
    `themeStyle(tokens)` gives the same variables as a style object for your own wrapper.
 2. **Labels**: every sentence the components show (`DEFAULT_LABELS` lists them), for a product's

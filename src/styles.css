@@ -10,7 +10,12 @@
  * The defaults are declared on the provider's wrapper, or on a component used WITHOUT one; a
  * component inside a provider declares nothing itself, or it would shadow the provider's values.
  */
-.cal-root { display: contents; }
+.cal-root { display: block; min-width: 0; }
+/* ⚠ A REAL BOX, NOT `display: contents` (0.39.0). The wrapper used to add no box, so any spacing a
+ * product gave it (a Tailwind space-y margin, a mt-* on the provider) landed on nothing and the kit
+ * panel sat flush against its neighbour. Every product hit it, several times, and each worked around
+ * it with an extra div. No kit surface sizes itself from the wrapper's parent (the dock is fixed;
+ * dialogs are in the top layer), so the box costs nothing. */
 
 :where(.cal-root, :is(.cal-week, .cal-month, .cal-amonth, .cal-mcal, .cal-slots, .cal-flow, .cal-avail, .cal-slots__empty, .cal-zoneprompt, .cal-scratchpad, .cal-dock, .cal-holidays, .cal-reminders, .cal-policy, .cal-rules, .cal-conns, .cal-links, .cal-notes, .cal-pads, .cal-paddlg, .cal-confirm, .cal-modal, .cal-tools, .cal-meeting, .cal-meeting-side):not(.cal-root *)) {
   --cal-accent: #4361ee;
@@ -625,3 +630,7 @@
 .cal-link-option__text { display: flex; flex-direction: column; min-width: 0; }
 .cal-link-option__label { font-weight: 600; overflow-wrap: anywhere; }
 .cal-link-option__detail { font-size: 12px; color: var(--cal-ink-muted); }
+
+/* Hours for a set time: the list stays on the page, the form opens in a modal (0.39.0). */
+.cal-avail__season-open { margin-top: 12px; }
+.cal-avail__season-modal .cal-avail__form { margin-top: 0; }

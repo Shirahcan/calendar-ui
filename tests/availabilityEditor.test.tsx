@@ -215,6 +215,8 @@ describe('AvailabilityEditor', () => {
 });
 
 describe('Hours for a set time', () => {
+  HTMLDialogElement.prototype.showModal ??= function (this: HTMLDialogElement) { this.setAttribute('open', ''); };
+
   const SEASONAL: AvailabilitySpec = {
     schema: 1,
     timezone: { zone: 'America/Edmonton' },
@@ -253,8 +255,10 @@ describe('Hours for a set time', () => {
     render(<AvailabilityEditor adapter={a} windowLengths />);
     await screen.findByLabelText('Your week at a glance');
 
+    // The form opens in a modal from the button under the list.
+    fireEvent.click(screen.getByRole('button', { name: 'Add hours for a set time' }));
     const add = screen.getByRole('button', { name: 'Add these hours' }) as HTMLButtonElement;
-    const season = add.closest('.cal-avail__season') as HTMLElement;
+    const season = add.closest('dialog') as HTMLElement;
     fireEvent.click(within(season).getByLabelText('Thursday'));
     expect(add.disabled).toBe(true);
     expect(screen.getByText('Pick a start date, an end date or both. Hours with neither belong in the week above.')).toBeTruthy();
@@ -262,6 +266,8 @@ describe('Hours for a set time', () => {
     fireEvent.change(within(season).getByLabelText('Ends on'), { target: { value: '2099-03-31' } });
     fireEvent.change(within(season).getByLabelText('Meeting length', { exact: false }), { target: { value: '60' } });
     fireEvent.click(add);
+    // Adding closes the modal.
+    expect(screen.queryByRole('button', { name: 'Add these hours' })).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Save availability' }));
     await waitFor(() => expect(a.save).toHaveBeenCalled());
     expect((a.save.mock.calls[0]![0] as AvailabilitySpec).weekly).toEqual([

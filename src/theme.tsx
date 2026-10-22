@@ -584,6 +584,8 @@ export interface CalendarLabels {
   availSeasonEnds: string;
   availSeasonLength: string;
   availSeasonAdd: string;
+  /** The button that opens the form for hours for a set time. */
+  availSeasonOpen: string;
   availSeasonEnded: string;
   availSeasonNeedsDate: string;
   availSeasonBackwards: string;
@@ -1110,6 +1112,7 @@ export const DEFAULT_LABELS: CalendarLabels = {
   availSeasonEnds: 'Ends on',
   availSeasonLength: 'Meeting length',
   availSeasonAdd: 'Add these hours',
+  availSeasonOpen: 'Add hours for a set time',
   availSeasonEnded: 'ended',
   availSeasonNeedsDate: 'Pick a start date, an end date or both. Hours with neither belong in the week above.',
   availSeasonBackwards: 'The end date is before the start date.',
@@ -1205,9 +1208,10 @@ export interface CalendarUiProviderProps extends CalendarUiConfig {
 }
 
 /**
- * One wrapper around a product's calendar surfaces. It renders a `div.cal-root` with
- * `display: contents`, so it adds no box to the layout, and carries the theme as CSS variables
- * plus `data-cal-scheme` (the resolved 'light' or 'dark').
+ * One wrapper around a product's calendar surfaces. It renders a `div.cal-root`, a normal block box
+ * (since 0.39.0; it was `display: contents`, which swallowed every margin a product gave it), and
+ * carries the theme as CSS variables plus `data-cal-scheme` (the resolved 'light' or 'dark'). Space
+ * it like any other block: a `space-y` stack, a margin, or a flex or grid gap all apply.
  */
 export function CalendarUiProvider({ theme, darkTheme, colorScheme = 'auto', labels, classNames, hourCycle = 24, className, children }: CalendarUiProviderProps) {
   const osDark = useSyncExternalStore(subscribeToScheme, osPrefersDark, () => false);
