@@ -74,6 +74,36 @@ describe('CancelMeetingDialog', () => {
   });
 });
 
+describe('CancelMeetingDialog, too late to cancel', () => {
+  it('offers moving it instead when the refusal says the booker still may', async () => {
+    const late = Object.assign(new Error('Cancellation must be made at least 24 hours before the meeting.'), { alternative: 'reschedule' });
+    const onCancel = vi.fn().mockRejectedValue(late);
+    const onClose = vi.fn();
+    const onRescheduleInstead = vi.fn();
+    render(<CancelMeetingDialog title="Study permit review" otherParty="your consultant" onCancel={onCancel} onClose={onClose}
+      offersReschedule={(e) => (e as { alternative?: string }).alternative === 'reschedule'} onRescheduleInstead={onRescheduleInstead} />);
+
+    fireEvent.change(screen.getByRole('textbox', { name: /Reason/ }), { target: { value: 'Something came up' } });
+    await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Cancel meeting' })));
+
+    expect(screen.getByRole('alert').textContent).toBe('Cancellation must be made at least 24 hours before the meeting. You can still move it to another time instead.');
+    fireEvent.click(screen.getByRole('button', { name: 'Reschedule instead' }));
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(onRescheduleInstead).toHaveBeenCalledTimes(1);
+  });
+
+  it('offers nothing when the refusal carries no alternative', async () => {
+    const onCancel = vi.fn().mockRejectedValue(new Error('Cancellation must be made at least 24 hours before the meeting.'));
+    render(<CancelMeetingDialog title="Study permit review" otherParty="your consultant" onCancel={onCancel} onClose={() => undefined}
+      offersReschedule={(e) => (e as { alternative?: string }).alternative === 'reschedule'} onRescheduleInstead={() => undefined} />);
+
+    fireEvent.change(screen.getByRole('textbox', { name: /Reason/ }), { target: { value: 'Something came up' } });
+    await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Cancel meeting' })));
+
+    expect(screen.queryByRole('button', { name: 'Reschedule instead' })).toBeNull();
+  });
+});
+
 describe('RescheduleDialog', () => {
   const slots: Slot[] = [
     { start_utc: '2026-10-12T13:00:00Z', end_utc: '2026-10-12T13:30:00Z', host_ids: [] },

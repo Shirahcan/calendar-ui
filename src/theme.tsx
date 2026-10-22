@@ -216,6 +216,9 @@ export interface CalendarLabels {
   cancelKeep: string;
   cancelConfirm: string;
   cancelFailed: string;
+  /** Too late to cancel, still in time to move it: the offer and its button. */
+  cancelLateOffer: string;
+  cancelRescheduleInstead: string;
   rescheduleTitle: string;
   /* Booking a missed call again (RebookDialog) */
   rebookTitle: string;
@@ -751,6 +754,8 @@ export const DEFAULT_LABELS: CalendarLabels = {
   cancelKeep: 'Keep meeting',
   cancelConfirm: 'Cancel meeting',
   cancelFailed: 'The meeting could not be cancelled.',
+  cancelLateOffer: 'You can still move it to another time instead.',
+  cancelRescheduleInstead: 'Reschedule instead',
   rescheduleTitle: 'Move this meeting',
   rebookTitle: 'Book a new time',
   rebookMissed: (when) => `Missed: ${when}`,

@@ -105,23 +105,37 @@ export interface CancelMeetingDialogProps {
   onCancel: (reason: string) => Promise<void>;
   onClose: () => void;
   describeError?: (error: unknown) => string;
+  /**
+   * Too late to cancel but still in time to move it (calendar-service refuses a booker's late
+   * cancel with `alternative: reschedule`): does this refusal offer that? When it does and
+   * `onRescheduleInstead` is given, the dialog offers "Reschedule instead" beside the reason.
+   */
+  offersReschedule?: (error: unknown) => boolean;
+  /** Open the product's reschedule flow for this meeting (the dialog closes itself first). */
+  onRescheduleInstead?: () => void;
 }
 
-/** Cancel a meeting with a reason the other side is told. */
-export function CancelMeetingDialog({ title, otherParty, onCancel, onClose, describeError }: CancelMeetingDialogProps) {
+/**
+ * Cancel a meeting with a reason the other side is told. Refused for being too late, it offers
+ * moving the meeting instead whenever the service says that is still possible.
+ */
+export function CancelMeetingDialog({ title, otherParty, onCancel, onClose, describeError, offersReschedule, onRescheduleInstead }: CancelMeetingDialogProps) {
   const { labels, classNames } = useCalendarUi();
   const [reason, setReason] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [canMove, setCanMove] = useState(false);
   const ok = reason.trim().length >= 5;
 
   const submit = async () => {
     setBusy(true);
     setError(null);
+    setCanMove(false);
     try {
       await onCancel(reason.trim());
     } catch (err) {
       setError(describeError ? describeError(err) : err instanceof Error && err.message ? err.message : labels.cancelFailed);
+      setCanMove(Boolean(onRescheduleInstead && offersReschedule?.(err)));
     } finally {
       setBusy(false);
     }
@@ -146,7 +160,19 @@ export function CancelMeetingDialog({ title, otherParty, onCancel, onClose, desc
         <textarea value={reason} onChange={(e) => setReason(e.target.value)} maxLength={1000} disabled={busy} />
         <span className="cal-modal__hint">{labels.cancelReasonHint}</span>
       </label>
-      {error && <p className="cal-modal__error" role="alert">{error}</p>}
+      {error && <p className="cal-modal__error" role="alert">{error}{canMove ? ` ${labels.cancelLateOffer}` : ''}</p>}
+      {canMove && onRescheduleInstead && (
+        <button
+          type="button"
+          className={cx('cal-btn', 'cal-btn--primary', classNames.button, classNames.buttonPrimary)}
+          onClick={() => {
+            onClose();
+            onRescheduleInstead();
+          }}
+        >
+          {labels.cancelRescheduleInstead}
+        </button>
+      )}
     </ModalShell>
   );
 }
