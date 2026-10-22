@@ -31,14 +31,16 @@ export interface MeetingQuickViewProps {
 /**
  * The calendar's quick look at one meeting. ONE main action, chosen for the moment: Join while
  * the room is open, otherwise the meeting page (every detail, notes, its own Join). While Join is
- * the main action, "View details" sits under it, so the meeting page is always one click away.
- * Any other action sits behind one kebab, destructive ones last.
+ * the main action, "View details" is the kebab's first item, so the meeting page is always reachable.
+ * Any other action sits behind that one kebab, destructive ones last.
  */
 export function MeetingQuickView({ meeting, timezone, now, roomOpen, onJoin, onOpenPage, actions = [], onClose, icons, statusClassName, className }: MeetingQuickViewProps) {
   const { labels, classNames } = useCalendarUi();
-  const menu = actions.length > 0
-    ? <RowMenu label={labels.quickViewMore} items={actions.map((a) => ({ label: a.label, onSelect: a.onSelect, danger: a.danger, disabled: a.disabled || a.busy }))} />
-    : null;
+  const items = [
+    ...(roomOpen ? [{ label: labels.quickViewDetails, onSelect: onOpenPage }] : []),
+    ...actions.map((a) => ({ label: a.label, onSelect: a.onSelect, danger: a.danger, disabled: a.disabled || a.busy })),
+  ];
+  const menu = items.length > 0 ? <RowMenu label={labels.quickViewMore} items={items} /> : null;
 
   return (
     <ModalShell
@@ -47,16 +49,9 @@ export function MeetingQuickView({ meeting, timezone, now, roomOpen, onJoin, onO
       headSide={menu}
       className={className}
       footer={
-        <>
-          <button type="button" className={cx('cal-btn', 'cal-btn--primary', 'cal-modal__primary', classNames.button, classNames.buttonPrimary)} onClick={roomOpen ? onJoin : onOpenPage}>
-            {roomOpen ? labels.quickViewJoin : labels.quickViewOpenPage}
-          </button>
-          {roomOpen && (
-            <button type="button" className={cx('cal-btn', 'cal-btn--ghost', 'cal-modal__primary', classNames.button)} onClick={onOpenPage}>
-              {labels.quickViewDetails}
-            </button>
-          )}
-        </>
+        <button type="button" className={cx('cal-btn', 'cal-btn--primary', 'cal-modal__primary', classNames.button, classNames.buttonPrimary)} onClick={roomOpen ? onJoin : onOpenPage}>
+          {roomOpen ? labels.quickViewJoin : labels.quickViewOpenPage}
+        </button>
       }
     >
       <MeetingSummary meeting={meeting} timezone={timezone} now={now} icons={icons} statusClassName={statusClassName} linkHint={false} />

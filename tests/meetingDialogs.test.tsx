@@ -48,10 +48,12 @@ describe('MeetingQuickView', () => {
     rerender(<MeetingQuickView meeting={meeting} timezone="Africa/Lagos" now={now} roomOpen onJoin={onJoin} onOpenPage={onOpenPage} onClose={() => undefined} />);
     fireEvent.click(screen.getByRole('button', { name: 'Join meeting' }));
     expect(onJoin).toHaveBeenCalled();
-    expect(screen.queryByRole('button', { name: 'More actions' })).toBeNull();
-    // While Join is the main action, the meeting page is still one click away.
+    // While Join is the main action, the meeting page is the kebab's first item.
+    expect(screen.queryByRole('button', { name: 'View details' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'More actions' }));
+    expect(screen.getAllByRole('menuitem').map((i) => i.textContent)).toEqual(['View details']);
     onOpenPage.mockClear();
-    fireEvent.click(screen.getByRole('button', { name: 'View details' }));
+    fireEvent.click(screen.getByRole('menuitem', { name: 'View details' }));
     expect(onOpenPage).toHaveBeenCalledTimes(1);
   });
 });

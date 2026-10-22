@@ -192,7 +192,7 @@ export interface CalendarLabels {
   quickViewClose: string;
   quickViewJoin: string;
   quickViewOpenPage: string;
-  /** Under Join, while the room is open: the meeting page (every detail, notes). */
+  /** The kebab's first item while Join is the main action: the meeting page (every detail, notes). */
   quickViewDetails: string;
   /** The quick look while the meeting is still being fetched. */
   quickViewLoading: string;
