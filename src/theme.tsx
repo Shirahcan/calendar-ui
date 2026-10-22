@@ -192,6 +192,8 @@ export interface CalendarLabels {
   quickViewClose: string;
   quickViewJoin: string;
   quickViewOpenPage: string;
+  /** Under Join, while the room is open: the meeting page (every detail, notes). */
+  quickViewDetails: string;
   /** The quick look while the meeting is still being fetched. */
   quickViewLoading: string;
   quickViewMore: string;
@@ -729,6 +731,7 @@ export const DEFAULT_LABELS: CalendarLabels = {
   quickViewClose: 'Close',
   quickViewJoin: 'Join meeting',
   quickViewOpenPage: 'Open meeting page',
+  quickViewDetails: 'View details',
   quickViewLoading: 'Loading the meeting…',
   quickViewMore: 'More actions',
   linkTitle: (noun) => `Link to a ${noun}`,

@@ -42,10 +42,17 @@ describe('MeetingQuickView', () => {
     fireEvent.click(screen.getByRole('menuitem', { name: 'Cancel meeting' }));
     expect(cancel).toHaveBeenCalled();
 
+    // No "View details" while the page IS the main action.
+    expect(screen.queryByRole('button', { name: 'View details' })).toBeNull();
+
     rerender(<MeetingQuickView meeting={meeting} timezone="Africa/Lagos" now={now} roomOpen onJoin={onJoin} onOpenPage={onOpenPage} onClose={() => undefined} />);
     fireEvent.click(screen.getByRole('button', { name: 'Join meeting' }));
     expect(onJoin).toHaveBeenCalled();
     expect(screen.queryByRole('button', { name: 'More actions' })).toBeNull();
+    // While Join is the main action, the meeting page is still one click away.
+    onOpenPage.mockClear();
+    fireEvent.click(screen.getByRole('button', { name: 'View details' }));
+    expect(onOpenPage).toHaveBeenCalledTimes(1);
   });
 });
 
