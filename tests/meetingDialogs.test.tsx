@@ -104,6 +104,20 @@ describe('CancelMeetingDialog, too late to cancel', () => {
   });
 });
 
+describe('RescheduleDialog, only the chosen day', () => {
+  it("never lists another day's times under the day picked (test, 2026-10-20: a rebook landed on the next day)", async () => {
+    // Monday 12 October is picked; the fetcher wrongly hands back Tuesday's times too.
+    const fetcher = vi.fn().mockResolvedValue({ slots: [
+      { start_utc: '2026-10-12T14:00:00Z', end_utc: '2026-10-12T14:30:00Z', host_ids: [] },
+      { start_utc: '2026-10-13T15:55:00Z', end_utc: '2026-10-13T16:25:00Z', host_ids: [] },
+    ] });
+    render(<RescheduleDialog title="General Consultation" currentStart="2026-10-12T10:00:00Z" viewerZone="Africa/Lagos" fetcher={fetcher} bookingType="meeting" now={now} onReschedule={vi.fn()} onClose={() => undefined} />);
+
+    await waitFor(() => expect(screen.getAllByRole('button', { name: /Monday 12 October, 3:00 PM WAT/ }).length).toBeGreaterThan(0));
+    expect(screen.queryByRole('button', { name: /4:55 PM/ })).toBeNull();
+  });
+});
+
 describe('RescheduleDialog', () => {
   const slots: Slot[] = [
     { start_utc: '2026-10-12T13:00:00Z', end_utc: '2026-10-12T13:30:00Z', host_ids: [] },
@@ -199,15 +213,16 @@ describe('LinkMeetingDialog', () => {
 
 describe('RebookDialog', () => {
   it('says the call was missed and books a new time', async () => {
-    const slots: Slot[] = [{ start_utc: '2026-10-12T15:00:00Z', end_utc: '2026-10-12T15:30:00Z', host_ids: [] }];
+    // On the day the dialog opens (today, Saturday 10 October): it lists only that day's times.
+    const slots: Slot[] = [{ start_utc: '2026-10-10T15:00:00Z', end_utc: '2026-10-10T15:30:00Z', host_ids: [] }];
     const onRebook = vi.fn().mockResolvedValue(undefined);
     render(<RebookDialog title="First call" currentStart="2026-10-10T14:00:00Z" viewerZone="Africa/Lagos" fetcher={vi.fn().mockResolvedValue({ slots })}
       bookingType="consultation" now={now} onRebook={onRebook} onClose={() => undefined} />);
 
     expect(screen.getByRole('dialog', { hidden: true }).getAttribute('aria-label')).toBe('Book a new time');
     expect(screen.getByText(/Missed: /, { exact: false })).toBeTruthy();
-    await waitFor(() => screen.getByRole('button', { name: /Monday 12 October, 4:00 PM WAT/, hidden: true }));
-    fireEvent.click(screen.getByRole('button', { name: /Monday 12 October, 4:00 PM WAT/, hidden: true }));
+    await waitFor(() => screen.getByRole('button', { name: /Saturday 10 October, 4:00 PM WAT/, hidden: true }));
+    fireEvent.click(screen.getByRole('button', { name: /Saturday 10 October, 4:00 PM WAT/, hidden: true }));
     await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Book 4:00 PM WAT', hidden: true })));
     expect(onRebook).toHaveBeenCalledWith(slots[0], '');
   });

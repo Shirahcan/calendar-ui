@@ -374,8 +374,10 @@ export function RescheduleDialog({ title, currentStart, viewerZone, hostZone, fe
   const from = useMemo(() => new Date(wallTimeToInstant(`${day}T00:00`, viewerZone) ?? `${day}T00:00:00Z`), [day, viewerZone]);
   const to = useMemo(() => new Date(wallTimeToInstant(`${addDays(day, 1)}T00:00`, viewerZone) ?? `${addDays(day, 1)}T00:00:00Z`), [day, viewerZone]);
   const slots = useSlots({ fetcher, bookingType, from, to, viewerZone });
-  // Only times still ahead, and never the meeting's own current time.
-  const open = slots.slots.filter((s) => new Date(s.start_utc).getTime() > now && s.start_utc !== currentStart);
+  // Only times still ahead, never the meeting's own current time, and only times ON the chosen
+  // day: the times are listed under that day's name, so a fetcher that hands back another day's
+  // times (a different zone's day, the next open day) would book a day the person never picked.
+  const open = slots.slots.filter((s) => new Date(s.start_utc).getTime() > now && s.start_utc !== currentStart && dayKey(s.start_utc, viewerZone) === day);
   const byDay = open.length > 0 ? new Map([[day, open]]) : new Map<string, Slot[]>();
 
   const move = (n: number) => {
