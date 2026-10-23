@@ -346,6 +346,9 @@ export interface CalendarLabels {
   policySeedWeek: string;
   policySeedWeekHint: string;
   policyObserveHolidays: string;
+  /** The policy setting `weekly_hours_need_dates`. */
+  policyWeeklyNeedDates: string;
+  policyWeeklyNeedDatesHint: string;
   policyRecords: string;
   policyWait: string;
   policyWaitHint: string;
@@ -597,6 +600,20 @@ export interface CalendarLabels {
   /** The dates a row applies for, each already formatted; either may be open. */
   availSeasonWhen: (from: string | null, until: string | null) => string;
   availSeasonHours: (days: string, start: string, end: string, length: number | null) => string;
+  /**
+   * Weekly hours only for a set period (the product's policy `weekly_hours_need_dates`): the tab,
+   * the section and its empty state, the button, the "both dates" hint, the label on a row left
+   * with no end date, the problem that blocks a save while one is left, and the ribbon's title.
+   */
+  availTabPeriods: string;
+  availPeriodTitle: string;
+  availPeriodIntro: string;
+  availPeriodNone: string;
+  availPeriodOpen: string;
+  availPeriodNeedsDates: string;
+  availPeriodNoEnd: string;
+  availPeriodOpenEnded: string;
+  availRibbonThisWeek: string;
   /** A date with extra hours added to its usual ones (a `dates` row), in Date changes. */
   availExtraHours: (windows: string) => string;
 }
@@ -878,6 +895,8 @@ export const DEFAULT_LABELS: CalendarLabels = {
   policySeedWeek: 'The week a new person starts with',
   policySeedWeekHint: 'Also the hours a day gets when someone turns it on.',
   policyObserveHolidays: "Close on a person's public holidays unless they choose otherwise",
+  policyWeeklyNeedDates: 'Weekly hours only for a set period',
+  policyWeeklyNeedDatesHint: 'People set weekly hours with a start and an end date, such as two weeks for interviews, instead of hours that run every week. Give existing always-on hours dates before turning this on, or their next save is refused.',
   policyRecords: 'Meeting records',
   policyWait: 'Wait before booking',
   policyWaitHint: 'Times open only this long after the event, for the person it happened to. 0 means no wait.',
@@ -1126,6 +1145,15 @@ export const DEFAULT_LABELS: CalendarLabels = {
   availSeasonBackwards: 'The end date is before the start date.',
   availSeasonWhen: (from, until) => (from && until ? `${from} to ${until}` : from ? `From ${from}` : `Until ${until}`),
   availSeasonHours: (days, start, end, length) => `${days}: ${start} to ${end}${length ? `, ${length} min meetings` : ''}`,
+  availTabPeriods: 'Weekly hours',
+  availPeriodTitle: 'Weekly hours for a set period',
+  availPeriodIntro: 'Pick the days and hours you can take calls, and the dates they run from and to, such as two weeks set aside for interviews. Outside a period, nobody can book time with you.',
+  availPeriodNone: 'No periods yet. Nobody can book time with you until you add one.',
+  availPeriodOpen: 'Add a period',
+  availPeriodNeedsDates: 'Pick a start date and an end date.',
+  availPeriodNoEnd: 'no end date: remove it and add it again with dates',
+  availPeriodOpenEnded: 'Some weekly hours have no start or end date. Remove them, or add them again with dates, before saving.',
+  availRibbonThisWeek: 'This week at a glance',
   availExtraHours: (windows) => `Extra hours: ${windows}`,
 };
 

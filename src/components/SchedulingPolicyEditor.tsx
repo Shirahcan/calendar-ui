@@ -294,6 +294,18 @@ export function SchedulingPolicyEditor({ adapter, describeError, showBackupCall 
             {labels.policyObserveHolidays}
           </label>
 
+          <label className="cal-policy__check">
+            <input
+              type="checkbox"
+              checked={draft.weekly_hours_need_dates === true}
+              disabled={busy}
+              aria-describedby={`${ids}-weekly-dates-hint`}
+              onChange={(e) => set('weekly_hours_need_dates', e.target.checked)}
+            />
+            {labels.policyWeeklyNeedDates}
+          </label>
+          <span className="cal-policy__hint" id={`${ids}-weekly-dates-hint`}>{labels.policyWeeklyNeedDatesHint}</span>
+
           <div className="cal-policy__actions">
             <button type="button" className={primary} disabled={busy || !dirty} onClick={() => void save(draft)}>{labels.policySave}</button>
             {dirty ? <button type="button" className={btn} disabled={busy} onClick={() => setDraft(saved.policy)}>{labels.availDiscard}</button> : null}

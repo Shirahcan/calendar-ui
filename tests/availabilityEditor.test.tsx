@@ -283,3 +283,94 @@ describe('Hours for a set time', () => {
     expect(screen.getByText('Extra hours: 18:00-20:00')).toBeTruthy();
   });
 });
+
+describe('Weekly hours only for a set period (policy weekly_hours_need_dates)', () => {
+  HTMLDialogElement.prototype.showModal ??= function (this: HTMLDialogElement) { this.setAttribute('open', ''); };
+
+  const DATED_POLICY: SchedulingPolicy = { ...POLICY, weekly_hours_need_dates: true };
+
+  function datedAdapter(spec: AvailabilitySpec) {
+    const a = adapter(spec);
+    let held = spec;
+    a.load = vi.fn(async () => ({ spec: held, policy: DATED_POLICY, regions: [] }));
+    a.save = vi.fn(async (s: AvailabilitySpec) => {
+      held = s;
+      return s;
+    });
+    return a;
+  }
+
+  function ymd(plus: number): string {
+    const n = new Date();
+    const d = new Date(n.getFullYear(), n.getMonth(), n.getDate() + plus);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+
+  it('hides the every-week pattern and adds a period with both dates, two weeks by default', async () => {
+    const a = datedAdapter({ schema: 1, timezone: { zone: 'America/Edmonton' }, weekly: [] });
+    render(<AvailabilityEditor adapter={a} />);
+    await screen.findByLabelText('This week at a glance');
+
+    expect(screen.queryByText('Hours for a set time')).toBeNull();
+    expect(screen.getByText('Weekly hours for a set period')).toBeTruthy();
+    expect(screen.getByText('No periods yet. Nobody can book time with you until you add one.')).toBeTruthy();
+    // No day toggles of the every-week editor.
+    expect(screen.queryByRole('checkbox', { name: 'Monday' })).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Add a period' }));
+    const add = screen.getByRole('button', { name: 'Add these hours' }) as HTMLButtonElement;
+    const dialog = add.closest('dialog') as HTMLElement;
+    expect((within(dialog).getByLabelText('Starts on') as HTMLInputElement).value).toBe(ymd(0));
+    expect((within(dialog).getByLabelText('Ends on') as HTMLInputElement).value).toBe(ymd(13));
+
+    fireEvent.click(within(dialog).getByLabelText('Tuesday'));
+    fireEvent.change(within(dialog).getByLabelText('Ends on'), { target: { value: '' } });
+    expect(add.disabled).toBe(true);
+    expect(screen.getByText('Pick a start date and an end date.')).toBeTruthy();
+
+    fireEvent.change(within(dialog).getByLabelText('Ends on'), { target: { value: ymd(6) } });
+    fireEvent.click(add);
+    fireEvent.click(screen.getByRole('button', { name: 'Save availability' }));
+    await waitFor(() => expect(a.save).toHaveBeenCalled());
+    expect((a.save.mock.calls[0]![0] as AvailabilitySpec).weekly).toEqual([
+      { days: ['tue'], start: '08:30', end: '16:30', valid_from: ymd(0), valid_until: ymd(6) },
+    ]);
+  });
+
+  it('lists an open-ended row as one to fix and blocks saving until it is gone', async () => {
+    const a = datedAdapter({
+      schema: 1,
+      timezone: { zone: 'America/Edmonton' },
+      weekly: [
+        { days: ['wed'], start: '09:00', end: '12:00' },
+        { days: ['thu'], start: '09:00', end: '12:00', valid_from: ymd(0), valid_until: ymd(13) },
+      ],
+    });
+    render(<AvailabilityEditor adapter={a} />);
+    await screen.findByLabelText('This week at a glance');
+
+    const open = screen.getByText('Wednesday: 09:00 to 12:00 (no end date: remove it and add it again with dates)').closest('li')!;
+    expect(screen.getByText('Some weekly hours have no start or end date. Remove them, or add them again with dates, before saving.')).toBeTruthy();
+
+    fireEvent.click(within(open).getByRole('button', { name: 'Remove' }));
+    const save = screen.getByRole('button', { name: 'Save availability' }) as HTMLButtonElement;
+    expect(save.disabled).toBe(false);
+    fireEvent.click(save);
+    await waitFor(() => expect(a.save).toHaveBeenCalled());
+    expect((a.save.mock.calls[0]![0] as AvailabilitySpec).weekly).toHaveLength(1);
+  });
+
+  it("shows this week's hours from the periods that cover each day", async () => {
+    const today = new Date();
+    const names = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const;
+    const day = names[today.getDay()]!;
+    render(<AvailabilityEditor adapter={datedAdapter({
+      schema: 1,
+      timezone: { zone: 'America/Edmonton' },
+      weekly: [{ days: [day], start: '10:00', end: '11:30', valid_from: ymd(0), valid_until: ymd(0) }],
+    })} />);
+    const ribbon = await screen.findByLabelText('This week at a glance');
+
+    expect(within(ribbon).getByText('10:00-11:30')).toBeTruthy();
+  });
+});

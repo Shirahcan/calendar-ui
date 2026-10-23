@@ -298,6 +298,8 @@
 .cal-avail__item--working { border-color: color-mix(in srgb, var(--cal-accent) 35%, var(--cal-border)); }
 .cal-avail__item .cal-btn { padding: 6px 12px; font-size: 13px; }
 .cal-avail__item--ended { opacity: 0.65; }
+/* Hours that need dates: a row left with no start or end date is one to fix. */
+.cal-avail__item--open .cal-avail__item-what { color: var(--cal-danger); }
 
 /* Weekly hours with dates: below the every-week pattern, set apart by a rule. */
 .cal-avail__season { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--cal-border); }

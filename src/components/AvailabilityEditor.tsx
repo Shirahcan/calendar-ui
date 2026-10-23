@@ -58,8 +58,12 @@ export function AvailabilityEditor({ adapter, sections = ['weekly', 'dates', 'ti
   const [tab, setTab] = useState<AvailabilitySection>(sections[0] ?? 'weekly');
   const describe = describeError ?? ((e: unknown) => errorText(e, labels.availFailed));
   const busy = s.saving || !s.ready;
+  // The product offers weekly hours only for a set period (its policy): no every-week pattern.
+  const dated = s.policy?.weekly_hours_need_dates === true;
+  const openEnded = dated && (s.spec?.weekly ?? []).some((r) => !r.valid_from || !r.valid_until);
+  const problems = openEnded ? [...s.problems, labels.availPeriodOpenEnded] : s.problems;
   const titles: Record<AvailabilitySection, string> = {
-    weekly: labels.availTabWeekly,
+    weekly: dated ? labels.availTabPeriods : labels.availTabWeekly,
     dates: labels.availTabDates,
     timeoff: labels.availTabTimeOff,
     holidays: labels.availTabHolidays,
@@ -77,7 +81,7 @@ export function AvailabilityEditor({ adapter, sections = ['weekly', 'dates', 'ti
 
       {s.ready ? (
         <>
-          <WeekRibbon spec={s.spec} />
+          <WeekRibbon spec={s.spec} dated={dated} />
 
           {showZone ? (
             <label className="cal-avail__field cal-avail__zone">
@@ -128,10 +132,14 @@ export function AvailabilityEditor({ adapter, sections = ['weekly', 'dates', 'ti
 
           <div role="tabpanel" id={`${ids}-${tab}-panel`} aria-labelledby={`${ids}-${tab}`} className="cal-avail__panel">
             {tab === 'weekly' && s.policy ? (
-              <>
-                <WeeklyHours spec={s.spec} policy={s.policy} edit={s.edit} disabled={busy} windowLengths={windowLengths} usualLength={usualLength} />
-                <SeasonalHours spec={s.spec} policy={s.policy} edit={s.edit} disabled={busy} windowLengths={windowLengths} usualLength={usualLength} />
-              </>
+              dated ? (
+                <SeasonalHours dated spec={s.spec} policy={s.policy} edit={s.edit} disabled={busy} windowLengths={windowLengths} usualLength={usualLength} />
+              ) : (
+                <>
+                  <WeeklyHours spec={s.spec} policy={s.policy} edit={s.edit} disabled={busy} windowLengths={windowLengths} usualLength={usualLength} />
+                  <SeasonalHours spec={s.spec} policy={s.policy} edit={s.edit} disabled={busy} windowLengths={windowLengths} usualLength={usualLength} />
+                </>
+              )
             ) : null}
             {tab === 'dates' ? <DateChanges spec={s.spec} edit={s.edit} disabled={busy} /> : null}
             {tab === 'timeoff' ? <TimeOff spec={s.spec} edit={s.edit} disabled={busy} /> : null}
@@ -140,9 +148,9 @@ export function AvailabilityEditor({ adapter, sections = ['weekly', 'dates', 'ti
 
           {extra ? <div className="cal-avail__extra">{extra}</div> : null}
 
-          {s.problems.length > 0 ? (
+          {problems.length > 0 ? (
             <ul className="cal-avail__problems" role="alert">
-              {s.problems.map((p) => <li key={p}>{p}</li>)}
+              {problems.map((p) => <li key={p}>{p}</li>)}
             </ul>
           ) : null}
 
@@ -154,7 +162,7 @@ export function AvailabilityEditor({ adapter, sections = ['weekly', 'dates', 'ti
                   {labels.availDiscard}
                 </button>
               ) : null}
-              <button type="button" className={cx('cal-btn cal-btn--primary', classNames.button, classNames.buttonPrimary)} disabled={!s.dirty || s.saving || s.problems.length > 0} onClick={() => void s.save()}>
+              <button type="button" className={cx('cal-btn cal-btn--primary', classNames.button, classNames.buttonPrimary)} disabled={!s.dirty || s.saving || problems.length > 0} onClick={() => void s.save()}>
                 {labels.availSave}
               </button>
             </div>

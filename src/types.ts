@@ -97,6 +97,8 @@ export interface SchedulingPolicy {
   /** The week a new person starts with; its rows also give the hours a day gets when turned on. */
   seed_weekly: WeeklyRule[];
   observe_holidays_by_default: boolean;
+  /** Weekly hours only for a set period: every weekly row has a start and an end date (MployNow). */
+  weekly_hours_need_dates?: boolean;
   /** Erase an ended booking (its notes, pads and people) this many days after it ended; null keeps it. */
   erase_ended_bookings_after_days?: number | null;
   /** The call tools people may connect instead of the product's own room. */
