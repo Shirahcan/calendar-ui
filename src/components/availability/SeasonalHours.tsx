@@ -43,6 +43,49 @@ function rows(spec: AvailabilitySpec, all = false): SeasonRow[] {
   return out.sort((a, b) => (a.from ?? '').localeCompare(b.from ?? '') || (a.until ?? '9999').localeCompare(b.until ?? '9999'));
 }
 
+/** Every row that runs over the same dates, shown as ONE period (MployNow 2026-10-23). */
+interface SeasonGroup {
+  key: string;
+  from: string | null;
+  until: string | null;
+  rows: SeasonRow[];
+}
+
+/**
+ * Rows grouped by their dates, in date order. Weekly rules converted one per day pattern all share
+ * a period's dates, so listing them one by one repeated the same range on every line.
+ */
+function groups(list: SeasonRow[]): SeasonGroup[] {
+  const out = new Map<string, SeasonGroup>();
+  for (const r of list) {
+    const key = `${r.from ?? ''}|${r.until ?? ''}`;
+    const g = out.get(key) ?? { key, from: r.from, until: r.until, rows: [] };
+    g.rows.push(r);
+    out.set(key, g);
+  }
+
+  return [...out.values()];
+}
+
+/**
+ * The actions that remove every row of a group. A rule's index shifts once an earlier one goes, so
+ * weekly rules are removed from the last down, and a period (several rules, one action) only once.
+ */
+function removeAll(rows: SeasonRow[]): EditorAction[] {
+  const weekly = new Set<number>();
+  const periods = new Set<number>();
+  for (const r of rows) {
+    if (r.remove.type === 'removeWeekly') weekly.add(r.remove.index);
+    if (r.remove.type === 'removePeriod') periods.add(r.remove.index);
+  }
+  const down = (a: number, b: number) => b - a;
+
+  return [
+    ...[...weekly].sort(down).map((index): EditorAction => ({ type: 'removeWeekly', index })),
+    ...[...periods].sort(down).map((index): EditorAction => ({ type: 'removePeriod', index })),
+  ];
+}
+
 /**
  * Weekly hours that start or stop on a date (a busy season, a temporary schedule). The days above
  * are the every-week pattern and leave these alone; without this list a person could neither see
@@ -118,26 +161,50 @@ export function SeasonalHours({ spec, policy, edit, disabled, windowLengths = fa
         <p className="cal-avail__empty">{dated ? labels.availPeriodNone : labels.availSeasonNone}</p>
       ) : (
         <ul className="cal-avail__list">
-          {list.map((r) => {
-            const ended = r.until !== null && r.until < today;
-            const openEnded = dated && (r.from === null || r.until === null);
+          {groups(list).map((g) => {
+            const ended = g.until !== null && g.until < today;
+            const openEnded = dated && (g.from === null || g.until === null);
+            const note = ended ? ` (${labels.availSeasonEnded})` : openEnded ? ` (${labels.availPeriodNoEnd})` : '';
+            const what = (r: SeasonRow) =>
+              labels.availSeasonHours(r.rule.days.map((d) => labels.availDayNames[d]).join(', '), r.rule.start, r.rule.end, r.rule.length ?? null);
+            const many = g.rows.length > 1;
 
             return (
-              <li key={r.key} className={cx('cal-avail__item', ended && 'cal-avail__item--ended', openEnded && 'cal-avail__item--open')}>
+              <li key={g.key} className={cx('cal-avail__item', ended && 'cal-avail__item--ended', openEnded && 'cal-avail__item--open')}>
                 <span className="cal-avail__item-date">
-                  {r.from === null && r.until === null ? '' : labels.availSeasonWhen(r.from ? dateLabel(r.from) : null, r.until ? dateLabel(r.until) : null)}
+                  {g.from === null && g.until === null ? '' : labels.availSeasonWhen(g.from ? dateLabel(g.from) : null, g.until ? dateLabel(g.until) : null)}
                 </span>
-                <span className="cal-avail__item-what">
-                  {labels.availSeasonHours(
-                    r.rule.days.map((d) => labels.availDayNames[d]).join(', '),
-                    r.rule.start,
-                    r.rule.end,
-                    r.rule.length ?? null,
-                  )}
-                  {ended ? ` (${labels.availSeasonEnded})` : openEnded ? ` (${labels.availPeriodNoEnd})` : ''}
-                </span>
-                <button type="button" className={cx(btn, 'cal-btn--ghost')} disabled={disabled} onClick={() => edit(r.remove)}>
-                  {labels.availRemove}
+                {many ? (
+                  <span className="cal-avail__item-what cal-avail__item-lines">
+                    {g.rows.map((r) => (
+                      <span key={r.key} className="cal-avail__item-line">
+                        {what(r)}
+                        <button
+                          type="button"
+                          className={cx(btn, 'cal-btn--ghost')}
+                          disabled={disabled}
+                          aria-label={labels.availRemovePeriodHours(what(r))}
+                          onClick={() => edit(r.remove)}
+                        >
+                          {labels.availRemove}
+                        </button>
+                      </span>
+                    ))}
+                    {note ? <span className="cal-avail__item-note">{note.trim()}</span> : null}
+                  </span>
+                ) : (
+                  <span className="cal-avail__item-what">
+                    {what(g.rows[0]!)}
+                    {note}
+                  </span>
+                )}
+                <button
+                  type="button"
+                  className={cx(btn, 'cal-btn--ghost')}
+                  disabled={disabled}
+                  onClick={() => removeAll(g.rows).forEach((a) => edit(a))}
+                >
+                  {many ? labels.availRemoveAll : labels.availRemove}
                 </button>
               </li>
             );

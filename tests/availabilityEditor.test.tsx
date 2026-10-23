@@ -360,6 +360,42 @@ describe('Weekly hours only for a set period (policy weekly_hours_need_dates)', 
     expect((a.save.mock.calls[0]![0] as AvailabilitySpec).weekly).toHaveLength(1);
   });
 
+  it('lists hours over the same dates as one period, removable line by line or all at once', async () => {
+    const shared = { valid_from: ymd(0), valid_until: ymd(27) };
+    const spec: AvailabilitySpec = {
+      schema: 1,
+      timezone: { zone: 'America/Edmonton' },
+      weekly: [
+        { days: ['mon'], start: '09:00', end: '17:00', ...shared },
+        { days: ['thu'], start: '10:00', end: '12:00', valid_from: ymd(0), valid_until: ymd(6) },
+        { days: ['wed'], start: '13:00', end: '15:00', ...shared },
+      ],
+    };
+
+    // One line removed: the other rule of that period, and the other period, stay.
+    const a = datedAdapter(spec);
+    const { unmount } = render(<AvailabilityEditor adapter={a} />);
+    await screen.findByLabelText('The next 7 days at a glance');
+    const period = screen.getByText('Monday: 09:00 to 17:00').closest('li')!;
+    expect(within(period).getByText('Wednesday: 13:00 to 15:00')).toBeTruthy();
+    expect(screen.getAllByRole('listitem').filter((li) => li.classList.contains('cal-avail__item'))).toHaveLength(2);
+    fireEvent.click(within(period).getByRole('button', { name: 'Remove Wednesday: 13:00 to 15:00' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Save availability' }));
+    await waitFor(() => expect(a.save).toHaveBeenCalled());
+    expect((a.save.mock.calls[0]![0] as AvailabilitySpec).weekly).toEqual([spec.weekly![0], spec.weekly![1]]);
+    unmount();
+
+    // "Remove all" takes the whole period (both rules, whatever their order), and only it.
+    const b = datedAdapter(spec);
+    render(<AvailabilityEditor adapter={b} />);
+    await screen.findByLabelText('The next 7 days at a glance');
+    const again = screen.getByText('Monday: 09:00 to 17:00').closest('li')!;
+    fireEvent.click(within(again).getByRole('button', { name: 'Remove all' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Save availability' }));
+    await waitFor(() => expect(b.save).toHaveBeenCalled());
+    expect((b.save.mock.calls[0]![0] as AvailabilitySpec).weekly).toEqual([spec.weekly![1]]);
+  });
+
   it("shows the next seven days' hours from the periods that cover each date", async () => {
     const today = new Date();
     const names = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const;

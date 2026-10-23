@@ -570,6 +570,10 @@ export interface CalendarLabels {
   availAddTimeOff: string;
   availNoTimeOff: string;
   availRemove: string;
+  /** A period listed as one entry (several sets of hours over the same dates): remove all of it. */
+  availRemoveAll: string;
+  /** The accessible name of the button that removes one set of hours inside a period. */
+  availRemovePeriodHours: (what: string) => string;
   availHolidaysIntro: string;
   availObserve: string;
   availRegion: string;
@@ -1118,6 +1122,8 @@ export const DEFAULT_LABELS: CalendarLabels = {
   availAddTimeOff: 'Add time off',
   availNoTimeOff: 'No time off planned.',
   availRemove: 'Remove',
+  availRemoveAll: 'Remove all',
+  availRemovePeriodHours: (what) => `Remove ${what}`,
   availHolidaysIntro: 'Close on the public holidays where you work. Pick any you will work anyway.',
   availObserve: 'Close on public holidays',
   availRegion: 'Where',
