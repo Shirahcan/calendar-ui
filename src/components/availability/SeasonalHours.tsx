@@ -176,7 +176,7 @@ export function SeasonalHours({ spec, policy, edit, disabled, windowLengths = fa
             const many = g.rows.length > 1;
 
             return (
-              <li key={g.key} className={cx('cal-avail__item', ended && 'cal-avail__item--ended', openEnded && 'cal-avail__item--open')}>
+              <li key={g.key} className={cx('cal-avail__item', many && 'cal-avail__item--group', ended && 'cal-avail__item--ended', openEnded && 'cal-avail__item--open')}>
                 <span className="cal-avail__item-date">
                   {g.from === null && g.until === null ? '' : labels.availSeasonWhen(g.from ? dateLabel(g.from) : null, g.until ? dateLabel(g.until) : null)}
                 </span>
