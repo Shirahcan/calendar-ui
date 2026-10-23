@@ -896,7 +896,7 @@ export const DEFAULT_LABELS: CalendarLabels = {
   policySeedWeekHint: 'Also the hours a day gets when someone turns it on.',
   policyObserveHolidays: "Close on a person's public holidays unless they choose otherwise",
   policyWeeklyNeedDates: 'Weekly hours only for a set period',
-  policyWeeklyNeedDatesHint: 'People set weekly hours with a start and an end date, such as two weeks for interviews, instead of hours that run every week. Give existing always-on hours dates before turning this on, or their next save is refused.',
+  policyWeeklyNeedDatesHint: 'People set weekly hours with a start and an end date, such as two weeks for interviews, instead of hours that run every week. Hours already saved without dates must be given dates before they can be saved again.',
   policyRecords: 'Meeting records',
   policyWait: 'Wait before booking',
   policyWaitHint: 'Times open only this long after the event, for the person it happened to. 0 means no wait.',
@@ -1153,7 +1153,7 @@ export const DEFAULT_LABELS: CalendarLabels = {
   availPeriodNeedsDates: 'Pick a start date and an end date.',
   availPeriodNoEnd: 'no end date: remove it and add it again with dates',
   availPeriodOpenEnded: 'Some weekly hours have no start or end date. Remove them, or add them again with dates, before saving.',
-  availRibbonThisWeek: 'This week at a glance',
+  availRibbonThisWeek: 'The next 7 days at a glance',
   availExtraHours: (windows) => `Extra hours: ${windows}`,
 };
 

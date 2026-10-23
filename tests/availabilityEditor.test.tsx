@@ -309,7 +309,7 @@ describe('Weekly hours only for a set period (policy weekly_hours_need_dates)', 
   it('hides the every-week pattern and adds a period with both dates, two weeks by default', async () => {
     const a = datedAdapter({ schema: 1, timezone: { zone: 'America/Edmonton' }, weekly: [] });
     render(<AvailabilityEditor adapter={a} />);
-    await screen.findByLabelText('This week at a glance');
+    await screen.findByLabelText('The next 7 days at a glance');
 
     expect(screen.queryByText('Hours for a set time')).toBeNull();
     expect(screen.getByText('Weekly hours for a set period')).toBeTruthy();
@@ -347,7 +347,7 @@ describe('Weekly hours only for a set period (policy weekly_hours_need_dates)', 
       ],
     });
     render(<AvailabilityEditor adapter={a} />);
-    await screen.findByLabelText('This week at a glance');
+    await screen.findByLabelText('The next 7 days at a glance');
 
     const open = screen.getByText('Wednesday: 09:00 to 12:00 (no end date: remove it and add it again with dates)').closest('li')!;
     expect(screen.getByText('Some weekly hours have no start or end date. Remove them, or add them again with dates, before saving.')).toBeTruthy();
@@ -360,7 +360,7 @@ describe('Weekly hours only for a set period (policy weekly_hours_need_dates)', 
     expect((a.save.mock.calls[0]![0] as AvailabilitySpec).weekly).toHaveLength(1);
   });
 
-  it("shows this week's hours from the periods that cover each day", async () => {
+  it("shows the next seven days' hours from the periods that cover each date", async () => {
     const today = new Date();
     const names = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const;
     const day = names[today.getDay()]!;
@@ -369,7 +369,7 @@ describe('Weekly hours only for a set period (policy weekly_hours_need_dates)', 
       timezone: { zone: 'America/Edmonton' },
       weekly: [{ days: [day], start: '10:00', end: '11:30', valid_from: ymd(0), valid_until: ymd(0) }],
     })} />);
-    const ribbon = await screen.findByLabelText('This week at a glance');
+    const ribbon = await screen.findByLabelText('The next 7 days at a glance');
 
     expect(within(ribbon).getByText('10:00-11:30')).toBeTruthy();
   });

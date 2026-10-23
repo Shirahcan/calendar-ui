@@ -21,20 +21,27 @@ function bars(windows: [string, string][]): Array<{ left: number; width: number 
   });
 }
 
-/** YYYY-MM-DD of each day of the current week (Monday first) on this device's clock. */
-function thisWeek(): Record<DayName, string> {
-  const now = new Date();
-  const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - ((now.getDay() + 6) % 7));
-  const out = {} as Record<DayName, string>;
-  WEEK.forEach((day, i) => {
-    const d = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + i);
-    out[day] = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-  });
+const DAY_OF: DayName[] = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
 
-  return out;
+/**
+ * The next seven days from today on this device's clock, in order: a calendar week shown on a
+ * Friday would be mostly past, and say nothing about the period starting on Monday.
+ */
+function nextSevenDays(): Array<{ day: DayName; date: string; label: number }> {
+  const now = new Date();
+
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i);
+
+    return {
+      day: DAY_OF[d.getDay()]!,
+      date: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`,
+      label: d.getDate(),
+    };
+  });
 }
 
-/** A dated row's windows on one date: the hours a period gives that day of THIS week. */
+/** The hours the dated rows and periods give one date. */
 function datedWindows(spec: AvailabilitySpec, day: DayName, date: string): [string, string][] {
   const rules = [
     ...(spec.weekly ?? []).filter((r) => (r.valid_from || r.valid_until) && (!r.valid_from || r.valid_from <= date) && (!r.valid_until || r.valid_until >= date)),
@@ -49,20 +56,22 @@ function datedWindows(spec: AvailabilitySpec, day: DayName, date: string): [stri
 
 /**
  * The shape of the week at a glance: each day's open hours on one 24-hour track. With `dated`
- * (hours only for a set period) it is THIS week's hours from whichever periods cover each day.
+ * (hours only for a set period) it is the next seven days' hours from whichever periods cover
+ * each date, each row named by weekday and day of the month.
  */
 export function WeekRibbon({ spec, dated = false }: { spec: AvailabilitySpec; dated?: boolean }) {
   const { labels } = useCalendarUi();
-  const [dates] = useState(thisWeek);
+  const [days] = useState(nextSevenDays);
+  const rows = dated ? days : WEEK.map((day) => ({ day, date: '', label: 0 }));
 
   return (
-    <figure className="cal-avail__ribbon" aria-label={dated ? labels.availRibbonThisWeek : labels.availRibbon}>
-      {WEEK.map((day) => {
-        const windows = dated ? datedWindows(spec, day, dates[day]) : dayWindows(spec, day);
+    <figure className={dated ? 'cal-avail__ribbon cal-avail__ribbon--dated' : 'cal-avail__ribbon'} aria-label={dated ? labels.availRibbonThisWeek : labels.availRibbon}>
+      {rows.map(({ day, date, label }) => {
+        const windows = dated ? datedWindows(spec, day, date) : dayWindows(spec, day);
 
         return (
-          <div key={day} className="cal-avail__ribbon-row">
-            <span className="cal-avail__ribbon-day">{labels.availDayNames[day].slice(0, 3)}</span>
+          <div key={dated ? date : day} className="cal-avail__ribbon-row">
+            <span className="cal-avail__ribbon-day">{labels.availDayNames[day].slice(0, 3)}{dated ? ` ${label}` : ''}</span>
             <span className="cal-avail__ribbon-track" aria-hidden="true">
               {bars(windows.map(([s, e]) => [s, e] as [string, string])).map((b, i) => (
                 <span key={i} className="cal-avail__ribbon-bar" style={{ left: `${b.left}%`, width: `${b.width}%` }} />

@@ -239,12 +239,15 @@
 .cal-avail__ribbon { margin: 0; display: grid; gap: 6px; padding: 14px 16px; border-radius: calc(var(--cal-radius) * 0.6); background: var(--cal-surface-muted); }
 .cal-avail__ribbon-row { display: grid; grid-template-columns: 34px minmax(0, 1fr) minmax(0, 11rem); align-items: center; gap: 10px; font-size: 12px; }
 .cal-avail__ribbon-day { font-weight: 600; color: var(--cal-ink); }
+/* Dated hours name each of the next seven days by weekday and date ("Mon 26"). */
+.cal-avail__ribbon--dated .cal-avail__ribbon-row { grid-template-columns: 52px minmax(0, 1fr) minmax(0, 11rem); }
 .cal-avail__ribbon-track { position: relative; height: 10px; border-radius: 999px; background: color-mix(in srgb, var(--cal-ink) 7%, transparent); overflow: hidden; }
 .cal-avail__ribbon-bar { position: absolute; top: 0; bottom: 0; border-radius: 999px; background: var(--cal-accent); }
 .cal-avail__ribbon-text { color: var(--cal-ink-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .cal-avail__ribbon-scale { display: flex; justify-content: space-between; margin-left: 44px; margin-right: calc(11rem + 10px); font-size: 10px; color: var(--cal-ink-muted); }
 @media (max-width: 560px) {
   .cal-avail__ribbon-row { grid-template-columns: 34px minmax(0, 1fr); }
+  .cal-avail__ribbon--dated .cal-avail__ribbon-row { grid-template-columns: 52px minmax(0, 1fr); }
   .cal-avail__ribbon-text { display: none; }
   .cal-avail__ribbon-scale { margin-right: 0; }
 }
