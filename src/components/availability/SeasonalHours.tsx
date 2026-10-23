@@ -64,6 +64,12 @@ function groups(list: SeasonRow[]): SeasonGroup[] {
     out.set(key, g);
   }
 
+  // Inside a period, the week's order (then the start time), not the order the rules were stored in.
+  const first = (r: SeasonRow) => Math.min(...r.rule.days.map((d) => WEEK.indexOf(d)));
+  for (const g of out.values()) {
+    g.rows.sort((a, b) => first(a) - first(b) || a.rule.start.localeCompare(b.rule.start));
+  }
+
   return [...out.values()];
 }
 

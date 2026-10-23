@@ -366,9 +366,9 @@ describe('Weekly hours only for a set period (policy weekly_hours_need_dates)', 
       schema: 1,
       timezone: { zone: 'America/Edmonton' },
       weekly: [
-        { days: ['mon'], start: '09:00', end: '17:00', ...shared },
-        { days: ['thu'], start: '10:00', end: '12:00', valid_from: ymd(0), valid_until: ymd(6) },
         { days: ['wed'], start: '13:00', end: '15:00', ...shared },
+        { days: ['thu'], start: '10:00', end: '12:00', valid_from: ymd(0), valid_until: ymd(6) },
+        { days: ['mon'], start: '09:00', end: '17:00', ...shared },
       ],
     };
 
@@ -378,11 +378,13 @@ describe('Weekly hours only for a set period (policy weekly_hours_need_dates)', 
     await screen.findByLabelText('The next 7 days at a glance');
     const period = screen.getByText('Monday: 09:00 to 17:00').closest('li')!;
     expect(within(period).getByText('Wednesday: 13:00 to 15:00')).toBeTruthy();
+    // In the week's order, not the stored one (Wednesday is stored first).
+    expect(within(period).getAllByText(/: \d\d:\d\d to /).map((n) => n.textContent?.split(':')[0])).toEqual(['Monday', 'Wednesday']);
     expect(screen.getAllByRole('listitem').filter((li) => li.classList.contains('cal-avail__item'))).toHaveLength(2);
     fireEvent.click(within(period).getByRole('button', { name: 'Remove Wednesday: 13:00 to 15:00' }));
     fireEvent.click(screen.getByRole('button', { name: 'Save availability' }));
     await waitFor(() => expect(a.save).toHaveBeenCalled());
-    expect((a.save.mock.calls[0]![0] as AvailabilitySpec).weekly).toEqual([spec.weekly![0], spec.weekly![1]]);
+    expect((a.save.mock.calls[0]![0] as AvailabilitySpec).weekly).toEqual([spec.weekly![1], spec.weekly![2]]);
     unmount();
 
     // "Remove all" takes the whole period (both rules, whatever their order), and only it.
